@@ -42,6 +42,28 @@ export function BudgetPage(): JSX.Element {
         </nav>
       </header>
 
+      <div className="flex flex-wrap gap-2 text-sm">
+        <span className="self-center text-slate-500">{t("export.label")}:</span>
+        <a
+          href={`/api/v1/objects/${id}/export/xlsx`}
+          className="rounded border border-slate-300 bg-white px-3 py-1 hover:bg-slate-50"
+        >
+          {t("export.xlsx")}
+        </a>
+        <a
+          href={`/api/v1/objects/${id}/export/pdf`}
+          className="rounded border border-slate-300 bg-white px-3 py-1 hover:bg-slate-50"
+        >
+          {t("export.pdf")}
+        </a>
+        <a
+          href={`/api/v1/objects/${id}/export/npk`}
+          className="rounded border border-slate-300 bg-white px-3 py-1 hover:bg-slate-50"
+        >
+          {t("export.npk")}
+        </a>
+      </div>
+
       <ReservePanel objectId={id} />
 
       <div className="rounded border border-slate-200 bg-white p-4">

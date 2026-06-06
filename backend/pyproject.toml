@@ -23,6 +23,8 @@ dependencies = [
   "apscheduler>=3.10",
   "httpx>=0.28",
   "structlog>=24.4",
+  "openpyxl>=3.1",
+  "reportlab>=4.2",
 ]
 
 [project.optional-dependencies]
@@ -87,7 +89,7 @@ explicit_package_bases = true
 packages = ["app"]
 
 [[tool.mypy.overrides]]
-module = ["magic", "passlib.*", "apscheduler.*"]
+module = ["magic", "passlib.*", "apscheduler.*", "reportlab.*", "openpyxl.*"]
 ignore_missing_imports = true
 
 # ----- pytest -----

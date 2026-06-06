@@ -334,6 +334,12 @@ export const de = {
       "bkp_code.create": "eBKP-H Code angelegt",
     },
   },
+  export: {
+    label: "Export",
+    xlsx: "Excel (XLSX)",
+    pdf: "PDF",
+    npk: "NPK-Stub (JSON)",
+  },
   attachments: {
     title: "Anhänge",
     pick: "Datei wählen",

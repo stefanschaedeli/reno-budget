@@ -15,6 +15,7 @@ from app.api.v1 import auth as auth_router
 from app.api.v1 import bkp as bkp_router
 from app.api.v1 import budgets as budgets_router
 from app.api.v1 import cost_items as cost_items_router
+from app.api.v1 import exports as exports_router
 from app.api.v1 import finances as finances_router
 from app.api.v1 import health
 from app.api.v1 import objects as objects_router
@@ -55,6 +56,7 @@ def create_app() -> FastAPI:
     app.include_router(finances_router.router, prefix=settings.api_prefix)
     app.include_router(attachments_router.router, prefix=settings.api_prefix)
     app.include_router(audit_router.router, prefix=settings.api_prefix)
+    app.include_router(exports_router.router, prefix=settings.api_prefix)
 
     return app
 

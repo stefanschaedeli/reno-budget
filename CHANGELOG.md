@@ -7,6 +7,47 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-06-06
+
+### Added
+- **Exporte** (Phase 8): Drei neue Download-Endpunkte pro Objekt für
+  Eigentümer, Editoren und Viewer.
+- **XLSX-Export** (`/api/v1/objects/{id}/export/xlsx`): Arbeitsmappe mit
+  Blatt **Kostenpositionen** (BKP-Code, Titel, Status, Priorität, Plan-/
+  Effektiv-Betrag, Datum, Anteils-Verteilung, NPK-Stub) und Blatt
+  **Budget** (Jahres-Aggregate plus Reserve-Kennzahlen).
+  Beträge mit Schweizer Zahlenformat (`#,##0.00`), Kopfzeile fett,
+  fixierte erste Zeile.
+- **PDF-Export** (`/api/v1/objects/{id}/export/pdf`): Einseitiger A4-
+  Bericht mit Kopfdaten, Reserve-Kennzahlen, Top-10-Plan-Positionen und
+  Renofond-Unterdeckungs-Hinweis.
+- **NPK-Stub-Export** (`/api/v1/objects/{id}/export/npk`):
+  Strukturiertes JSON, das die Mapping-Struktur für den späteren SIA-
+  NPK-2025-Katalog vorbereitet. Jeder Eintrag trägt `stub: true` und
+  einen `TODO`-Marker im Header.
+- **RBAC-Pro-Rating**: Gescopte Editor/Viewer erhalten in XLSX und PDF
+  alle Beträge anteilig (`Σ share_permille / 1000`), analog zu den
+  Budget-Endpunkten.
+- **Audit**: Jeder erfolgreiche Export schreibt ein `object.export`-
+  Audit-Event (siehe [Audit-Log](docs/howto/audit.md)) mit dem Format
+  im `payload`.
+- **Frontend**: Drei Download-Buttons (XLSX, PDF, NPK-Stub) im Kopf
+  der Budget-Seite (`/objekte/:id/budget`). Deutsche UI-Strings
+  unter `export.*`.
+- Dokumentation: `docs/howto/export.md` (Anwender-Anleitung Deutsch).
+- 5 neue Backend-Integration-Tests (XLSX-Workbook-Inhalt, PDF-Magic-
+  Bytes, NPK-JSON-Stub, Outsider-Schutz, Audit-Event-Erzeugung) —
+  Gesamt: 158 Backend- und 61 Frontend-Tests.
+
+### Changed
+- Neue Backend-Abhängigkeiten: `openpyxl` (XLSX), `reportlab` (PDF).
+
+### Security
+- Alle Export-Endpunkte erfordern mindestens **Viewer**-Rolle; Outsider
+  erhalten 403/404 analog zur Budget-Policy.
+- Antworten setzen `Cache-Control: private, no-store` und liefern
+  RFC-5987-konforme `Content-Disposition`-Header.
+
 ## [0.8.0] — 2026-06-06
 
 ### Added

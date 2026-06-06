@@ -40,6 +40,7 @@ ACTION_OBJECT_CREATE = "object.create"
 ACTION_OBJECT_UPDATE = "object.update"
 ACTION_OBJECT_DELETE = "object.delete"
 ACTION_OBJECT_UNITS_REPLACE = "object.units_replace"
+ACTION_OBJECT_EXPORT = "object.export"
 
 ACTION_MEMBERSHIP_GRANT = "membership.grant"
 ACTION_MEMBERSHIP_UPDATE = "membership.update"
