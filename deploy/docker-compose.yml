@@ -1,0 +1,77 @@
+name: reno-budget
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-reno}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-reno}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      RENO_DATABASE_URL: ${RENO_DATABASE_URL}
+    volumes:
+      - uploads_data:/data/uploads
+      - backups_data:/backups
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/v1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - uploads_data:/data/uploads
+      - backups_data:/backups
+    # Phase 0: worker has no jobs yet; sleeps. Real entrypoint added in Phase 9.
+    command: ["python", "-c", "import time; print('worker placeholder'); time.sleep(2**31)"]
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  db_data:
+  uploads_data:
+  backups_data:

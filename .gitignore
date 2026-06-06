@@ -1,0 +1,68 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+dist/
+build/
+
+# Stray TS emits — only the .ts sources are authoritative
+frontend/src/**/*.js
+frontend/src/**/*.d.ts
+frontend/tests/**/*.js
+frontend/tests/**/*.d.ts
+frontend/vite.config.js
+frontend/vitest.config.js
+
+# --- Node / Frontend ---
+node_modules/
+.pnp/
+.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.vite/
+dist/
+coverage/
+.eslintcache
+
+# --- Editors / OS ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Env / Secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# --- App data ---
+/data/
+/backups/
+uploads/
+
+# --- Docker ---
+*.local.yml
+docker-compose.override.yml
+
+# --- Misc ---
+*.log
+.cache/

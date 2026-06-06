@@ -1,0 +1,16 @@
+# Beispiel-Override für lokale Entwicklung.
+# Kopiere nach `docker-compose.override.yml` (wird von docker compose automatisch geladen).
+
+services:
+  db:
+    ports:
+      - "5432:5432"
+
+  api:
+    ports:
+      - "8000:8000"
+    environment:
+      RENO_ENVIRONMENT: development
+      RENO_LOG_LEVEL: DEBUG
+    volumes:
+      - ../backend/app:/app/app:ro
