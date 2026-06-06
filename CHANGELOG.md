@@ -7,6 +7,43 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-06-06
+
+### Added
+- **Objekte & Einheiten** (Phase 2): Datenmodell für `objects`, `units`,
+  `object_memberships` und `unit_scopes`. Wertquoten in Permille (‰) mit
+  serverseitiger Prüfung "Summe = 1000‰" und CHECK-Constraints in der DB.
+- **Per-Objekt-RBAC** mit Rollen OWNER / EDITOR / VIEWER und optionaler
+  Einschränkung von EDITOR/VIEWER auf einzelne Einheiten ("Unit Scope").
+- **API**: `GET/POST /api/v1/objects`, `GET/PATCH/DELETE
+  /api/v1/objects/{id}`, `GET/PUT /api/v1/objects/{id}/units`, Mitglieder-
+  und Einladungs-Endpoints unter `/api/v1/objects/{id}/members[,/invitations]`.
+- **FastAPI-Dependency** `require_object_access_dep(role)` als einzige
+  Stelle, an der per-Objekt-Zugriff erzwungen wird (keine Ad-hoc-Checks in
+  Routern).
+- **Einladungs-Erweiterung**: Eine Einladung kann jetzt an ein Objekt
+  gebunden werden; beim Annehmen wird automatisch die entsprechende
+  Mitgliedschaft mit Rolle und Unit-Scope erstellt.
+- **Alembic-Migration** `0002_objects_units_rbac` legt die neuen Tabellen
+  an und ergänzt `invitations` um `object_id`, `role`, `scope_unit_ids`.
+- **Frontend-Seiten** (Deutsch): Objekt-Liste, Objekt-Erstellung mit
+  Live-‰-Summenanzeige, Objekt-Detail (Einheiten read-only in Phase 2);
+  `react-router`-Routen `/objekte`, `/objekte/neu`, `/objekte/:id`.
+- 20 neue Backend-Tests (6 Wertquoten-Unit, 14 Integrations-Tests für die
+  RBAC-Matrix inkl. Last-Owner-Guard und Scope-Sichtbarkeit) sowie
+  3 Frontend-Tests für den Unit-Editor.
+- Dokumentation: `docs/howto/objekte.md`, `docs/howto/rbac.md`.
+
+### Security
+- OWNER-Mitgliedschaften ignorieren versehentliche Unit-Scope-Einträge
+  (Defense-in-Depth gegen widersprüchliche Konfigurationen).
+- 404 statt 403 für Nicht-Mitglieder, damit die Existenz fremder Objekte
+  nicht enumeriert werden kann.
+- Superuser erben **keinen** Zugriff auf Objektdaten — sie müssen explizit
+  Mitglied sein, um Kostenpositionen / Einheiten zu sehen.
+- "Letzter OWNER kann nicht entfernt/herabgestuft werden" verhindert
+  Orphaning eines Objekts.
+
 ## [0.2.0] — 2026-06-06
 
 ### Added

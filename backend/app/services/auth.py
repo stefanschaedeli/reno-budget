@@ -210,8 +210,18 @@ async def issue_invitation(
     email: str,
     *,
     invited_by: uuid.UUID | None,
+    object_id: uuid.UUID | None = None,
+    role: str | None = None,
+    scope_unit_ids_encoded: str | None = None,
 ) -> tuple[Invitation, str]:
-    """Create a pending invitation; return record + plaintext token."""
+    """Create a pending invitation; return record + plaintext token.
+
+    When ``object_id`` and ``role`` are supplied, the invitation is bound to
+    that object — accepting it will create an :class:`ObjectMembership` with
+    the given role (and optional unit scope via ``scope_unit_ids_encoded``,
+    a JSON string produced by
+    :func:`app.services.objects.encode_scope_unit_ids`).
+    """
     email = email.lower().strip()
     existing_user = await get_user_by_email(session, email)
     if existing_user is not None:
@@ -223,6 +233,9 @@ async def issue_invitation(
         invited_by=invited_by,
         token_hash=hash_token(plaintext),
         expires_at=utcnow() + INVITATION_TTL,
+        object_id=object_id,
+        role=role,
+        scope_unit_ids=scope_unit_ids_encoded,
     )
     session.add(record)
     await session.flush()
@@ -268,6 +281,14 @@ async def accept_invitation(
     invitation.accepted_at = utcnow()
 
     await session.flush()
+
+    # Phase 2: if the invitation is bound to an object, create the membership.
+    # Local import keeps services/auth.py independent of the object domain at
+    # import time (avoids circular imports during Alembic autogenerate).
+    from app.services.objects import apply_invitation_membership
+
+    await apply_invitation_membership(session, invitation=invitation, user_id=user.id)
+
     return user
 
 

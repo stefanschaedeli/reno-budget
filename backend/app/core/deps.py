@@ -2,8 +2,10 @@
 
 * :func:`get_current_user` decodes the Bearer JWT and loads the matching user.
 * :func:`require_superuser` rejects non-admins.
-* :func:`get_csrf_protected` enforces the double-submit cookie pattern on
+* :func:`require_csrf` enforces the double-submit cookie pattern on
   state-changing requests that use the refresh cookie.
+* :func:`require_object_access_dep` factory wraps
+  :func:`app.services.rbac.require_object_access` for use as a router dep.
 
 These are dependency factories — never call them directly; always inject via
 ``Depends`` / ``Annotated``.
@@ -11,15 +13,19 @@ These are dependency factories — never call them directly; always inject via
 
 from __future__ import annotations
 
-from typing import Annotated
+import uuid
+from collections.abc import Callable, Coroutine
+from typing import Annotated, Any
 
 import jwt
-from fastapi import Cookie, Depends, Header, HTTPException, status
+from fastapi import Cookie, Depends, Header, HTTPException, Path, status
 
 from app.core.db import SessionDep
 from app.core.security import constant_time_compare, decode_access_token
+from app.models.object import ObjectRole
 from app.models.user import User
 from app.repositories.user import get_user_by_id
+from app.services.rbac import ObjectAccess, require_object_access
 
 
 async def get_current_user(
@@ -77,3 +83,32 @@ def require_csrf(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="CSRF-Token fehlt oder ist ungültig",
         )
+
+
+def require_object_access_dep(
+    minimum_role: ObjectRole,
+) -> Callable[..., Coroutine[Any, Any, ObjectAccess]]:
+    """Build a FastAPI dependency that enforces ``minimum_role`` on the path's object.
+
+    Usage::
+
+        @router.get("/{object_id}/units")
+        async def list_units(
+            object_id: uuid.UUID,
+            access: Annotated[ObjectAccess, Depends(require_object_access_dep(ObjectRole.VIEWER))],
+            session: SessionDep,
+        ): ...
+
+    The ``object_id`` is read from the path parameter of the same name; the
+    dependency raises 404 if the user has no membership and 403 if the role
+    is insufficient (see :func:`app.services.rbac.require_object_access`).
+    """
+
+    async def _dep(
+        object_id: Annotated[uuid.UUID, Path()],
+        user: CurrentUser,
+        session: SessionDep,
+    ) -> ObjectAccess:
+        return await require_object_access(session, user, object_id, minimum_role)
+
+    return _dep

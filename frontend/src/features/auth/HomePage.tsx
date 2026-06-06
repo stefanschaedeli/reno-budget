@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
 export function HomePage(): JSX.Element {
@@ -23,6 +24,14 @@ export function HomePage(): JSX.Element {
           {t("auth.me.greeting", { name: user.display_name })}
         </p>
       )}
+      <nav className="mt-6">
+        <Link
+          to="/objekte"
+          className="inline-block rounded bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-700"
+        >
+          {t("objects.list.title")}
+        </Link>
+      </nav>
     </div>
   );
 }

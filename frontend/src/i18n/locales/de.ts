@@ -46,6 +46,38 @@ export const de = {
     error: "Es ist ein Fehler aufgetreten.",
     submitting: "Wird gesendet…",
   },
+  objects: {
+    list: {
+      title: "Objekte",
+      create: "Neues Objekt",
+      empty: "Noch keine Objekte. Legen Sie Ihr erstes Objekt an.",
+    },
+    create: {
+      title: "Objekt erstellen",
+      submit: "Objekt anlegen",
+    },
+    fields: {
+      name: "Bezeichnung",
+      address: "Adresse",
+      yearBuilt: "Baujahr",
+      type: "Typ",
+    },
+    type: {
+      sfh: "Einfamilienhaus",
+      mfh: "Mehrfamilienhaus / Stockwerkeigentum",
+    },
+    units: {
+      title: "Einheiten",
+      label: "Bezeichnung",
+      wertquote: "Wertquote",
+      area: "Fläche",
+      add: "Einheit hinzufügen",
+      remove: "Entfernen",
+      implicitLabel: "Ganzes Haus",
+      sum: "Summe: {{sum}}‰",
+      sumHint: "muss 1000‰ ergeben",
+    },
+  },
 } as const;
 
 export type TranslationKeys = typeof de;

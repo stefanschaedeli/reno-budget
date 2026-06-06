@@ -6,6 +6,9 @@ import { AcceptInvitePage } from "@/features/auth/AcceptInvitePage";
 import { PasswordResetRequestPage } from "@/features/auth/PasswordResetRequestPage";
 import { PasswordResetConfirmPage } from "@/features/auth/PasswordResetConfirmPage";
 import { HomePage } from "@/features/auth/HomePage";
+import { ObjectsListPage } from "@/features/objects/ObjectsListPage";
+import { ObjectCreatePage } from "@/features/objects/ObjectCreatePage";
+import { ObjectDetailPage } from "@/features/objects/ObjectDetailPage";
 
 function RequireAuth({ children }: { children: React.ReactElement }) {
   const { user, bootstrapping } = useAuth();
@@ -33,6 +36,30 @@ export function App(): JSX.Element {
             element={
               <RequireAuth>
                 <HomePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/objekte"
+            element={
+              <RequireAuth>
+                <ObjectsListPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/objekte/neu"
+            element={
+              <RequireAuth>
+                <ObjectCreatePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/objekte/:id"
+            element={
+              <RequireAuth>
+                <ObjectDetailPage />
               </RequireAuth>
             }
           />

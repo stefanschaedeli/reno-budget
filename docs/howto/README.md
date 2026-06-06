@@ -11,7 +11,9 @@ Empfehlung, sondern Voraussetzung dafür, dass ein Phasen-Tag gesetzt wird.
 
 | Funktion                            | Datei                  | Eingeführt in Version |
 |-------------------------------------|------------------------|-----------------------|
-| Anmeldung, Einladung & Passwort     | [auth.md](./auth.md)   | 0.2.0                 |
+| Anmeldung, Einladung & Passwort     | [auth.md](./auth.md)       | 0.2.0                 |
+| Objekte & Einheiten verwalten       | [objekte.md](./objekte.md) | 0.3.0                 |
+| Rollen & Berechtigungen (RBAC)      | [rbac.md](./rbac.md)       | 0.3.0                 |
 
 ## Vorlage für eine neue How-To
 

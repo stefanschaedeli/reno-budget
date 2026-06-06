@@ -11,6 +11,7 @@ from starlette.responses import JSONResponse
 from app import __version__
 from app.api.v1 import auth as auth_router
 from app.api.v1 import health
+from app.api.v1 import objects as objects_router
 from app.core.config import get_settings
 
 
@@ -39,6 +40,7 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router, prefix=settings.api_prefix)
     app.include_router(auth_router.router, prefix=settings.api_prefix)
+    app.include_router(objects_router.router, prefix=settings.api_prefix)
 
     return app
 

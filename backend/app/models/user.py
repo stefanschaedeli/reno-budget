@@ -111,12 +111,17 @@ class PasswordResetToken(Base):
 
 
 class Invitation(Base):
-    """Per-email invitation issued by an admin/owner.
+    """Per-email invitation issued by an admin or object owner.
 
     The token sent in the e-mail is opaque; only its hash is stored. On signup,
     the user provides the token, sets a password and display name, and a
-    :class:`User` row is created. ``object_id`` (and a future ``role`` column)
-    will be added in Phase 2 once the Object model exists.
+    :class:`User` row is created.
+
+    Phase 2 adds optional binding to an :class:`~app.models.object.Object`
+    and a role: when ``object_id`` is set, accepting the invitation also
+    creates an :class:`~app.models.object.ObjectMembership` with the recorded
+    role and optional unit scopes (``scope_unit_ids``). When ``object_id`` is
+    NULL the invitation is admin-only (no membership is created).
     """
 
     __tablename__ = "invitations"
@@ -137,3 +142,15 @@ class Invitation(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, nullable=False
     )
+
+    # Phase 2: bind invitation to a specific object + role (+ optional unit scope).
+    # NULL object_id = admin-only invitation (no membership created on accept).
+    object_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("objects.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    role: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    # JSON-encoded list of unit UUIDs to scope EDITOR/VIEWER to. NULL = unscoped.
+    scope_unit_ids: Mapped[str | None] = mapped_column(String(2048), nullable=True)

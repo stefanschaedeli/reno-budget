@@ -5,6 +5,14 @@ so that Alembic's ``--autogenerate`` (and the test fixtures) see the full
 metadata. Add new modules here when you create them.
 """
 
+from app.models.object import (  # noqa: F401
+    Object,
+    ObjectMembership,
+    ObjectRole,
+    ObjectType,
+    Unit,
+    UnitScope,
+)
 from app.models.user import (  # noqa: F401
     Invitation,
     PasswordResetToken,
