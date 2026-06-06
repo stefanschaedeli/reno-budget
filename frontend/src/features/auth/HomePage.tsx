@@ -24,12 +24,18 @@ export function HomePage(): JSX.Element {
           {t("auth.me.greeting", { name: user.display_name })}
         </p>
       )}
-      <nav className="mt-6">
+      <nav className="mt-6 flex gap-2">
         <Link
           to="/objekte"
           className="inline-block rounded bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-700"
         >
           {t("objects.list.title")}
+        </Link>
+        <Link
+          to="/finanzen"
+          className="inline-block rounded border border-slate-300 px-3 py-2 text-sm hover:bg-slate-100"
+        >
+          {t("budget.nav")}
         </Link>
       </nav>
     </div>

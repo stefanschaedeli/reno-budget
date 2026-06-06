@@ -11,6 +11,8 @@ import { ObjectsListPage } from "@/features/objects/ObjectsListPage";
 import { ObjectCreatePage } from "@/features/objects/ObjectCreatePage";
 import { ObjectDetailPage } from "@/features/objects/ObjectDetailPage";
 import { CostsPage } from "@/features/costs/CostsPage";
+import { BudgetPage } from "@/features/budget/BudgetPage";
+import { FinancesPage } from "@/features/budget/FinancesPage";
 
 /**
  * Single QueryClient for the whole app. Defaults are conservative:
@@ -86,6 +88,22 @@ export function App(): JSX.Element {
             element={
               <RequireAuth>
                 <CostsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/objekte/:id/budget"
+            element={
+              <RequireAuth>
+                <BudgetPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/finanzen"
+            element={
+              <RequireAuth>
+                <FinancesPage />
               </RequireAuth>
             }
           />

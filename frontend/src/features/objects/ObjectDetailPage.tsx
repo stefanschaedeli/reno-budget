@@ -52,6 +52,12 @@ export function ObjectDetailPage(): JSX.Element {
           >
             {t("costs.title")}
           </Link>
+          <Link
+            to={`/objekte/${obj.id}/budget`}
+            className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
+          >
+            {t("budget.tab")}
+          </Link>
         </nav>
       </header>
 
