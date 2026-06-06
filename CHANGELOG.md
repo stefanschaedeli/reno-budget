@@ -7,6 +7,49 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-06-06
+
+### Added
+- **Renofond-Projektion** (Phase 5): Pro Objekt eine Jahres-Projektion des
+  Reservesaldos über den Planungshorizont — beginnend mit der initialen
+  Reserve, plus Soll-Einlage (aus Phase 4), plus effektive Einzahlungen,
+  minus inflationierter geplanter Aufwand. Jahre mit negativem Saldo
+  werden als `underfunding_years` aggregiert.
+- **Effektive Einzahlungen** (`reserve_contributions`): Neues Modell pro
+  Objekt mit Feldern `year`, `amount_chf` (Numeric 12,2), `note` und
+  `created_at`. Mehrere Einzahlungen pro Jahr werden in der Projektion
+  summiert.
+- **API**:
+  - `GET /api/v1/objects/{id}/renofond/projection` — Per-Jahr-Saldo,
+    geplanter Aufwand, kumulierter Plan und Unterdeckungs-Digest.
+  - `GET /api/v1/objects/{id}/renofond/contributions` — Liste der
+    Einzahlungen plus `my_role` für UI-Gating.
+  - `POST /api/v1/objects/{id}/renofond/contributions` (Owner + CSRF).
+  - `DELETE /api/v1/objects/{id}/renofond/contributions/{contribution_id}`
+    (Owner + CSRF).
+- **Frontend**: Route `/objekte/:id/renofond` mit Unterdeckungs-Banner,
+  SVG-Bilanzverlauf-Diagramm (ohne zusätzliche Chart-Abhängigkeit) und
+  Einzahlungs-Tabelle inkl. Add/Delete-Formular (nur Owner).
+  Verknüpfung von der Budget-Seite und neuer i18n-Block `renofond.*`.
+- **Pro-Rating**: Gescopte Editor/Viewer sehen Saldo, Plan und effektive
+  Einzahlungen jeweils auf ihren Anteil pro-ratiert (`Σ share_permille
+  / 1000`); `scope_pro_rated` im Response.
+- Alembic-Migration `0005_reserve_contributions` für die neue Tabelle
+  inkl. Check-Constraints (`amount_chf >= 0`,
+  `year BETWEEN 1900 AND 2200`) und zusammengesetztem Index
+  `(object_id, year)`.
+- Dokumentation: `docs/howto/renofond.md` (Anwender-Anleitung Deutsch)
+  mit Erklärung der Projektionsformel und der Pro-Rating-Logik.
+- 13 neue Backend-Tests (Service-Math + API/RBAC-Matrix + CSRF) sowie
+  6 neue Frontend-Tests (Banner, Chart, Tabelle, Add-Formular, Empty-
+  und Viewer-State) — Gesamt: 142 Backend- und 56 Frontend-Tests.
+
+### Security
+- Mutationen auf `/renofond/contributions` erfordern **Owner** + CSRF;
+  Viewer und Editor erhalten 403 für POST/DELETE.
+- Outsider erhalten 404 auf alle `/renofond/*`-Endpunkte (analog zur
+  Budget-Policy) — verhindert Objekt-Enumeration.
+
 ## [0.5.0] — 2026-06-06
 
 ### Added

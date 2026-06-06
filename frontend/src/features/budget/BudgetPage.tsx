@@ -33,6 +33,12 @@ export function BudgetPage(): JSX.Element {
           >
             {t("costs.title")}
           </Link>
+          <Link
+            to={`/objekte/${id}/renofond`}
+            className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
+          >
+            {t("renofond.tab")}
+          </Link>
         </nav>
       </header>
 

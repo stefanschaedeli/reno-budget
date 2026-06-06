@@ -13,6 +13,7 @@ import { ObjectDetailPage } from "@/features/objects/ObjectDetailPage";
 import { CostsPage } from "@/features/costs/CostsPage";
 import { BudgetPage } from "@/features/budget/BudgetPage";
 import { FinancesPage } from "@/features/budget/FinancesPage";
+import { RenofondPage } from "@/features/renofond/RenofondPage";
 
 /**
  * Single QueryClient for the whole app. Defaults are conservative:
@@ -96,6 +97,14 @@ export function App(): JSX.Element {
             element={
               <RequireAuth>
                 <BudgetPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/objekte/:id/renofond"
+            element={
+              <RequireAuth>
+                <RenofondPage />
               </RequireAuth>
             }
           />
