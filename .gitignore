@@ -24,6 +24,8 @@ frontend/tests/**/*.js
 frontend/tests/**/*.d.ts
 frontend/vite.config.js
 frontend/vitest.config.js
+frontend/tsconfig.tsbuildinfo
+frontend/*.tsbuildinfo
 
 # --- Node / Frontend ---
 node_modules/

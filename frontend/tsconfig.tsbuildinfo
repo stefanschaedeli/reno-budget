@@ -1,1 +1,0 @@
-{"root":["./src/main.tsx","./src/app/app.tsx","./src/i18n/i18n.ts","./src/i18n/locales/de.ts","./tests/app.test.tsx","./tests/setup.ts","./vite.config.ts","./vitest.config.ts"],"version":"5.9.3"}
