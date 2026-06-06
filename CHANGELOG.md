@@ -7,6 +7,82 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-06-06
+
+### Was ships in 1.0
+
+Erste stabile Version von Reno-Budget. Phase 10 ist ein reiner
+**Härtungs-Pass** — keine neuen Endanwender-Features, sondern Verifikation,
+Verschärfung und Dokumentation der gesamten in Phasen 0–9 ausgelieferten
+Funktionsfläche.
+
+### Added
+- **Sicherheits-Header-Middleware** (`app/core/security_headers.py`):
+  setzt `X-Content-Type-Options`, `X-Frame-Options: DENY`,
+  `Referrer-Policy: strict-origin-when-cross-origin`,
+  `Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=()`,
+  `Cross-Origin-Opener-Policy: same-origin` auf jede Antwort und
+  `Strict-Transport-Security` nur über HTTPS
+  (`X-Forwarded-Proto: https` oder `RENO_ENVIRONMENT=production`).
+  Für `text/html`-Antworten zusätzlich eine strikte
+  `Content-Security-Policy`; bestehende strengere Endpoint-Header
+  (z. B. auf `/attachments/{id}/download`) bleiben unverändert.
+- Header-Set zusätzlich redundant in `deploy/nginx.conf` für die SPA.
+- **Pen-Test-Checkliste** (`docs/architecture/pentest-checklist.md`)
+  mit Roh-Outputs für jede Probe (Unauth, CSRF, Rate-Limit,
+  Mime-Spoofing, Path-Traversal, SQL-Injection, Logout-Session-Replay,
+  Audit-RBAC, Open-Redirect, statische Header).
+- **OWASP-ASVS-L2-Spot-Check**
+  (`docs/architecture/asvs-l2-checklist.md`): 37 zutreffende Kontrollen
+  über V2, V3, V4, V5, V7, V8, V9, V13 — 32 ✅, 4 ⚠ (mit Mitigation),
+  1 ❌ (out-of-scope).
+- **Sicherheitsnotizen** (`docs/architecture/security-notes.md`) mit
+  Ergebnis der Abhängigkeits-Audits (`pip-audit`, `npm audit --omit=dev`
+  — beide ohne offene Befunde) und bewusst akzeptierten Hinweisen
+  (z. B. `SameSite=Lax` auf Refresh-Cookie).
+- **Performance-Baseline**
+  (`docs/architecture/performance-baseline.md`) mit p50/p95/p99 für
+  `GET /healthz`, `GET /objects`, `GET /objects/{id}/budget/timeline`,
+  `GET /objects/{id}/audit?limit=50`, `POST /cost-items` (alle deutlich
+  unter 500 ms p95).
+- **Performance-Smoke-Skript** (`scripts/perf_smoke.py`) für
+  reproduzierbare Folge-Messungen.
+- 5 neue Unit-Tests für die Sicherheits-Header-Middleware
+  (`tests/unit/test_security_headers.py`). Gesamt: 177 Backend-Tests
+  und 61 Frontend-Tests grün.
+
+### Changed
+- `VERSION`, `backend/pyproject.toml`, `backend/app/__init__.py`,
+  `frontend/package.json` auf **1.0.0**.
+- `README.md`: Quickstart präzisiert (alembic upgrade, dev seed,
+  libmagic-Hinweis), neue Sektion „Was ist enthalten" mit dem
+  vollständigen Funktionsumfang, Roadmap-Tabelle „v1.0.0 erledigt"
+  über alle Phasen.
+- `deploy/nginx.conf`: `Permissions-Policy` an Backend-Set
+  angeglichen, COOP + strikte CSP ergänzt.
+
+### Released milestones (alle bis v1.0.0)
+
+- **Phase 0** — `v0.1.0`: Initiales Monorepo-Scaffolding.
+- **Phase 1** — `v0.2.0`: Authentifizierung (Argon2id, JWT, Refresh,
+  Invitation, Reset).
+- **Phase 2** — `v0.3.0`: Objekte, Einheiten, Wertquoten, per-Objekt-RBAC.
+- **Phase 3** — `v0.4.0`: eBKP-H-Katalog + Kostenpositionen.
+- **Phase 4** — `v0.5.0`: Budget-Zeitachse + Reserveplanung + Finanzen-
+  Roll-up.
+- **Phase 5** — `v0.6.0`: Renofond-Projektion + effektive Einzahlungen.
+- **Phase 6** — `v0.7.0`: Content-adressierte Anhänge mit Mime-Schnüffeln.
+- **Phase 7** — `v0.8.0`: Append-only Audit-Log mit Verlauf-UI.
+- **Phase 8** — `v0.9.0`: XLSX-/PDF-/NPK-Stub-Exporte.
+- **Phase 9** — `v0.10.0`: Nächtliche Backups + wöchentlicher Digest.
+- **Phase 10** — `v1.0.0`: Härtungs-Pass + erste stabile Version.
+
+### Security
+- `pip-audit` (Backend) und `npm audit --omit=dev` (Frontend) am
+  2026-06-06 ohne offene Befunde.
+- Vollständige ASVS-L2-Sichtung dokumentiert; alle abweichenden
+  Punkte sind mit Begründung in `security-notes.md` festgehalten.
+
 ## [0.10.0] — 2026-06-06
 
 ### Added

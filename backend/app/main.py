@@ -21,6 +21,7 @@ from app.api.v1 import health
 from app.api.v1 import objects as objects_router
 from app.api.v1 import renofond as renofond_router
 from app.core.config import get_settings
+from app.core.security_headers import SecurityHeadersMiddleware
 
 
 def create_app() -> FastAPI:
@@ -38,6 +39,7 @@ def create_app() -> FastAPI:
     auth_router.limiter.enabled = settings.environment != "test"
     app.state.limiter = auth_router.limiter
     app.add_middleware(SlowAPIMiddleware)
+    app.add_middleware(SecurityHeadersMiddleware)
 
     @app.exception_handler(RateLimitExceeded)
     async def _rate_limit_handler(_request: Request, exc: RateLimitExceeded) -> JSONResponse:

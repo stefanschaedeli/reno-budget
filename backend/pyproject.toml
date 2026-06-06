@@ -1,6 +1,6 @@
 [project]
 name = "reno-budget-api"
-version = "0.10.0"
+version = "1.0.0"
 description = "Reno-Budget backend (FastAPI + SQLAlchemy + Postgres)"
 requires-python = ">=3.12"
 readme = "../README.md"
