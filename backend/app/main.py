@@ -1,21 +1,20 @@
-"""FastAPI application factory.
-
-Kept deliberately small: wiring only. Business logic lives in ``app.services``
-and ``app.api.v1.*`` routers. Tests import :func:`create_app` to obtain a fresh
-app instance with overridable dependencies.
-"""
+"""FastAPI application factory."""
 
 from __future__ import annotations
 
 from fastapi import FastAPI
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from app import __version__
+from app.api.v1 import auth as auth_router
 from app.api.v1 import health
 from app.core.config import get_settings
 
 
 def create_app() -> FastAPI:
-    """Build and return the FastAPI application."""
     settings = get_settings()
 
     app = FastAPI(
@@ -25,7 +24,21 @@ def create_app() -> FastAPI:
         openapi_url=f"{settings.api_prefix}/openapi.json",
     )
 
+    # Rate limiter (slowapi). Disabled under RENO_ENVIRONMENT=test so the
+    # test suite isn't throttled by per-IP login limits.
+    auth_router.limiter.enabled = settings.environment != "test"
+    app.state.limiter = auth_router.limiter
+    app.add_middleware(SlowAPIMiddleware)
+
+    @app.exception_handler(RateLimitExceeded)
+    async def _rate_limit_handler(_request: Request, exc: RateLimitExceeded) -> JSONResponse:
+        return JSONResponse(
+            status_code=429,
+            content={"detail": f"Zu viele Anfragen — bitte später erneut versuchen ({exc.detail})"},
+        )
+
     app.include_router(health.router, prefix=settings.api_prefix)
+    app.include_router(auth_router.router, prefix=settings.api_prefix)
 
     return app
 

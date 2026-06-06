@@ -1,6 +1,6 @@
 [project]
 name = "reno-budget-api"
-version = "0.1.0"
+version = "0.2.0"
 description = "Reno-Budget backend (FastAPI + SQLAlchemy + Postgres)"
 requires-python = ">=3.12"
 readme = "../README.md"
@@ -35,6 +35,8 @@ dev = [
   "bandit>=1.8",
   "pip-audit>=2.7",
   "types-passlib",
+  "testcontainers[postgres]>=4.8",
+  "aiosmtplib>=3.0",
 ]
 exports = [
   "openpyxl>=3.1",

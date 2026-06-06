@@ -9,9 +9,9 @@ Empfehlung, sondern Voraussetzung dafür, dass ein Phasen-Tag gesetzt wird.
 
 > _Wird gefüllt, sobald Funktionen ausgeliefert sind._
 
-| Funktion          | Datei                  | Eingeführt in Version |
-|-------------------|------------------------|-----------------------|
-| _(noch keine)_    | —                      | —                     |
+| Funktion                            | Datei                  | Eingeführt in Version |
+|-------------------------------------|------------------------|-----------------------|
+| Anmeldung, Einladung & Passwort     | [auth.md](./auth.md)   | 0.2.0                 |
 
 ## Vorlage für eine neue How-To
 
