@@ -22,6 +22,7 @@ from __future__ import annotations
 import enum
 import uuid
 from datetime import UTC, datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -34,6 +35,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    Numeric,
     String,
     UniqueConstraint,
 )
@@ -68,6 +70,14 @@ class ObjectRole(enum.StrEnum):
     VIEWER = "viewer"
 
 
+class ContributionMode(enum.StrEnum):
+    """How the OWNER plans to set aside the renovation reserve."""
+
+    MONTHLY = "monthly"
+    YEARLY = "yearly"
+    LUMP_SUM = "lump_sum"
+
+
 class Object(Base):
     """A building tracked by Reno-Budget.
 
@@ -88,6 +98,22 @@ class Object(Base):
     # Planning horizon used by the Renofond projection (Phase 5). 30 y is the
     # Swiss default for renovation reserve planning.
     planning_horizon_years: Mapped[int] = mapped_column(Integer, nullable=False, default=30)
+    # Phase 4: cashflow-planning fields. Reserve & inflation are stored on the
+    # object so all members see the same numbers in /finanzen and /budget views.
+    contribution_mode: Mapped[ContributionMode] = mapped_column(
+        Enum(ContributionMode, name="contribution_mode", native_enum=False),
+        nullable=False,
+        default=ContributionMode.YEARLY,
+    )
+    # Annual inflation rate in percent, e.g. 1.500 = 1.5 %. Numeric(5,3) gives
+    # us a 0..99.999 range; the check constraint caps the realistic band.
+    inflation_rate_percent: Mapped[Decimal] = mapped_column(
+        Numeric(5, 3), nullable=False, default=Decimal("0")
+    )
+    # Money already set aside; subtracted from the required contribution sum.
+    initial_reserve_chf: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), nullable=False, default=Decimal("0")
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, nullable=False
@@ -114,6 +140,14 @@ class Object(Base):
         CheckConstraint(
             "planning_horizon_years BETWEEN 1 AND 100",
             name="ck_objects_planning_horizon_range",
+        ),
+        CheckConstraint(
+            "inflation_rate_percent >= 0 AND inflation_rate_percent <= 20",
+            name="ck_objects_inflation_rate_range",
+        ),
+        CheckConstraint(
+            "initial_reserve_chf >= 0",
+            name="ck_objects_initial_reserve_nonneg",
         ),
     )
 

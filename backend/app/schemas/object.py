@@ -14,10 +14,11 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
-from app.models.object import ObjectRole, ObjectType
+from app.models.object import ContributionMode, ObjectRole, ObjectType
 from app.services.allocations import WertquoteError, validate_wertquoten_sum
 
 # ---- Units ------------------------------------------------------------------
@@ -54,6 +55,13 @@ class ObjectCreate(BaseModel):
     year_built: int | None = Field(default=None, ge=1500, le=2100)
     type: ObjectType
     planning_horizon_years: int = Field(default=30, ge=1, le=100)
+    contribution_mode: ContributionMode = ContributionMode.YEARLY
+    inflation_rate_percent: Decimal = Field(
+        default=Decimal("0"), ge=Decimal("0"), le=Decimal("20"), max_digits=5, decimal_places=3
+    )
+    initial_reserve_chf: Decimal = Field(
+        default=Decimal("0"), ge=Decimal("0"), max_digits=12, decimal_places=2
+    )
     units: list[UnitCreate] = Field(min_length=1)
 
     @model_validator(mode="after")
@@ -71,14 +79,23 @@ class ObjectCreate(BaseModel):
 
 
 class ObjectUpdate(BaseModel):
+    model_config = ConfigDict(json_encoders={Decimal: str})
+
     name: str | None = Field(default=None, min_length=1, max_length=120)
     address: str | None = Field(default=None, max_length=255)
     year_built: int | None = Field(default=None, ge=1500, le=2100)
     planning_horizon_years: int | None = Field(default=None, ge=1, le=100)
+    contribution_mode: ContributionMode | None = None
+    inflation_rate_percent: Decimal | None = Field(
+        default=None, ge=Decimal("0"), le=Decimal("20"), max_digits=5, decimal_places=3
+    )
+    initial_reserve_chf: Decimal | None = Field(
+        default=None, ge=Decimal("0"), max_digits=12, decimal_places=2
+    )
 
 
 class ObjectPublic(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, json_encoders={Decimal: str})
 
     id: uuid.UUID
     name: str
@@ -86,6 +103,9 @@ class ObjectPublic(BaseModel):
     year_built: int | None
     type: ObjectType
     planning_horizon_years: int
+    contribution_mode: ContributionMode
+    inflation_rate_percent: Decimal
+    initial_reserve_chf: Decimal
     created_at: datetime
 
 

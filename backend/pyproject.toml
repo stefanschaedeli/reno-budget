@@ -83,8 +83,8 @@ strict = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 plugins = ["pydantic.mypy"]
-mypy_path = "app"
 explicit_package_bases = true
+packages = ["app"]
 
 [[tool.mypy.overrides]]
 module = ["magic", "passlib.*", "apscheduler.*"]

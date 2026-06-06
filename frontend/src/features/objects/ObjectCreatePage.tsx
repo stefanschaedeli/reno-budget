@@ -67,7 +67,7 @@ export function ObjectCreatePage(): JSX.Element {
   return (
     <section className="mx-auto mt-12 max-w-3xl p-6">
       <h2 className="mb-6 text-2xl font-semibold">{t("objects.create.title")}</h2>
-      <form onSubmit={submit} className="space-y-4">
+      <form onSubmit={(e) => void submit(e)} className="space-y-4">
         <label className="block">
           <span className="text-sm">{t("objects.fields.name")}</span>
           <input

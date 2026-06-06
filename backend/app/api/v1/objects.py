@@ -74,6 +74,9 @@ def _to_detail(obj: Object, units: Sequence[Unit]) -> ObjectDetail:
         year_built=obj.year_built,
         type=obj.type,
         planning_horizon_years=obj.planning_horizon_years,
+        contribution_mode=obj.contribution_mode,
+        inflation_rate_percent=obj.inflation_rate_percent,
+        initial_reserve_chf=obj.initial_reserve_chf,
         created_at=obj.created_at,
         units=[UnitPublic.model_validate(u) for u in units],
     )

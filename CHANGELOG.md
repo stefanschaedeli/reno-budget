@@ -7,6 +7,53 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-06-06
+
+### Added
+- **Budget-Aggregation & Reserveplanung** (Phase 4): Pro Objekt eine
+  Jahres-Zeitachse mit Plan-, inflationiertem Plan- und Ist-Betrag, plus
+  ein Reserveplan, der den Soll-Beitrag pro Monat, Jahr oder als
+  Einmal­einlage ableitet.
+- **Neue Objekt-Felder**: `contribution_mode` (`monthly` / `yearly` /
+  `lump-sum`), `inflation_rate_percent` (Numeric 5,3) und
+  `initial_reserve_chf` (Numeric 12,2) — alle vom Owner per `PATCH /objects/{id}`
+  editierbar.
+- **API**:
+  - `GET /api/v1/objects/{id}/budget/timeline?inflated=true|false` —
+    Jahres-Aggregate mit Aufschlüsselung nach eBKP-H-Hauptgruppe, Einheit,
+    Status und Priorität.
+  - `GET /api/v1/objects/{id}/budget/reserve` — Soll-Beitrag inkl.
+    Initial-Reserve-Abzug und (für Lump-Sum) Pro-Jahr-Bedarf.
+  - `GET /api/v1/finances/overview` — objekt­übergreifender Roll-up für
+    alle Objekte des Users; respektiert RBAC und Scope-Pro-Rating.
+- **Frontend**: Routen `/objekte/:id/budget` (Budget-Seite mit Reserve-Panel,
+  Zeitachse und Aufschlüsselungen) und `/finanzen` (Cross-Object-Übersicht).
+  Neue Tab-Verlinkung im Objekt-Detail; neuer Top-Nav-Eintrag „Finanzen“.
+- **Pro-Rating für gescopte Mitglieder**: Editor/Viewer mit Unit-Scope sehen
+  in Zeitachse, Reserve und Roll-up alle Beträge auf ihren Anteil
+  (`Σ share_permille / 1000`) reduziert; ein UI-Badge zeigt das an.
+- **Dev-Seed** (`backend/app/seeds/dev_seed.py`): Idempotentes Seed-Modul mit
+  zwei Demo-Objekten (SFH + MFH), 4 Einheiten, 3 Mitgliedschaften (inkl.
+  scoped EDITOR) und 18 mehrjährigen Kostenpositionen für Demo-Zwecke.
+- Alembic-Migration `0004_object_finance_fields` für die neuen Spalten und
+  Check-Constraints (`inflation_rate_percent BETWEEN 0 AND 20`,
+  `initial_reserve_chf >= 0`).
+- Dokumentation: `docs/howto/budget.md` (Anwender-Anleitung Deutsch) mit
+  Erklärung der Inflations- und Pro-Rating-Mathematik.
+- 23 neue Backend-Tests (Service + API) sowie 20 neue Frontend-Tests für
+  Reserve-Panel, Zeitachse, Aufschlüsselungen und Finanzen-Seite —
+  Gesamt: 112 Backend- und 44 Frontend-Tests.
+
+### Changed
+- `Object.contribution_mode` ersetzt die zuvor implizite Annahme "monatlich" —
+  bestehende Objekte erhalten beim Migrieren den Default `monthly`.
+
+### Security
+- Alle Budget-Endpunkte erfordern mindestens **Viewer**-Rolle; Mutationen der
+  Reserve-Einstellungen erfordern **Owner** und CSRF-Token.
+- Outsider erhalten 404 (nicht 403) auf `/budget/timeline` — verhindert
+  Objekt-Enumeration analog zur Cost-Items-Policy.
+
 ## [0.4.0] — 2026-06-06
 
 ### Added

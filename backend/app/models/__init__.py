@@ -14,6 +14,7 @@ from app.models.cost import (  # noqa: F401
     CostItemUnitAllocation,
 )
 from app.models.object import (  # noqa: F401
+    ContributionMode,
     Object,
     ObjectMembership,
     ObjectRole,

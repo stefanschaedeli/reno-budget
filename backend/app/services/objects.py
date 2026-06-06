@@ -77,6 +77,9 @@ async def create_object_with_units(
         year_built=payload.year_built,
         type=payload.type,
         planning_horizon_years=payload.planning_horizon_years,
+        contribution_mode=payload.contribution_mode,
+        inflation_rate_percent=payload.inflation_rate_percent,
+        initial_reserve_chf=payload.initial_reserve_chf,
     )
     session.add(obj)
     await session.flush()  # need obj.id before adding units
