@@ -27,7 +27,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PATH="/install/bin:$PATH"
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends libmagic1 curl \
+ && apt-get install -y --no-install-recommends libmagic1 curl postgresql-client \
  && rm -rf /var/lib/apt/lists/* \
  && addgroup --system --gid 10001 reno \
  && adduser  --system --uid 10001 --ingroup reno --home /app reno

@@ -30,7 +30,7 @@ services:
       RENO_DATABASE_URL: ${RENO_DATABASE_URL}
     volumes:
       - uploads_data:/data/uploads
-      - backups_data:/backups
+      - backups_data:/data/backups
     expose:
       - "8000"
     healthcheck:
@@ -49,11 +49,15 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    environment:
+      RENO_DATABASE_URL: ${RENO_DATABASE_URL}
+      RENO_BACKUPS_DIR: /data/backups
     volumes:
       - uploads_data:/data/uploads
-      - backups_data:/backups
-    # Phase 0: worker has no jobs yet; sleeps. Real entrypoint added in Phase 9.
-    command: ["python", "-c", "import time; print('worker placeholder'); time.sleep(2**31)"]
+      - backups_data:/data/backups
+    # Phase 9: APScheduler-based worker. Runs nightly DB backups and weekly
+    # reminder digest emails. See docs/howto/worker.md for operations.
+    command: ["python", "-m", "app.worker"]
 
   web:
     build:

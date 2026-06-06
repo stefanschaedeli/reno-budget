@@ -58,6 +58,15 @@ ACTION_RESERVE_CONTRIBUTION_DELETE = "reserve_contribution.delete"
 
 ACTION_BKP_CODE_CREATE = "bkp_code.create"
 
+# Worker (Phase 9). System-driven; ``actor_email`` is the synthetic
+# ``worker@reno-budget.local`` identity since there's no logged-in caller.
+ACTION_WORKER_BACKUP = "worker.backup"
+ACTION_WORKER_DIGEST_SENT = "worker.digest_sent"
+
+# Synthetic actor email for system-driven worker events. Not a real user;
+# the FK column ``actor_user_id`` stays NULL.
+WORKER_ACTOR_EMAIL = "worker@reno-budget.local"
+
 
 def _client_meta(request: Request | None) -> tuple[str | None, str | None]:
     """Extract ``(ip_address, user_agent)`` from ``request`` if present.

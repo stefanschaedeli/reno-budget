@@ -7,6 +7,44 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.10.0] — 2026-06-06
+
+### Added
+- **Worker** (Phase 9): Eigener Hintergrunddienst (`python -m app.worker`)
+  mit zwei APScheduler-Jobs.
+- **Nächtliches DB-Backup** (`worker.backup`): `pg_dump` schreibt
+  gezippte Dumps nach `RENO_BACKUPS_DIR` (Format
+  `reno-budget_YYYY-MM-DD-HHmmss.sql.gz`). Passwort wird ausschliesslich
+  über `PGPASSWORD` übergeben — niemals via argv.
+- **Aufbewahrungsrichtlinie**: Standardmässig 30 tägliche + 12 monatliche
+  Backups; konfigurierbar via
+  `RENO_WORKER_BACKUP_RETENTION_DAILY` / `_MONTHLY`. Pruning läuft
+  automatisch nach jedem erfolgreichen Backup.
+- **Wöchentlicher Erinnerungs-Digest** (`worker.digest_sent`): Pro
+  aktivem Benutzer eine deutsche Zusammenfassung mit dringenden Kosten-
+  positionen, Renofond-Unterdeckung (5-Jahres-Horizont, nur Eigentümer)
+  und neuen Anhängen anderer Mitwirkender (7 Tage, nur Eigentümer).
+  Keine E-Mail bei leerem Inhalt.
+- **Audit-Events**: `worker.backup` (Erfolg, mit Dateigrösse) und
+  `worker.digest_sent` (pro Empfänger). Fehlgeschlagene Backups
+  schreiben kein Audit, sondern propagieren den Fehler.
+- **CLI**: `--run-once backup` und `--run-once digest` für manuelle
+  Läufe (Smoke-Test, Ad-hoc-Backup).
+- **Docker**: Worker-Service in `deploy/docker-compose.yml` auf den
+  echten Entrypoint umgestellt; `postgresql-client` ins API-Image
+  aufgenommen (liefert `pg_dump`). Backups-Volume bei API und Worker
+  einheitlich auf `/data/backups`.
+- **Konfiguration**: Neue Settings `backups_dir`, `worker_backup_cron`,
+  `worker_digest_cron`, `worker_backup_retention_daily`,
+  `worker_backup_retention_monthly`, `app_base_url`. Beispiele in
+  `deploy/.env.example`.
+- **Dokumentation**: `docs/howto/worker.md` (Deutsch — Was läuft wann,
+  Restore-Anleitung, `--run-once`-Beispiele, Inhalt der wöchentlichen
+  E-Mail).
+- 14 neue Backend-Tests (8 Unit für URL-Parsing / argv / Retention; 6
+  Integration für Backup-Audit, Digest-Versand inkl. leerer Digest,
+  neue-Anhänge-Erkennung und Scheduler-Wiring). Gesamt: 172 Backend-Tests.
+
 ## [0.9.0] — 2026-06-06
 
 ### Added

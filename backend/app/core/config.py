@@ -59,6 +59,18 @@ class Settings(BaseSettings):
     smtp_password: SecretStr | None = None
     smtp_from: str = "reno-budget@localhost"
 
+    # Worker (Phase 9) — nightly backups + weekly digest emails.
+    # ``backups_dir`` is the directory pg_dump writes into. Cron expressions
+    # follow APScheduler's CronTrigger.from_crontab() syntax. Retention is
+    # measured in finished daily files / finished monthly files.
+    backups_dir: str = "./backups"
+    worker_backup_cron: str = "30 2 * * *"
+    worker_digest_cron: str = "0 7 * * MON"
+    worker_backup_retention_daily: int = 30
+    worker_backup_retention_monthly: int = 12
+    # App-base-URL embedded in digest emails (link to the web UI).
+    app_base_url: str = "http://localhost:8080"
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
