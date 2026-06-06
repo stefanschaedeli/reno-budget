@@ -121,9 +121,7 @@ async def replace_units(
     if obj.type == ObjectType.SFH and (
         len(new_units) != 1 or new_units[0].wertquote_permille != 1000
     ):
-        raise ObjectServiceError(
-            "Einfamilienhaus muss genau eine Einheit mit 1000‰ enthalten"
-        )
+        raise ObjectServiceError("Einfamilienhaus muss genau eine Einheit mit 1000‰ enthalten")
     try:
         validate_wertquoten_sum(u.wertquote_permille for u in new_units)
     except WertquoteError as exc:
@@ -169,16 +167,12 @@ async def update_membership(
         if membership.role == ObjectRole.OWNER and new_role != ObjectRole.OWNER:
             remaining = await count_owner_memberships(session, obj.id)
             if remaining <= 1:
-                raise LastOwnerError(
-                    "Letzter Eigentümer kann nicht herabgestuft werden"
-                )
+                raise LastOwnerError("Letzter Eigentümer kann nicht herabgestuft werden")
         membership.role = new_role
 
     if new_scope_unit_ids is not None:
         if membership.role == ObjectRole.OWNER and new_scope_unit_ids:
-            raise ObjectServiceError(
-                "OWNER-Mitgliedschaft darf nicht unit-eingeschränkt sein"
-            )
+            raise ObjectServiceError("OWNER-Mitgliedschaft darf nicht unit-eingeschränkt sein")
         await _verify_units_belong_to_object(session, obj.id, new_scope_unit_ids)
         await replace_unit_scopes(session, membership, new_scope_unit_ids)
 
@@ -205,9 +199,7 @@ async def _verify_units_belong_to_object(
     valid = {u.id for u in units}
     bad = [str(u) for u in unit_ids if u not in valid]
     if bad:
-        raise InvalidUnitScopeError(
-            f"Einheiten gehören nicht zu diesem Objekt: {', '.join(bad)}"
-        )
+        raise InvalidUnitScopeError(f"Einheiten gehören nicht zu diesem Objekt: {', '.join(bad)}")
 
 
 # ---- Invitation extension (object-bound invites) ----------------------------

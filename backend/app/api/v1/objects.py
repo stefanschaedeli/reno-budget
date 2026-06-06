@@ -8,6 +8,7 @@ Every state-changing endpoint requires the appropriate per-object role via
 from __future__ import annotations
 
 import uuid
+from collections.abc import Sequence
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -15,7 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from app.core.config import get_settings
 from app.core.db import SessionDep
 from app.core.deps import CurrentUser, require_csrf, require_object_access_dep
-from app.models.object import ObjectRole
+from app.models.object import Object, ObjectMembership, ObjectRole, Unit
 from app.repositories.object import (
     get_membership,
     get_object,
@@ -55,7 +56,7 @@ router = APIRouter(prefix="/objects", tags=["objects"])
 # ---- Helpers ----------------------------------------------------------------
 
 
-def _membership_to_public(m, scope_ids: list[uuid.UUID]) -> MembershipPublic:
+def _membership_to_public(m: ObjectMembership, scope_ids: list[uuid.UUID]) -> MembershipPublic:
     return MembershipPublic(
         id=m.id,
         user_id=m.user_id,
@@ -65,7 +66,7 @@ def _membership_to_public(m, scope_ids: list[uuid.UUID]) -> MembershipPublic:
     )
 
 
-def _to_detail(obj, units) -> ObjectDetail:
+def _to_detail(obj: Object, units: Sequence[Unit]) -> ObjectDetail:
     return ObjectDetail(
         id=obj.id,
         name=obj.name,
@@ -99,9 +100,7 @@ async def create_object(
 ) -> ObjectDetail:
     """Create a new object and become its OWNER."""
     try:
-        obj = await create_object_with_units(
-            session, payload=payload, owner_user_id=user.id
-        )
+        obj = await create_object_with_units(session, payload=payload, owner_user_id=user.id)
     except ObjectServiceError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
     await session.commit()
@@ -210,10 +209,7 @@ async def list_object_members(
     session: SessionDep,
 ) -> list[MembershipPublic]:
     members = await list_memberships(session, object_id)
-    return [
-        _membership_to_public(m, [s.unit_id for s in m.unit_scopes])
-        for m in members
-    ]
+    return [_membership_to_public(m, [s.unit_id for s in m.unit_scopes]) for m in members]
 
 
 @router.patch(

@@ -22,6 +22,10 @@ from __future__ import annotations
 import enum
 import uuid
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.cost import CostItem
 
 from sqlalchemy import (
     CheckConstraint,
@@ -97,6 +101,13 @@ class Object(Base):
     )
     memberships: Mapped[list[ObjectMembership]] = relationship(
         back_populates="object", cascade="all, delete-orphan"
+    )
+    # Phase 3: cost items live on the object. CASCADE delete ensures dropping
+    # an object cleanly removes its renovation plan and its allocations.
+    cost_items: Mapped[list[CostItem]] = relationship(
+        "CostItem",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     __table_args__ = (

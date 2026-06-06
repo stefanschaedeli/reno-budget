@@ -121,9 +121,7 @@ async def mfh_object(db_session: AsyncSession, owner: User) -> Object:
     ]
     for u in units:
         db_session.add(u)
-    db_session.add(
-        ObjectMembership(user_id=owner.id, object_id=obj.id, role=ObjectRole.OWNER)
-    )
+    db_session.add(ObjectMembership(user_id=owner.id, object_id=obj.id, role=ObjectRole.OWNER))
     await db_session.commit()
     return obj
 
@@ -275,8 +273,10 @@ class TestUnitScopeVisibility:
         from sqlalchemy import select
 
         units = (
-            await db_session.execute(select(Unit).where(Unit.object_id == mfh_object.id))
-        ).scalars().all()
+            (await db_session.execute(select(Unit).where(Unit.object_id == mfh_object.id)))
+            .scalars()
+            .all()
+        )
         scoped_unit = units[0]
         await _grant(
             db_session,

@@ -7,6 +7,55 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-06-06
+
+### Added
+- **eBKP-H-Katalog** (Phase 3): Hierarchisches Klassifikationsmodell
+  (`bkp_codes`) mit rund 75 vorinstallierten Codes der ersten beiden
+  Ebenen (Hauptgruppen A–Z, Elementgruppen Cxx/Dxx/…). Seed-Daten werden
+  per Alembic-Datenmigration aus `backend/app/seeds/ebkp_h.json` geladen
+  und sind als `is_seed=true` markiert.
+- **Kostenpositionen** (`cost_items`): Modell mit Status (Idee … Storniert),
+  Priorität, geplantem/effektivem Betrag (Numeric 12,2), Lebensdauer,
+  Garantie, eBKP-H-Referenz und optionaler NPK-Stelle (Stub für Phase 8).
+  Die DB erzwingt, dass mindestens ein Betrag gesetzt ist.
+- **Anteils-Verteilung** (`cost_item_unit_allocations`): pro Position
+  eine Verteilung in Permille auf die Einheiten des Objekts; serverseitig
+  geprüft "Summe = 1000‰". Bei Modus **Gemeinsam** und fehlender Eingabe
+  wird automatisch aus den Wertquoten materialisiert.
+- **API**: `GET /api/v1/bkp-codes`, `GET /api/v1/bkp-codes/tree`,
+  `POST /api/v1/bkp-codes` (nur Administrator);
+  `GET/POST /api/v1/objects/{id}/cost-items`,
+  `GET/PATCH/DELETE /api/v1/objects/{id}/cost-items/{item_id}`.
+  Listen-Endpoint mit Filtern für Status, Priorität, Jahr, Einheit,
+  eBKP-Präfix und Volltext (Titel).
+- **RBAC-Erweiterung**: Eingeschränkte EDITOR/VIEWER sehen
+  "Gemeinsam"-Positionen nur, wenn mindestens eine ihrer Einheiten an
+  der Verteilung beteiligt ist; Mutation erfordert mindestens eine
+  Einheit im Scope.
+- **Frontend-Modul `features/costs`** (Deutsch): Tabellen- und
+  Kanban-Ansicht, URL-getriebene Filterleiste, eBKP-H-Baum-Picker mit
+  Suche, Verteilungs-Editor mit Live-‰-Summe und "Standard"-Reset, Form
+  mit Zod-Validierung. Drag-and-drop-Statuswechsel mit optimistischer
+  TanStack-Query-Mutation.
+- 19 neue Frontend-Tests (`AllocationEditor`, `CostItemForm`,
+  `CostItemFilters`, `BkpCodePicker`) sowie neue Backend-Tests für
+  Allocation-Validatoren, eBKP-H-Katalog und die RBAC-Matrix der
+  Kostenpositionen (Gesamtsuite 89 Backend-Tests grün).
+- Dokumentation: `docs/howto/ebkp.md`, `docs/howto/kosten.md`.
+
+### Changed
+- `backend/app/services/allocations.py` ergänzt um
+  `validate_allocation_sum` / `AllocationError` mit
+  Kostenpositions-spezifischer Fehlermeldung; bestehende
+  `validate_wertquoten_sum` bleibt unverändert.
+- `Object.cost_items`-Relation (Cascade Delete) für Aufräumen bei
+  Objekt-Löschung.
+
+### Fixed
+- Fehlende Typannotationen in `app/api/v1/objects.py` (mypy strict),
+  Restbestand aus Phase 2.
+
 ## [0.3.0] — 2026-06-06
 
 ### Added

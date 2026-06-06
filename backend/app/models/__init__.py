@@ -5,6 +5,14 @@ so that Alembic's ``--autogenerate`` (and the test fixtures) see the full
 metadata. Add new modules here when you create them.
 """
 
+from app.models.cost import (  # noqa: F401
+    BkpCode,
+    CostItem,
+    CostItemPriority,
+    CostItemScope,
+    CostItemStatus,
+    CostItemUnitAllocation,
+)
 from app.models.object import (  # noqa: F401
     Object,
     ObjectMembership,

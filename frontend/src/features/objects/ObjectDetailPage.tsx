@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import { getObject } from "./api";
 import type { ObjectDetail } from "./types";
@@ -45,6 +45,14 @@ export function ObjectDetailPage(): JSX.Element {
           {t(`objects.type.${obj.type}`)}
           {obj.address && ` — ${obj.address}`}
         </p>
+        <nav className="mt-3 flex gap-3 text-sm">
+          <Link
+            to={`/objekte/${obj.id}/kosten`}
+            className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
+          >
+            {t("costs.title")}
+          </Link>
+        </nav>
       </header>
 
       <section className="mb-8">

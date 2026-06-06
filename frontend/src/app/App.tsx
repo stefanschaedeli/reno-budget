@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "@/features/auth/AuthContext";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { AcceptInvitePage } from "@/features/auth/AcceptInvitePage";
@@ -9,6 +10,22 @@ import { HomePage } from "@/features/auth/HomePage";
 import { ObjectsListPage } from "@/features/objects/ObjectsListPage";
 import { ObjectCreatePage } from "@/features/objects/ObjectCreatePage";
 import { ObjectDetailPage } from "@/features/objects/ObjectDetailPage";
+import { CostsPage } from "@/features/costs/CostsPage";
+
+/**
+ * Single QueryClient for the whole app. Defaults are conservative:
+ * one retry on transient failures, no automatic refetch on window focus
+ * (the user mostly works inside one tab; aggressive refetch surprises
+ * mid-edit).
+ */
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function RequireAuth({ children }: { children: React.ReactElement }) {
   const { user, bootstrapping } = useAuth();
@@ -24,9 +41,10 @@ function RequireAuth({ children }: { children: React.ReactElement }) {
 
 export function App(): JSX.Element {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
           <Route path="/anmelden" element={<LoginPage />} />
           <Route path="/invite/:token" element={<AcceptInvitePage />} />
           <Route path="/passwort-zuruecksetzen" element={<PasswordResetRequestPage />} />
@@ -63,9 +81,18 @@ export function App(): JSX.Element {
               </RequireAuth>
             }
           />
+          <Route
+            path="/objekte/:objectId/kosten"
+            element={
+              <RequireAuth>
+                <CostsPage />
+              </RequireAuth>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </QueryClientProvider>
   );
 }

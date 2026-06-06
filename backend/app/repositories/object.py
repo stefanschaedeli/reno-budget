@@ -22,9 +22,7 @@ async def get_object(session: AsyncSession, object_id: uuid.UUID) -> Object | No
     return await session.get(Object, object_id)
 
 
-async def list_objects_for_user(
-    session: AsyncSession, user_id: uuid.UUID
-) -> Sequence[Object]:
+async def list_objects_for_user(session: AsyncSession, user_id: uuid.UUID) -> Sequence[Object]:
     """All objects on which ``user_id`` holds any membership, sorted by name."""
     stmt = (
         select(Object)
@@ -72,9 +70,7 @@ async def get_membership(
     return (await session.execute(stmt)).scalar_one_or_none()
 
 
-async def count_owner_memberships(
-    session: AsyncSession, object_id: uuid.UUID
-) -> int:
+async def count_owner_memberships(session: AsyncSession, object_id: uuid.UUID) -> int:
     """Used to prevent removing the last OWNER of an object."""
     stmt = select(ObjectMembership).where(
         ObjectMembership.object_id == object_id,
@@ -95,8 +91,6 @@ async def replace_unit_scopes(
     """
     from sqlalchemy import delete
 
-    await session.execute(
-        delete(UnitScope).where(UnitScope.membership_id == membership.id)
-    )
+    await session.execute(delete(UnitScope).where(UnitScope.membership_id == membership.id))
     for uid in unit_ids:
         session.add(UnitScope(membership_id=membership.id, unit_id=uid))

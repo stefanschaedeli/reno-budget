@@ -66,9 +66,7 @@ class ObjectCreate(BaseModel):
         if self.type == ObjectType.SFH and (
             len(self.units) != 1 or self.units[0].wertquote_permille != 1000
         ):
-            raise ValueError(
-                "Einfamilienhaus muss genau eine Einheit mit 1000‰ enthalten"
-            )
+            raise ValueError("Einfamilienhaus muss genau eine Einheit mit 1000‰ enthalten")
         return self
 
 

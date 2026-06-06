@@ -1,0 +1,533 @@
+[
+  {
+    "_meta": true,
+    "source": "Curated from the public eBKP-H structure (CRB/SIA) — top two levels only",
+    "version": "2026-06-06",
+    "note": "Top-level Hauptgruppen + selected Elementgruppen. Custom user codes may be added at runtime; this seed is the baseline."
+  },
+  {
+    "code": "A",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Grundstück",
+    "description": "Hauptgruppe — Kosten für Erwerb und Erschliessung des Grundstücks."
+  },
+  {
+    "code": "A01",
+    "parent_code": "A",
+    "level": 2,
+    "label_de": "Grundstückserwerb",
+    "description": "Kaufpreis und Nebenkosten für den Erwerb des Grundstücks."
+  },
+  {
+    "code": "A02",
+    "parent_code": "A",
+    "level": 2,
+    "label_de": "Rechte und Abgaben",
+    "description": "Dienstbarkeiten, Servitute, Grundbuch- und Notariatsgebühren."
+  },
+  {
+    "code": "A03",
+    "parent_code": "A",
+    "level": 2,
+    "label_de": "Bestehende Bauten",
+    "description": "Wertanrechnung oder Übernahme bestehender Bauten auf dem Grundstück."
+  },
+  {
+    "code": "A04",
+    "parent_code": "A",
+    "level": 2,
+    "label_de": "Erschliessung Grundstück",
+    "description": "Anschluss an Werkleitungen, Strassen und öffentliche Infrastruktur."
+  },
+  {
+    "code": "B",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Vorbereitung",
+    "description": "Hauptgruppe — vorbereitende Arbeiten vor dem eigentlichen Hochbau."
+  },
+  {
+    "code": "B01",
+    "parent_code": "B",
+    "level": 2,
+    "label_de": "Istzustandsaufnahme",
+    "description": "Bestandsaufnahme, Vermessung und Dokumentation des Ausgangszustands."
+  },
+  {
+    "code": "B06",
+    "parent_code": "B",
+    "level": 2,
+    "label_de": "Baugrunduntersuchung",
+    "description": "Geotechnische und hydrogeologische Untersuchungen des Baugrunds."
+  },
+  {
+    "code": "B07",
+    "parent_code": "B",
+    "level": 2,
+    "label_de": "Bestehende Bauten Rückbau",
+    "description": "Abbruch und Rückbau bestehender Bauten und Bauteile."
+  },
+  {
+    "code": "B08",
+    "parent_code": "B",
+    "level": 2,
+    "label_de": "Schutzmassnahmen",
+    "description": "Schutz von Nachbargebäuden, Bäumen und bestehenden Anlagen."
+  },
+  {
+    "code": "B09",
+    "parent_code": "B",
+    "level": 2,
+    "label_de": "Anpassung Bestand",
+    "description": "Anpassungen an bestehender Bausubstanz zur Vorbereitung des Neubaus oder Umbaus."
+  },
+  {
+    "code": "C",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Konstruktion Gebäude",
+    "description": "Hauptgruppe — tragende und nichttragende Konstruktionen des Gebäudes."
+  },
+  {
+    "code": "C01",
+    "parent_code": "C",
+    "level": 2,
+    "label_de": "Bodenplatte",
+    "description": "Bodenplatte inklusive Abdichtung und Wärmedämmung gegen Erdreich."
+  },
+  {
+    "code": "C02",
+    "parent_code": "C",
+    "level": 2,
+    "label_de": "Fundament",
+    "description": "Einzel-, Streifen- oder Pfahlfundamente zur Lastableitung in den Baugrund."
+  },
+  {
+    "code": "C03",
+    "parent_code": "C",
+    "level": 2,
+    "label_de": "Wandkonstruktion",
+    "description": "Tragende Aussen- und Innenwände in Massiv- oder Skelettbauweise."
+  },
+  {
+    "code": "C04",
+    "parent_code": "C",
+    "level": 2,
+    "label_de": "Stützenkonstruktion",
+    "description": "Tragende Stützen und Pfeiler aus Beton, Stahl oder Holz."
+  },
+  {
+    "code": "C05",
+    "parent_code": "C",
+    "level": 2,
+    "label_de": "Deckenkonstruktion",
+    "description": "Tragende Geschossdecken inklusive Unterzüge."
+  },
+  {
+    "code": "C06",
+    "parent_code": "C",
+    "level": 2,
+    "label_de": "Dachkonstruktion",
+    "description": "Tragwerk des Dachs (Sparren, Pfetten, Binder, Betondach)."
+  },
+  {
+    "code": "C07",
+    "parent_code": "C",
+    "level": 2,
+    "label_de": "Spezielle Konstruktion",
+    "description": "Treppen, Rampen, Balkone und weitere konstruktive Sonderbauteile."
+  },
+  {
+    "code": "D",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Technik Gebäude",
+    "description": "Hauptgruppe — gebäudetechnische Anlagen (HLKSE)."
+  },
+  {
+    "code": "D01",
+    "parent_code": "D",
+    "level": 2,
+    "label_de": "Elektroanlage",
+    "description": "Starkstrom-, Schwachstrom- und Beleuchtungsanlagen."
+  },
+  {
+    "code": "D05",
+    "parent_code": "D",
+    "level": 2,
+    "label_de": "Wärmeanlage",
+    "description": "Wärmeerzeugung, Wärmeverteilung und Wärmeabgabe (Heizung)."
+  },
+  {
+    "code": "D07",
+    "parent_code": "D",
+    "level": 2,
+    "label_de": "Lufttechnische Anlage",
+    "description": "Lüftungs- und Klimaanlagen inklusive Kanalnetz."
+  },
+  {
+    "code": "D08",
+    "parent_code": "D",
+    "level": 2,
+    "label_de": "Sanitäranlage",
+    "description": "Wasserversorgung, Abwasser und sanitäre Apparate."
+  },
+  {
+    "code": "D09",
+    "parent_code": "D",
+    "level": 2,
+    "label_de": "Transportanlage",
+    "description": "Aufzüge, Hebebühnen und weitere vertikale Fördersysteme."
+  },
+  {
+    "code": "D11",
+    "parent_code": "D",
+    "level": 2,
+    "label_de": "Spezielle Technikanlage",
+    "description": "Spezialtechnik wie Photovoltaik, Notstrom oder Gebäudeautomation."
+  },
+  {
+    "code": "E",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Äussere Wandbekleidung Gebäude",
+    "description": "Hauptgruppe — Aussenhülle der Wände inkl. Fenster und Aussentüren."
+  },
+  {
+    "code": "E01",
+    "parent_code": "E",
+    "level": 2,
+    "label_de": "Aussenwandbekleidung unter Terrain",
+    "description": "Abdichtung, Dämmung und Schutzschichten der Aussenwand im Erdreich."
+  },
+  {
+    "code": "E02",
+    "parent_code": "E",
+    "level": 2,
+    "label_de": "Aussenwandbekleidung über Terrain",
+    "description": "Putz-, Verkleidungs- oder Vorhangfassaden über Terrain."
+  },
+  {
+    "code": "E03",
+    "parent_code": "E",
+    "level": 2,
+    "label_de": "Element zu Aussenwand",
+    "description": "Fenster, Aussentüren, Tore und weitere Öffnungselemente."
+  },
+  {
+    "code": "E04",
+    "parent_code": "E",
+    "level": 2,
+    "label_de": "Aussenbeschattung",
+    "description": "Storen, Rollläden, Markisen und weitere Beschattungssysteme."
+  },
+  {
+    "code": "F",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Bedachung Gebäude",
+    "description": "Hauptgruppe — Dachabdeckung, Abdichtung und Dachöffnungen."
+  },
+  {
+    "code": "F01",
+    "parent_code": "F",
+    "level": 2,
+    "label_de": "Bedachung Flachdach",
+    "description": "Abdichtung, Dämmung und Schutzschichten des Flachdachs."
+  },
+  {
+    "code": "F02",
+    "parent_code": "F",
+    "level": 2,
+    "label_de": "Bedachung Steildach",
+    "description": "Ziegel, Schiefer, Metall oder andere Eindeckungen des Steildachs."
+  },
+  {
+    "code": "F03",
+    "parent_code": "F",
+    "level": 2,
+    "label_de": "Element zu Bedachung",
+    "description": "Dachfenster, Dachluken, Lichtkuppeln und weitere Dachöffnungen."
+  },
+  {
+    "code": "G",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Ausbau Gebäude",
+    "description": "Hauptgruppe — Innenausbau inkl. Trennwände, Beläge und Bekleidungen."
+  },
+  {
+    "code": "G01",
+    "parent_code": "G",
+    "level": 2,
+    "label_de": "Trennwand, Innentüre",
+    "description": "Nichttragende Trennwände sowie Innentüren und -tore."
+  },
+  {
+    "code": "G02",
+    "parent_code": "G",
+    "level": 2,
+    "label_de": "Bodenbelag",
+    "description": "Unterlagsboden und Bodenbeläge (Parkett, Plattenbelag, Teppich u.a.)."
+  },
+  {
+    "code": "G03",
+    "parent_code": "G",
+    "level": 2,
+    "label_de": "Wandbekleidung",
+    "description": "Innenputz, Tapeten, Plattenbeläge und sonstige Wandbekleidungen."
+  },
+  {
+    "code": "G04",
+    "parent_code": "G",
+    "level": 2,
+    "label_de": "Deckenbekleidung",
+    "description": "Abgehängte Decken, Putze und Bekleidungen der Innendecken."
+  },
+  {
+    "code": "G05",
+    "parent_code": "G",
+    "level": 2,
+    "label_de": "Spezieller Ausbau",
+    "description": "Einbaumöbel, Innentreppen, Kamine und weitere Sonderausbauten."
+  },
+  {
+    "code": "H",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Nutzungsspezifische Anlage Gebäude",
+    "description": "Hauptgruppe — Anlagen und Einrichtungen für die spezifische Gebäudenutzung."
+  },
+  {
+    "code": "H01",
+    "parent_code": "H",
+    "level": 2,
+    "label_de": "Nutzungsspezifische Einrichtung",
+    "description": "Festeingebaute Einrichtungen für die spezifische Nutzung (z. B. Küche, Labor)."
+  },
+  {
+    "code": "H02",
+    "parent_code": "H",
+    "level": 2,
+    "label_de": "Nutzungsspezifische Anlage",
+    "description": "Technische Anlagen für die spezifische Nutzung des Gebäudes."
+  },
+  {
+    "code": "I",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Umgebung Gebäude",
+    "description": "Hauptgruppe — Aussenanlagen, Gartenbau und Umgebungsarbeiten."
+  },
+  {
+    "code": "I01",
+    "parent_code": "I",
+    "level": 2,
+    "label_de": "Geländegestaltung",
+    "description": "Aushub, Auffüllung, Modellierung und Geländegestaltung der Umgebung."
+  },
+  {
+    "code": "I02",
+    "parent_code": "I",
+    "level": 2,
+    "label_de": "Befestigte Fläche",
+    "description": "Wege, Plätze, Zufahrten und weitere befestigte Aussenflächen."
+  },
+  {
+    "code": "I03",
+    "parent_code": "I",
+    "level": 2,
+    "label_de": "Umgebungskonstruktion",
+    "description": "Stützmauern, Einfriedungen, Pergolen und weitere Umgebungsbauten."
+  },
+  {
+    "code": "I04",
+    "parent_code": "I",
+    "level": 2,
+    "label_de": "Bepflanzung",
+    "description": "Bäume, Sträucher, Rasen und sonstige Bepflanzungen."
+  },
+  {
+    "code": "I05",
+    "parent_code": "I",
+    "level": 2,
+    "label_de": "Umgebungsausstattung",
+    "description": "Aussenbeleuchtung, Sitzbänke, Briefkästen und weitere Ausstattungen."
+  },
+  {
+    "code": "I06",
+    "parent_code": "I",
+    "level": 2,
+    "label_de": "Werkleitung Umgebung",
+    "description": "Versorgungs- und Entsorgungsleitungen in der Umgebung."
+  },
+  {
+    "code": "J",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Ausstattung Gebäude",
+    "description": "Hauptgruppe — bewegliche und allgemeine Ausstattung des Gebäudes."
+  },
+  {
+    "code": "J01",
+    "parent_code": "J",
+    "level": 2,
+    "label_de": "Allgemeine Ausstattung",
+    "description": "Mobiliar, Beschilderung und allgemeine Ausstattungsgegenstände."
+  },
+  {
+    "code": "J02",
+    "parent_code": "J",
+    "level": 2,
+    "label_de": "Textilien",
+    "description": "Vorhänge, Teppiche und sonstige textile Ausstattung."
+  },
+  {
+    "code": "J03",
+    "parent_code": "J",
+    "level": 2,
+    "label_de": "Kunst am Bau",
+    "description": "Kunstwerke und gestalterische Elemente im Zusammenhang mit dem Bau."
+  },
+  {
+    "code": "V",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Planungskosten",
+    "description": "Hauptgruppe — Honorare und Kosten für Planung und Bauleitung."
+  },
+  {
+    "code": "V01",
+    "parent_code": "V",
+    "level": 2,
+    "label_de": "Architekt",
+    "description": "Honorar für Architekturleistungen über alle Projektphasen."
+  },
+  {
+    "code": "V02",
+    "parent_code": "V",
+    "level": 2,
+    "label_de": "Bauingenieur",
+    "description": "Honorar für Tragwerksplanung und Bauingenieurleistungen."
+  },
+  {
+    "code": "V03",
+    "parent_code": "V",
+    "level": 2,
+    "label_de": "Elektroingenieur",
+    "description": "Honorar für Planung der Elektroanlagen."
+  },
+  {
+    "code": "V04",
+    "parent_code": "V",
+    "level": 2,
+    "label_de": "HLKK-Ingenieur",
+    "description": "Honorar für Heizungs-, Lüftungs-, Klima- und Kälteplanung."
+  },
+  {
+    "code": "V05",
+    "parent_code": "V",
+    "level": 2,
+    "label_de": "Sanitäringenieur",
+    "description": "Honorar für Planung der Sanitäranlagen."
+  },
+  {
+    "code": "V06",
+    "parent_code": "V",
+    "level": 2,
+    "label_de": "Bauphysik",
+    "description": "Honorar für Bauphysik, Akustik und Energienachweis."
+  },
+  {
+    "code": "V07",
+    "parent_code": "V",
+    "level": 2,
+    "label_de": "Spezialist",
+    "description": "Honorare weiterer Fachplaner und Spezialisten."
+  },
+  {
+    "code": "V08",
+    "parent_code": "V",
+    "level": 2,
+    "label_de": "Bauleitung",
+    "description": "Honorar für örtliche Bauleitung und Bauüberwachung."
+  },
+  {
+    "code": "W",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Nebenkosten",
+    "description": "Hauptgruppe — Nebenkosten der Bauherrschaft."
+  },
+  {
+    "code": "W01",
+    "parent_code": "W",
+    "level": 2,
+    "label_de": "Bewilligungen, Gebühren",
+    "description": "Baubewilligungen, Anschlussgebühren und behördliche Abgaben."
+  },
+  {
+    "code": "W02",
+    "parent_code": "W",
+    "level": 2,
+    "label_de": "Vervielfältigungen",
+    "description": "Kosten für Pläne, Drucke, Modelle und Dokumentationen."
+  },
+  {
+    "code": "W03",
+    "parent_code": "W",
+    "level": 2,
+    "label_de": "Versicherungen",
+    "description": "Bauwesen-, Bauherren- und Gebäudeversicherungen während der Bauzeit."
+  },
+  {
+    "code": "W04",
+    "parent_code": "W",
+    "level": 2,
+    "label_de": "Finanzierungskosten",
+    "description": "Bauzinsen und weitere Finanzierungskosten während der Bauphase."
+  },
+  {
+    "code": "W05",
+    "parent_code": "W",
+    "level": 2,
+    "label_de": "Übrige Nebenkosten",
+    "description": "Weitere Nebenkosten der Bauherrschaft, die keiner anderen Position zugeordnet sind."
+  },
+  {
+    "code": "Y",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Reserve",
+    "description": "Hauptgruppe — Reserve für Unvorhergesehenes und Teuerung."
+  },
+  {
+    "code": "Y01",
+    "parent_code": "Y",
+    "level": 2,
+    "label_de": "Unvorhergesehenes",
+    "description": "Reserve für unvorhersehbare Mehrkosten während der Realisierung."
+  },
+  {
+    "code": "Y02",
+    "parent_code": "Y",
+    "level": 2,
+    "label_de": "Teuerung",
+    "description": "Reserve für Preis- und Lohnsteigerungen während der Bauzeit."
+  },
+  {
+    "code": "Z",
+    "parent_code": null,
+    "level": 1,
+    "label_de": "Mehrwertsteuer",
+    "description": "Hauptgruppe — Mehrwertsteuer auf die gesamten Bau- und Nebenkosten."
+  },
+  {
+    "code": "Z01",
+    "parent_code": "Z",
+    "level": 2,
+    "label_de": "Mehrwertsteuer",
+    "description": "Auf die Gesamtkosten anfallende Mehrwertsteuer."
+  }
+]

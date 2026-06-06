@@ -94,14 +94,16 @@ async def get_object_access(
         )
 
     scope_rows = (
-        await session.execute(
-            select(UnitScope.unit_id).where(UnitScope.membership_id == membership.id)
+        (
+            await session.execute(
+                select(UnitScope.unit_id).where(UnitScope.membership_id == membership.id)
+            )
         )
-    ).scalars().all()
-
-    allowed: frozenset[uuid.UUID] | None = (
-        frozenset(scope_rows) if scope_rows else None
+        .scalars()
+        .all()
     )
+
+    allowed: frozenset[uuid.UUID] | None = frozenset(scope_rows) if scope_rows else None
     return ObjectAccess(
         membership_id=membership.id,
         role=membership.role,
@@ -123,9 +125,7 @@ async def require_object_access(
     """
     access = await get_object_access(session, user, object_id)
     if access is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Objekt nicht gefunden"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Objekt nicht gefunden")
     if not access.has_role(minimum_role):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

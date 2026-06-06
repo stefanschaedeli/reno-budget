@@ -14,10 +14,20 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 WERTQUOTE_TOTAL_PERMILLE = 1000
+ALLOCATION_TOTAL_PERMILLE = 1000
 
 
 class WertquoteError(ValueError):
     """Raised when the Wertquoten of an object do not sum to 1000."""
+
+
+class AllocationError(ValueError):
+    """Raised when per-cost-item allocations do not sum to 1000.
+
+    Distinct from :class:`WertquoteError` so callers (and tests) can target
+    cost-item misconfiguration without conflating it with object-level
+    Wertquote invariants — the user-facing German messages differ too.
+    """
 
 
 def validate_wertquoten_sum(permille_values: Iterable[int]) -> None:
@@ -37,6 +47,25 @@ def validate_wertquoten_sum(permille_values: Iterable[int]) -> None:
             )
     total = sum(values)
     if total != WERTQUOTE_TOTAL_PERMILLE:
-        raise WertquoteError(
-            f"Summe der Wertquoten muss 1000‰ ergeben, aktuell {total}‰"
-        )
+        raise WertquoteError(f"Summe der Wertquoten muss 1000‰ ergeben, aktuell {total}‰")
+
+
+def validate_allocation_sum(permille_values: Iterable[int]) -> None:
+    """Raise :class:`AllocationError` unless the allocations sum to exactly 1000.
+
+    Mirrors :func:`validate_wertquoten_sum` but uses the cost-item-specific
+    error class and German wording. Empty iterables fail loudly — a cost item
+    with no allocations cannot be attributed to any unit and would silently
+    fall out of every report.
+    """
+    values = list(permille_values)
+    if not values:
+        raise AllocationError("Mindestens eine Einheit-Aufteilung ist erforderlich")
+    for v in values:
+        if not 0 <= v <= ALLOCATION_TOTAL_PERMILLE:
+            raise AllocationError(
+                f"Aufteilung {v}‰ liegt ausserhalb des erlaubten Bereichs (0-1000‰)"
+            )
+    total = sum(values)
+    if total != ALLOCATION_TOTAL_PERMILLE:
+        raise AllocationError(f"Summe der Aufteilungen muss 1000‰ ergeben, aktuell {total}‰")
