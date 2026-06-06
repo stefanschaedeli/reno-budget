@@ -7,6 +7,54 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-06-06
+
+### Added
+- **Anhänge** (Phase 6): Content-adressierte Datei-Uploads für
+  Kostenpositionen und Objekte (Offerten, Rechnungen, Fotos, Verträge).
+  Dedup über SHA-256, gesharded nach `<sha[:2]>/<sha>` analog Git-LFS.
+  Max. 25 MiB pro Datei; erlaubte Mime-Typen: PDF, JPEG, PNG, WebP, HEIC,
+  XLSX, XLS. Mime wird serverseitig per `libmagic` aus den ersten 4 KiB
+  geschnüffelt — der Client-Header wird ignoriert.
+- **Neues Modell** `Attachment(id, sha256, filename, mime, size_bytes,
+  uploaded_by, target_type, target_id, created_at)`. Polymorphes Ziel
+  (`cost_item` / `object`) ohne DB-FK — Existenz und RBAC werden im
+  Router geprüft.
+- **API**:
+  - `POST /api/v1/cost-items/{id}/attachments` (Editor+, multipart)
+  - `POST /api/v1/objects/{id}/attachments` (Editor+, multipart)
+  - `GET  /api/v1/cost-items/{id}/attachments` / `GET /api/v1/objects/{id}/attachments` (Viewer+)
+  - `GET  /api/v1/attachments/{id}/download` — Streaming mit RBAC-Check,
+    RFC 6266-konformer `Content-Disposition` (ASCII-Fallback +
+    `filename*=UTF-8''…`).
+  - `DELETE /api/v1/attachments/{id}` (Editor+ am Parent; Uploader darf
+    immer eigene Anhänge löschen).
+- **Frontend**: Komponente `AttachmentList` mit Drag-Drop, Datei-Picker,
+  Upload-Fortschritt (XHR), Client-seitiger Grössen-Prüfung,
+  Lösch-Bestätigung. Eingebunden im Objekt-Detail und im
+  Kostenposition-Edit-Drawer. Deutsche UI-Strings (`attachments.*`).
+- Alembic-Migration `0006_attachments`.
+- Dokumentation: `docs/howto/uploads.md` inkl. Hinweis auf die
+  `libmagic`-Systemabhängigkeit (README ergänzt).
+- 17 neue Backend-Tests (8 Storage-Unit-Tests für Dedup, Sharding,
+  Mime-Schnüffeln, Grössen-Cap; 9 RBAC-Integration-Tests für Upload,
+  Download, Delete) und 6 neue Frontend-Tests (Drag-Drop, Progress,
+  Grössen-Ablehnung, Delete-Confirm) — Gesamt: 159 Backend- und
+  62 Frontend-Tests.
+
+### Changed
+- Config-Setting `uploads_root` → `uploads_dir` (env `RENO_UPLOADS_DIR`)
+  zur konsistenten Benennung; kein produktiver Aufrufer betroffen.
+
+### Security
+- Uploads werden niemals direkt über den Web-Root ausgeliefert — alle
+  Downloads laufen durch den RBAC-geprüften Stream-Endpunkt mit
+  `Content-Security-Policy: default-src 'none'`, `X-Content-Type-Options:
+  nosniff` und `Cache-Control: private, no-store`.
+- Dateiname-Validation lehnt `/`, `\`, Null-Bytes und `..` ab.
+- Mime-Spoofing-Schutz: erlaubte Liste wird gegen das echte
+  `libmagic`-Sniff-Ergebnis abgeglichen, nicht gegen den Client-Header.
+
 ## [0.6.0] — 2026-06-06
 
 ### Added

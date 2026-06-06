@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     refresh_token_ttl_days: int = 14
 
     # Uploads
-    uploads_root: str = "/data/uploads"
+    uploads_dir: str = "/data/uploads"
     upload_max_bytes: int = 25 * 1024 * 1024  # 25 MiB
 
     # SMTP (used by invitations / password reset / reminders)

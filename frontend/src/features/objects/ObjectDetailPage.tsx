@@ -5,6 +5,7 @@ import { ApiError } from "@/api/client";
 import { getObject } from "./api";
 import type { ObjectDetail } from "./types";
 import { UnitEditor } from "./UnitEditor";
+import { AttachmentList } from "@/features/attachments/AttachmentList";
 
 /**
  * Read-only object detail page. Phase 2 stops here for unit editing — the
@@ -74,6 +75,10 @@ export function ObjectDetailPage(): JSX.Element {
           }}
           readonly
         />
+      </section>
+
+      <section className="mb-8">
+        <AttachmentList targetType="object" targetId={obj.id} canEdit />
       </section>
     </section>
   );
