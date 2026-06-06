@@ -14,6 +14,7 @@ import { CostsPage } from "@/features/costs/CostsPage";
 import { BudgetPage } from "@/features/budget/BudgetPage";
 import { FinancesPage } from "@/features/budget/FinancesPage";
 import { RenofondPage } from "@/features/renofond/RenofondPage";
+import { GlobalAuditPage, ObjectAuditPage } from "@/features/audit/AuditPage";
 
 /**
  * Single QueryClient for the whole app. Defaults are conservative:
@@ -113,6 +114,22 @@ export function App(): JSX.Element {
             element={
               <RequireAuth>
                 <FinancesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/objekte/:id/audit"
+            element={
+              <RequireAuth>
+                <ObjectAuditPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/audit"
+            element={
+              <RequireAuth>
+                <GlobalAuditPage />
               </RequireAuth>
             }
           />

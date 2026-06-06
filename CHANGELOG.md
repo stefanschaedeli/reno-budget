@@ -7,6 +7,49 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-06-06
+
+### Added
+- **Audit-Log** (Phase 7): Append-only Aktivitätsverlauf für
+  mutierende Aktionen. Jeder Eintrag hält Akteur (`actor_user_id` +
+  denormalisierte `actor_email`), Zeitstempel (UTC), `action` (z. B.
+  `cost_item.create`), Ziel (`target_type`/`target_id`), `object_id`
+  für die Objekt-Filterung, einen kurzen deutschen `summary`, optionalen
+  `payload` (JSONB), `ip_address` und `user_agent` fest.
+- **Service** `app/services/audit.py` mit der Kern-Funktion `record(...)`
+  und Convenience-Helfern. Write-Hooks wurden in Auth-, Objekte-,
+  Mitgliedschaften-, Kostenpositionen-, Anhänge-, Renofond- und
+  BKP-Codes-Router eingehängt; reine Lese-Endpunkte schreiben **nichts**.
+- **API**:
+  - `GET /api/v1/objects/{id}/audit?limit=50&before=<cursor>` —
+    Owner-only Per-Object-Feed mit Keyset-Paginierung (`next_before`).
+  - `GET /api/v1/audit?limit=50&before=<cursor>` — Superuser-only,
+    globaler Feed.
+- **Frontend**: Neue Route `/objekte/:id/audit` (Owner-only, Reiter
+  „Verlauf" im Objekt-Detail) und `/admin/audit` (Superuser-only,
+  globaler Feed). Tabelle mit Zeit, Akteur, Aktion (deutsch übersetzt),
+  Beschreibung; „Weitere laden"-Button für Cursor-Paginierung.
+  Deutsche UI-Strings unter `audit.*`.
+- Alembic-Migration `0007_audit_events` mit Indizes
+  `ix_audit_events_object_id_created_at`, `ix_audit_events_created_at`
+  und `ix_audit_events_actor_user_id`.
+- Dokumentation: `docs/howto/audit.md` (Anwender-Anleitung Deutsch) inkl.
+  Tabelle aller protokollierten Aktionen.
+- 11 neue Backend-Integrations-Tests (Audit-Schreib-Hooks für die
+  wichtigsten Mutationen + API/RBAC-Matrix für Owner, Editor, Viewer,
+  Outsider, Superuser, sowie Cursor-Paginierung) und 5 neue
+  Frontend-Tests für die Verlauf-Seite (Empty, gerenderte Zeilen,
+  403-Banner, „Weitere laden", globaler Modus) — Gesamt: 153 Backend-
+  und 61 Frontend-Tests.
+
+### Security
+- `GET /audit` erfordert `is_superuser`; nicht-Superuser erhalten 403.
+- `GET /objects/{id}/audit` erfordert OWNER auf dem Objekt; Editor/
+  Viewer/Outsider erhalten 403 bzw. 404 analog zur Budget-Policy.
+- Das Log ist **nur lesbar** — es gibt keinen Schreib-, Update- oder
+  Delete-Endpunkt auf `audit_events` über die API; Einträge werden
+  ausschliesslich serverseitig durch den Audit-Service erzeugt.
+
 ## [0.7.0] — 2026-06-06
 
 ### Added

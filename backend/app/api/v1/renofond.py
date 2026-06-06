@@ -14,10 +14,10 @@ from __future__ import annotations
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 from app.core.db import SessionDep
-from app.core.deps import require_csrf, require_object_access_dep
+from app.core.deps import CurrentUser, require_csrf, require_object_access_dep
 from app.models.object import ObjectRole
 from app.schemas.renofond import (
     ContributionCreate,
@@ -25,6 +25,7 @@ from app.schemas.renofond import (
     ContributionRead,
     ProjectionResponse,
 )
+from app.services import audit as audit_svc
 from app.services.rbac import ObjectAccess
 from app.services.renofond import (
     compute_projection,
@@ -79,8 +80,10 @@ async def list_contributions_endpoint(
     dependencies=[Depends(require_csrf)],
 )
 async def create_contribution_endpoint(
+    request: Request,
     object_id: uuid.UUID,
     payload: ContributionCreate,
+    user: CurrentUser,
     _: Annotated[
         ObjectAccess, Depends(require_object_access_dep(ObjectRole.OWNER))
     ],
@@ -94,6 +97,17 @@ async def create_contribution_endpoint(
         amount_chf=payload.amount_chf,
         note=payload.note,
     )
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_RESERVE_CONTRIBUTION_CREATE,
+        object_id=object_id,
+        target_type="reserve_contribution",
+        target_id=row.id,
+        summary=f"Einzahlung {payload.year}: CHF {payload.amount_chf}",
+        payload={"year": payload.year, "amount_chf": str(payload.amount_chf)},
+        request=request,
+    )
     await session.commit()
     await session.refresh(row)
     return ContributionRead.model_validate(row)
@@ -105,8 +119,10 @@ async def create_contribution_endpoint(
     dependencies=[Depends(require_csrf)],
 )
 async def delete_contribution_endpoint(
+    request: Request,
     object_id: uuid.UUID,
     contribution_id: uuid.UUID,
+    user: CurrentUser,
     _: Annotated[
         ObjectAccess, Depends(require_object_access_dep(ObjectRole.OWNER))
     ],
@@ -119,5 +135,15 @@ async def delete_contribution_endpoint(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Einzahlung nicht gefunden",
         )
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_RESERVE_CONTRIBUTION_DELETE,
+        object_id=object_id,
+        target_type="reserve_contribution",
+        target_id=contribution_id,
+        summary="Einzahlung gelöscht",
+        request=request,
+    )
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

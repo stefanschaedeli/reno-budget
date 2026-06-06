@@ -36,6 +36,7 @@ from app.schemas.auth import (
     TokenResponse,
     UserPublic,
 )
+from app.services import audit as audit_svc
 from app.services import auth as auth_svc
 from app.services.mailer import render_invitation, render_password_reset, send_email
 
@@ -125,6 +126,15 @@ async def login(
         ip_address=request.client.host if request.client else None,
     )
     csrf = generate_csrf_token()
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_AUTH_LOGIN,
+        target_type="user",
+        target_id=user.id,
+        summary=f"Anmeldung von {user.email}",
+        request=request,
+    )
     await session.commit()
     _set_session_cookies(response, issued.token, csrf)
     return _access_token_response(user)
@@ -252,6 +262,15 @@ async def accept_invitation(
         ip_address=request.client.host if request.client else None,
     )
     csrf = generate_csrf_token()
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_AUTH_INVITATION_ACCEPT,
+        target_type="user",
+        target_id=user.id,
+        summary=f"Einladung angenommen von {user.email}",
+        request=request,
+    )
     await session.commit()
     _set_session_cookies(response, issued.token, csrf)
     return _access_token_response(user)
@@ -271,6 +290,18 @@ async def request_password_reset(
 ) -> Response:
     """Issue a reset token if the email is known. Always returns 202."""
     token = await auth_svc.request_password_reset(session, payload.email)
+    # Log the request regardless of whether the email is known (to keep
+    # the response timing identical and the log useful for forensic
+    # purposes). We never record whether the email existed.
+    await audit_svc.record(
+        session,
+        actor=None,
+        actor_email=payload.email,
+        action=audit_svc.ACTION_AUTH_PASSWORD_RESET_REQUEST,
+        target_type="user",
+        summary=f"Passwort-Reset angefordert für {payload.email}",
+        request=request,
+    )
     await session.commit()
 
     if token is not None:
@@ -288,7 +319,7 @@ async def confirm_password_reset(
     session: SessionDep,
 ) -> Response:
     try:
-        await auth_svc.confirm_password_reset(session, payload.token, payload.new_password)
+        user = await auth_svc.confirm_password_reset(session, payload.token, payload.new_password)
     except PasswordPolicyError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
@@ -298,5 +329,17 @@ async def confirm_password_reset(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Reset-Token ungültig, gebraucht oder abgelaufen",
         ) from exc
+    # System-initiated event: no JWT was presented, the token itself is the
+    # proof. We attribute it to the user whose password was changed.
+    await audit_svc.record(
+        session,
+        actor=None,
+        actor_email=user.email,
+        action=audit_svc.ACTION_AUTH_PASSWORD_RESET_CONFIRM,
+        target_type="user",
+        target_id=user.id,
+        summary=f"Passwort zurückgesetzt für {user.email}",
+        request=request,
+    )
     await session.commit()
     return Response(status_code=204)

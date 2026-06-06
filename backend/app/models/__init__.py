@@ -5,6 +5,13 @@ so that Alembic's ``--autogenerate`` (and the test fixtures) see the full
 metadata. Add new modules here when you create them.
 """
 
+from app.models.attachment import (  # noqa: F401
+    Attachment,
+    AttachmentTargetType,
+)
+from app.models.audit import (  # noqa: F401
+    AuditEvent,
+)
 from app.models.cost import (  # noqa: F401
     BkpCode,
     CostItem,

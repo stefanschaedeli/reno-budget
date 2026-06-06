@@ -11,7 +11,7 @@ import uuid
 from collections.abc import Sequence
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 from app.core.config import get_settings
 from app.core.db import SessionDep
@@ -36,6 +36,7 @@ from app.schemas.object import (
     UnitCreate,
     UnitPublic,
 )
+from app.services import audit as audit_svc
 from app.services import auth as auth_svc
 from app.services.mailer import render_invitation, send_email
 from app.services.objects import (
@@ -99,13 +100,26 @@ async def list_my_objects(user: CurrentUser, session: SessionDep) -> list[Object
     dependencies=[Depends(require_csrf)],
 )
 async def create_object(
-    payload: ObjectCreate, user: CurrentUser, session: SessionDep
+    request: Request,
+    payload: ObjectCreate,
+    user: CurrentUser,
+    session: SessionDep,
 ) -> ObjectDetail:
     """Create a new object and become its OWNER."""
     try:
         obj = await create_object_with_units(session, payload=payload, owner_user_id=user.id)
     except ObjectServiceError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_OBJECT_CREATE,
+        object_id=obj.id,
+        target_type="object",
+        target_id=obj.id,
+        summary=f"Objekt '{obj.name}' angelegt",
+        request=request,
+    )
     await session.commit()
     units = await list_units(session, obj.id)
     return _to_detail(obj, units)
@@ -129,15 +143,29 @@ async def get_object_detail(
     dependencies=[Depends(require_csrf)],
 )
 async def update_object(
+    request: Request,
     object_id: uuid.UUID,
     payload: ObjectUpdate,
+    user: CurrentUser,
     access: Annotated[ObjectAccess, Depends(require_object_access_dep(ObjectRole.OWNER))],
     session: SessionDep,
 ) -> ObjectDetail:
     obj = await get_object(session, object_id)
     assert obj is not None
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    changed = payload.model_dump(exclude_unset=True)
+    for field, value in changed.items():
         setattr(obj, field, value)
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_OBJECT_UPDATE,
+        object_id=obj.id,
+        target_type="object",
+        target_id=obj.id,
+        summary=f"Objekt '{obj.name}' aktualisiert",
+        payload={"fields": sorted(changed.keys())} if changed else None,
+        request=request,
+    )
     await session.commit()
     units = await list_units(session, object_id)
     return _to_detail(obj, units)
@@ -149,12 +177,28 @@ async def update_object(
     dependencies=[Depends(require_csrf)],
 )
 async def delete_object(
+    request: Request,
     object_id: uuid.UUID,
+    user: CurrentUser,
     access: Annotated[ObjectAccess, Depends(require_object_access_dep(ObjectRole.OWNER))],
     session: SessionDep,
 ) -> Response:
     obj = await get_object(session, object_id)
     assert obj is not None
+    name = obj.name
+    # Record the event BEFORE the delete so we can still reference the
+    # object name. Because audit_events.object_id is ON DELETE SET NULL,
+    # the row survives the cascade — only the link goes to NULL.
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_OBJECT_DELETE,
+        object_id=obj.id,
+        target_type="object",
+        target_id=obj.id,
+        summary=f"Objekt '{name}' gelöscht",
+        request=request,
+    )
     await session.delete(obj)
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -182,8 +226,10 @@ async def list_object_units(
     dependencies=[Depends(require_csrf)],
 )
 async def replace_object_units(
+    request: Request,
     object_id: uuid.UUID,
     payload: list[UnitCreate],
+    user: CurrentUser,
     access: Annotated[ObjectAccess, Depends(require_object_access_dep(ObjectRole.OWNER))],
     session: SessionDep,
 ) -> list[UnitPublic]:
@@ -198,6 +244,16 @@ async def replace_object_units(
         units = await replace_units(session, obj, payload)
     except ObjectServiceError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_OBJECT_UNITS_REPLACE,
+        object_id=obj.id,
+        target_type="unit",
+        summary=f"Einheiten von '{obj.name}' ersetzt ({len(units)})",
+        payload={"count": len(units)},
+        request=request,
+    )
     await session.commit()
     return [UnitPublic.model_validate(u) for u in units]
 
@@ -221,9 +277,11 @@ async def list_object_members(
     dependencies=[Depends(require_csrf)],
 )
 async def update_object_member(
+    request: Request,
     object_id: uuid.UUID,
     user_id: uuid.UUID,
     payload: MembershipUpdate,
+    user: CurrentUser,
     access: Annotated[ObjectAccess, Depends(require_object_access_dep(ObjectRole.OWNER))],
     session: SessionDep,
 ) -> MembershipPublic:
@@ -246,6 +304,20 @@ async def update_object_member(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
     except ObjectServiceError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_MEMBERSHIP_UPDATE,
+        object_id=obj.id,
+        target_type="membership",
+        target_id=membership.id,
+        summary=f"Mitgliedschaft aktualisiert (Rolle={membership.role.value})",
+        payload={
+            "user_id": str(user_id),
+            "role": membership.role.value,
+        },
+        request=request,
+    )
     await session.commit()
     # Reload scopes for response.
     refreshed = await get_membership(session, user_id, object_id)
@@ -260,8 +332,10 @@ async def update_object_member(
     dependencies=[Depends(require_csrf)],
 )
 async def remove_object_member(
+    request: Request,
     object_id: uuid.UUID,
     user_id: uuid.UUID,
+    user: CurrentUser,
     access: Annotated[ObjectAccess, Depends(require_object_access_dep(ObjectRole.OWNER))],
     session: SessionDep,
 ) -> Response:
@@ -274,6 +348,17 @@ async def remove_object_member(
         await remove_membership(session, obj=obj, membership=membership)
     except LastOwnerError as exc:
         raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_MEMBERSHIP_REVOKE,
+        object_id=obj.id,
+        target_type="membership",
+        target_id=membership.id,
+        summary=f"Mitgliedschaft entfernt für Benutzer {user_id}",
+        payload={"user_id": str(user_id)},
+        request=request,
+    )
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -288,6 +373,7 @@ async def remove_object_member(
     dependencies=[Depends(require_csrf)],
 )
 async def invite_to_object(
+    request: Request,
     object_id: uuid.UUID,
     payload: InviteToObjectRequest,
     access: Annotated[ObjectAccess, Depends(require_object_access_dep(ObjectRole.OWNER))],
@@ -321,6 +407,20 @@ async def invite_to_object(
     except auth_svc.InvitationConflictError as exc:
         raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
 
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_MEMBERSHIP_GRANT,
+        object_id=obj.id,
+        target_type="invitation",
+        target_id=invitation.id,
+        summary=f"Einladung an {payload.email} mit Rolle {payload.role.value}",
+        payload={
+            "email": payload.email,
+            "role": payload.role.value,
+        },
+        request=request,
+    )
     await session.commit()
 
     settings = get_settings()

@@ -10,6 +10,7 @@ from starlette.responses import JSONResponse
 
 from app import __version__
 from app.api.v1 import attachments as attachments_router
+from app.api.v1 import audit as audit_router
 from app.api.v1 import auth as auth_router
 from app.api.v1 import bkp as bkp_router
 from app.api.v1 import budgets as budgets_router
@@ -53,6 +54,7 @@ def create_app() -> FastAPI:
     app.include_router(renofond_router.router, prefix=settings.api_prefix)
     app.include_router(finances_router.router, prefix=settings.api_prefix)
     app.include_router(attachments_router.router, prefix=settings.api_prefix)
+    app.include_router(audit_router.router, prefix=settings.api_prefix)
 
     return app
 

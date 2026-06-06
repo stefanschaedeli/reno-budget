@@ -12,11 +12,12 @@ Security invariants
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.core.db import SessionDep
 from app.core.deps import CurrentUser, SuperuserDep, require_csrf
 from app.schemas.cost import BkpCodeCreate, BkpCodeRead, BkpCodeTree
+from app.services import audit as audit_svc
 from app.services.bkp import (
     BkpCodeServiceError,
     DuplicateBkpCodeError,
@@ -52,8 +53,9 @@ async def list_codes_tree(_user: CurrentUser, session: SessionDep) -> list[BkpCo
     dependencies=[Depends(require_csrf)],
 )
 async def create_code(
+    request: Request,
     payload: BkpCodeCreate,
-    _admin: SuperuserDep,
+    admin: SuperuserDep,
     session: SessionDep,
 ) -> BkpCodeRead:
     """Create a custom (non-seed) catalogue row. Superuser only.
@@ -69,5 +71,14 @@ async def create_code(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
     except BkpCodeServiceError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
+    await audit_svc.record(
+        session,
+        actor=admin,
+        action=audit_svc.ACTION_BKP_CODE_CREATE,
+        target_type="bkp_code",
+        summary=f"eBKP-H Code '{payload.code}' angelegt",
+        payload={"code": payload.code, "label_de": payload.label_de},
+        request=request,
+    )
     await session.commit()
     return BkpCodeRead.model_validate(row)

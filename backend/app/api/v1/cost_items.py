@@ -18,7 +18,7 @@ from __future__ import annotations
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
 from app.core.db import SessionDep
 from app.core.deps import CurrentUser, require_csrf, require_object_access_dep
@@ -29,6 +29,7 @@ from app.schemas.cost import (
     CostItemRead,
     CostItemUpdate,
 )
+from app.services import audit as audit_svc
 from app.services.cost_items import (
     CostItemNotFoundError,
     CostItemPermissionError,
@@ -94,6 +95,7 @@ async def list_items(
     dependencies=[Depends(require_csrf)],
 )
 async def create_item(
+    request: Request,
     object_id: uuid.UUID,
     payload: CostItemCreate,
     user: CurrentUser,
@@ -116,6 +118,17 @@ async def create_item(
         )
     except CostItemServiceError as exc:
         _raise_for(exc)
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_COST_ITEM_CREATE,
+        object_id=object_id,
+        target_type="cost_item",
+        target_id=item.id,
+        summary=f"Kostenposition '{item.title}' erstellt",
+        payload={"bkp_code": item.bkp_code},
+        request=request,
+    )
     await session.commit()
     return _to_read(item)
 
@@ -143,13 +156,16 @@ async def get_item(
     dependencies=[Depends(require_csrf)],
 )
 async def update_item(
+    request: Request,
     object_id: uuid.UUID,
     item_id: uuid.UUID,
     payload: CostItemUpdate,
+    user: CurrentUser,
     access: Annotated[ObjectAccess, Depends(require_object_access_dep(ObjectRole.EDITOR))],
     session: SessionDep,
 ) -> CostItemRead:
     """Patch a cost item. Caller MUST hold >=EDITOR and have scope on it."""
+    changed = sorted(payload.model_dump(exclude_unset=True).keys())
     try:
         item = await update_cost_item(
             session,
@@ -160,6 +176,17 @@ async def update_item(
         )
     except CostItemServiceError as exc:
         _raise_for(exc)
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_COST_ITEM_UPDATE,
+        object_id=object_id,
+        target_type="cost_item",
+        target_id=item.id,
+        summary=f"Kostenposition '{item.title}' aktualisiert",
+        payload={"fields": changed} if changed else None,
+        request=request,
+    )
     await session.commit()
     return _to_read(item)
 
@@ -170,15 +197,35 @@ async def update_item(
     dependencies=[Depends(require_csrf)],
 )
 async def delete_item(
+    request: Request,
     object_id: uuid.UUID,
     item_id: uuid.UUID,
+    user: CurrentUser,
     access: Annotated[ObjectAccess, Depends(require_object_access_dep(ObjectRole.EDITOR))],
     session: SessionDep,
 ) -> Response:
     """Delete a cost item. Caller MUST hold >=EDITOR and have scope on it."""
+    # Capture the title before delete so the audit summary keeps sense.
+    try:
+        existing = await get_cost_item(
+            session, object_id=object_id, cost_item_id=item_id, access=access
+        )
+    except CostItemServiceError as exc:
+        _raise_for(exc)
+    title = existing.title
     try:
         await delete_cost_item(session, object_id=object_id, cost_item_id=item_id, access=access)
     except CostItemServiceError as exc:
         _raise_for(exc)
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_COST_ITEM_DELETE,
+        object_id=object_id,
+        target_type="cost_item",
+        target_id=item_id,
+        summary=f"Kostenposition '{title}' gelöscht",
+        request=request,
+    )
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

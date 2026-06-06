@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Annotated
 from urllib.parse import quote as urlquote
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 
@@ -32,8 +32,10 @@ from app.core.deps import CurrentUser, require_csrf, require_object_access_dep
 from app.models.attachment import Attachment, AttachmentTargetType
 from app.models.cost import CostItem
 from app.models.object import ObjectRole
+from app.models.user import User
 from app.repositories.cost_item import get_cost_item as repo_get_cost_item
 from app.schemas.attachment import AttachmentRead
+from app.services import audit as audit_svc
 from app.services.rbac import ObjectAccess, require_object_access
 from app.services.storage import (
     FileTooLargeError,
@@ -152,6 +154,7 @@ async def list_cost_item_attachments(
     dependencies=[Depends(require_csrf)],
 )
 async def upload_cost_item_attachment(
+    request: Request,
     item_id: uuid.UUID,
     user: CurrentUser,
     session: SessionDep,
@@ -168,6 +171,9 @@ async def upload_cost_item_attachment(
         target_id=item_id,
         uploader_id=user.id,
         file=file,
+        actor=user,
+        object_id=item.object_id,
+        request=request,
     )
 
 
@@ -209,6 +215,7 @@ async def list_object_attachments(
     dependencies=[Depends(require_csrf)],
 )
 async def upload_object_attachment(
+    request: Request,
     object_id: uuid.UUID,
     user: CurrentUser,
     access: Annotated[ObjectAccess, Depends(require_object_access_dep(ObjectRole.EDITOR))],
@@ -223,6 +230,9 @@ async def upload_object_attachment(
         target_id=object_id,
         uploader_id=user.id,
         file=file,
+        actor=user,
+        object_id=object_id,
+        request=request,
     )
 
 
@@ -259,6 +269,7 @@ async def download_attachment(
     dependencies=[Depends(require_csrf)],
 )
 async def delete_attachment(
+    request: Request,
     attachment_id: uuid.UUID,
     user: CurrentUser,
     session: SessionDep,
@@ -278,7 +289,20 @@ async def delete_attachment(
         await _require_parent_access(session, user, att, ObjectRole.VIEWER)
     else:
         await _require_parent_access(session, user, att, ObjectRole.EDITOR)
+    parent_object_id = await _resolve_parent_object_id(session, att)
+    filename = att.filename
+    att_id = att.id
     await session.delete(att)
+    await audit_svc.record(
+        session,
+        actor=user,
+        action=audit_svc.ACTION_ATTACHMENT_DELETE,
+        object_id=parent_object_id,
+        target_type="attachment",
+        target_id=att_id,
+        summary=f"Anhang '{filename}' gelöscht",
+        request=request,
+    )
     await session.commit()
 
 
@@ -292,6 +316,9 @@ async def _persist_attachment(
     target_id: uuid.UUID,
     uploader_id: uuid.UUID,
     file: UploadFile,
+    actor: User,
+    object_id: uuid.UUID,
+    request: Request,
 ) -> AttachmentRead:
     """Stream + validate + insert. Common path for both upload endpoints."""
     try:
@@ -309,9 +336,38 @@ async def _persist_attachment(
         uploaded_by=uploader_id,
     )
     session.add(att)
+    await session.flush()
+    await audit_svc.record(
+        session,
+        actor=actor,
+        action=audit_svc.ACTION_ATTACHMENT_UPLOAD,
+        object_id=object_id,
+        target_type="attachment",
+        target_id=att.id,
+        summary=f"Anhang '{att.filename}' hochgeladen ({att.size_bytes} Bytes)",
+        payload={"mime": att.mime, "sha256": att.sha256},
+        request=request,
+    )
     await session.commit()
     await session.refresh(att)
     return _to_read(att)
+
+
+async def _resolve_parent_object_id(
+    session: SessionDep, att: Attachment
+) -> uuid.UUID:
+    """Return the ``object_id`` an attachment ultimately belongs to."""
+    if att.target_type == AttachmentTargetType.OBJECT:
+        return att.target_id
+    ci = (
+        await session.execute(select(CostItem).where(CostItem.id == att.target_id))
+    ).scalar_one_or_none()
+    if ci is None:
+        # Should not happen because the caller already validated access; we
+        # fall back to the (now-orphaned) target_id only so the audit row
+        # still records *something* meaningful.
+        return att.target_id
+    return ci.object_id
 
 
 async def _load_or_404(session: SessionDep, attachment_id: uuid.UUID) -> Attachment:
