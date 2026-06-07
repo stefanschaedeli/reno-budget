@@ -14,6 +14,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.cost import CostItem
+from app.models.lot import Lot
 from app.models.project import Project
 from app.models.tag import Tag, TagAssignment, TagTargetType
 from app.schemas.tag import TagCreate, TagUpdate
@@ -123,6 +124,9 @@ async def _target_object_id(
         return row.object_id if row is not None else None
     if target_type == TagTargetType.COST_ITEM:
         row = await session.get(CostItem, target_id)
+        return row.object_id if row is not None else None
+    if target_type == TagTargetType.LOT:
+        row = await session.get(Lot, target_id)
         return row.object_id if row is not None else None
     return None
 

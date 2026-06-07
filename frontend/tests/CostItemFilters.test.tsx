@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, useLocation } from "react-router-dom";
@@ -102,6 +102,65 @@ describe("CostItemFilters", () => {
     const calls = onChange.mock.calls as Array<[{ status?: string[] }]>;
     const lastCall = calls.at(-1);
     expect(lastCall?.[0]?.status).toEqual(["planned"]);
+  });
+
+  it("parses the lot filter from URL", () => {
+    const params = new URLSearchParams("lot=aaaa1111-1111-1111-1111-111111111111");
+    const parsed = parseFiltersFromParams(params);
+    expect(parsed.lot_id).toBe("aaaa1111-1111-1111-1111-111111111111");
+  });
+
+  it("writes lot selection back to URL search params", async () => {
+    const LOT_ID = "bbbb2222-2222-2222-2222-222222222222";
+    // Override fetch so the lots endpoint returns one lot the user can select.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+        const body = url.includes("/lots")
+          ? [
+              {
+                id: LOT_ID,
+                object_id: OBJ_ID,
+                name: "L1",
+                description: null,
+                status: "draft",
+                tender_deadline: null,
+                awarded_quote_id: null,
+                archived_at: null,
+                created_by: null,
+                created_at: "2026-01-01T00:00:00Z",
+                updated_at: "2026-01-01T00:00:00Z",
+                cost_item_count: 0,
+                cost_item_ids: null,
+              },
+            ]
+          : [];
+        return Promise.resolve(
+          new Response(JSON.stringify(body), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
+        );
+      }),
+    );
+
+    let lastSearch = "";
+    render(
+      withProviders(
+        <>
+          <CostItemFilters units={units} objectId={OBJ_ID} onChange={() => {}} />
+          <LocationProbe onLocation={(s) => (lastSearch = s)} />
+        </>,
+      ),
+    );
+    // Wait for the lot option to appear in the DOM.
+    const lotSelect = screen.getByLabelText(/^Los/);
+    await waitFor(() => {
+      expect(lotSelect.querySelector(`option[value="${LOT_ID}"]`)).not.toBeNull();
+    });
+    fireEvent.change(lotSelect, { target: { value: LOT_ID } });
+    expect(lastSearch).toContain(`lot=${LOT_ID}`);
   });
 
   it("round-trips a year value via the URL", () => {

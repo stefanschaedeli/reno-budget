@@ -217,6 +217,12 @@ class CostItem(Base):
     project: Mapped["Project | None"] = relationship(  # noqa: F821
         back_populates="cost_items",
     )
+    # Many-to-many membership in tender lots (Phase 11B). The secondary
+    # table is ``lot_cost_items``; cascade behaviour lives on the FKs.
+    lots: Mapped[list["Lot"]] = relationship(  # noqa: F821
+        secondary="lot_cost_items",
+        back_populates="cost_items",
+    )
 
     __table_args__ = (
         CheckConstraint(

@@ -233,6 +233,9 @@ class CostItemRead(_CostItemBase):
     # is called with ``?include_tag_ids=true``; ``None`` otherwise (NOT an
     # empty list — distinguishes "not requested" from "no tags assigned").
     tag_ids: list[uuid.UUID] | None = None
+    # Phase 11B: same pattern for lot membership ids — ``None`` means
+    # "not requested", ``[]`` means "no lot membership".
+    lot_ids: list[uuid.UUID] | None = None
 
 
 # ---- Filters / list query ---------------------------------------------------
@@ -254,12 +257,17 @@ class CostItemFilter(BaseModel):
     project_id: uuid.UUID | None = None
     # Multi-value: pass ``?tag_id=<a>&tag_id=<b>`` for OR semantics.
     tag_id: list[uuid.UUID] | None = Field(default=None)
+    # Phase 11B: scope to a single lot (any-of would be over-engineering for
+    # the UI which only ever filters by one lot at a time).
+    lot_id: uuid.UUID | None = None
     q: str | None = Field(default=None, max_length=200)
     sort: str | None = Field(default=None, max_length=64)
     # Phase 11A: when true, the list endpoint includes the per-item ``tag_ids``
     # in each response row (batched, single extra query). Disabled by default
     # so list payloads stay small for callers that don't render chips.
     include_tag_ids: bool = False
+    # Phase 11B: same pattern for lot membership ids.
+    include_lot_ids: bool = False
 
 
 # ---- Internal helpers -------------------------------------------------------

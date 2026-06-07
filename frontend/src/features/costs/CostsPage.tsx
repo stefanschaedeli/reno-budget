@@ -56,6 +56,7 @@ export function CostsPage(): JSX.Element {
   const costItemsQuery = useCostItems(objectId ?? "", {
     ...filters,
     include_tag_ids: true,
+    include_lot_ids: true,
   });
   const tagsQuery = useTags(objectId ?? "");
   const createMut = useCreateCostItem(objectId ?? "");

@@ -20,6 +20,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response, 
 from app.core.db import SessionDep
 from app.core.deps import CurrentUser, require_csrf, require_object_access_dep
 from app.models.cost import CostItem
+from app.models.lot import Lot
 from app.models.object import ObjectRole
 from app.models.project import Project
 from app.models.tag import Tag, TagTargetType
@@ -295,6 +296,11 @@ async def list_target_tags(
         if item is None:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Position nicht gefunden")
         object_id = item.object_id
+    elif target_type == TagTargetType.LOT:
+        lot = await session.get(Lot, target_id)
+        if lot is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Los nicht gefunden")
+        object_id = lot.object_id
     else:  # pragma: no cover — enum constraint above prevents this
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Zieltyp nicht erlaubt")
 

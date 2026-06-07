@@ -7,7 +7,7 @@
  */
 import { z } from "zod";
 
-export const TAG_TARGET_TYPES = ["project", "cost_item"] as const;
+export const TAG_TARGET_TYPES = ["project", "cost_item", "lot"] as const;
 export type TagTargetType = (typeof TAG_TARGET_TYPES)[number];
 
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;

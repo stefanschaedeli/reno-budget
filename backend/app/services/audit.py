@@ -63,6 +63,13 @@ ACTION_PROJECT_UPDATE = "project.update"
 ACTION_PROJECT_ARCHIVE = "project.archive"
 ACTION_PROJECT_DELETE = "project.delete"
 
+ACTION_LOT_CREATE = "lot.create"
+ACTION_LOT_UPDATE = "lot.update"
+ACTION_LOT_ARCHIVE = "lot.archive"
+ACTION_LOT_DELETE = "lot.delete"
+ACTION_LOT_ADD_ITEM = "lot.add_item"
+ACTION_LOT_REMOVE_ITEM = "lot.remove_item"
+
 ACTION_TAG_CREATE = "tag.create"
 ACTION_TAG_UPDATE = "tag.update"
 ACTION_TAG_DELETE = "tag.delete"

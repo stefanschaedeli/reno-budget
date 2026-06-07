@@ -35,6 +35,7 @@ from app.models.cost import (
     CostItemScope,
     CostItemUnitAllocation,
 )
+from app.models.lot import LotCostItem
 from app.models.object import ObjectRole, Unit
 from app.models.tag import TagAssignment, TagTargetType
 from app.models.user import User
@@ -127,7 +128,40 @@ async def list_cost_items_for_object(
         # a TagAssignment row targeting the cost_item polymorphically.
         tagged_ids = await _cost_items_with_any_tag(session, filters.tag_id)
         items = [i for i in items if i.id in tagged_ids]
+    if filters.lot_id is not None:
+        member_ids = await _cost_items_in_lot(session, filters.lot_id)
+        items = [i for i in items if i.id in member_ids]
     return _sort_items(items, filters.sort)
+
+
+async def _cost_items_in_lot(
+    session: AsyncSession, lot_id: uuid.UUID
+) -> set[uuid.UUID]:
+    """Return the set of cost_item IDs that are members of ``lot_id``."""
+    stmt = select(LotCostItem.cost_item_id).where(LotCostItem.lot_id == lot_id)
+    rows = (await session.execute(stmt)).scalars().all()
+    return set(rows)
+
+
+async def list_lot_ids_for_cost_items(
+    session: AsyncSession, cost_item_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, list[uuid.UUID]]:
+    """Return a ``{cost_item_id: [lot_id, ...]}`` map for the given items.
+
+    Single batched query — used by the list endpoint to avoid N+1 fetches
+    when rendering lot-membership badges per row. Items with no lots are
+    not present in the map (callers should ``.get(id, [])``).
+    """
+    if not cost_item_ids:
+        return {}
+    stmt = select(LotCostItem.cost_item_id, LotCostItem.lot_id).where(
+        LotCostItem.cost_item_id.in_(cost_item_ids)
+    )
+    rows = (await session.execute(stmt)).all()
+    out: dict[uuid.UUID, list[uuid.UUID]] = {}
+    for cost_item_id, lot_id in rows:
+        out.setdefault(cost_item_id, []).append(lot_id)
+    return out
 
 
 async def list_tag_ids_for_cost_items(

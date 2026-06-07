@@ -47,6 +47,7 @@ class TagTargetType(enum.StrEnum):
 
     PROJECT = "project"
     COST_ITEM = "cost_item"
+    LOT = "lot"
 
 
 class Tag(Base):

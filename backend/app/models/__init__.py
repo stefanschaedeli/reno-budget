@@ -21,6 +21,11 @@ from app.models.cost import (  # noqa: F401
     CostItemStatus,
     CostItemUnitAllocation,
 )
+from app.models.lot import (  # noqa: F401
+    Lot,
+    LotCostItem,
+    LotStatus,
+)
 from app.models.project import (  # noqa: F401
     Project,
     ProjectStatus,

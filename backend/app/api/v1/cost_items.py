@@ -42,6 +42,7 @@ from app.services.cost_items import (
     delete_cost_item,
     get_cost_item,
     list_cost_items_for_object,
+    list_lot_ids_for_cost_items,
     list_tag_ids_for_cost_items,
     update_cost_item,
 )
@@ -91,14 +92,25 @@ async def list_items(
     items = await list_cost_items_for_object(
         session, object_id=object_id, access=access, filters=filters
     )
-    if not filters.include_tag_ids:
+    if not filters.include_tag_ids and not filters.include_lot_ids:
         return [_to_read(i) for i in items]
-    tag_map = await list_tag_ids_for_cost_items(session, [i.id for i in items])
+    ids = [i.id for i in items]
+    tag_map = (
+        await list_tag_ids_for_cost_items(session, ids) if filters.include_tag_ids else {}
+    )
+    lot_map = (
+        await list_lot_ids_for_cost_items(session, ids) if filters.include_lot_ids else {}
+    )
     result: list[CostItemRead] = []
     for i in items:
         read = _to_read(i)
+        patch: dict[str, list[uuid.UUID]] = {}
+        if filters.include_tag_ids:
+            patch["tag_ids"] = tag_map.get(i.id, [])
+        if filters.include_lot_ids:
+            patch["lot_ids"] = lot_map.get(i.id, [])
         # Pydantic v2: model_copy(update=...) preserves the rest of the dump.
-        result.append(read.model_copy(update={"tag_ids": tag_map.get(i.id, [])}))
+        result.append(read.model_copy(update=patch))
     return result
 
 

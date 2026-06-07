@@ -17,6 +17,8 @@ import { RenofondPage } from "@/features/renofond/RenofondPage";
 import { GlobalAuditPage, ObjectAuditPage } from "@/features/audit/AuditPage";
 import { ProjectsPage } from "@/features/projects/ProjectsPage";
 import { ProjectDetailPage } from "@/features/projects/ProjectDetailPage";
+import { LotsPage } from "@/features/lots/LotsPage";
+import { LotDetailPage } from "@/features/lots/LotDetailPage";
 
 /**
  * Single QueryClient for the whole app. Defaults are conservative:
@@ -132,6 +134,22 @@ export function App(): JSX.Element {
             element={
               <RequireAuth>
                 <ProjectDetailPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/objekte/:objectId/lose"
+            element={
+              <RequireAuth>
+                <LotsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/lose/:lotId"
+            element={
+              <RequireAuth>
+                <LotDetailPage />
               </RequireAuth>
             }
           />

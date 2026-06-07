@@ -157,6 +157,14 @@ export function CostItemList({
                       .filter((t): t is Tag => Boolean(t))
                       .map((tag) => <TagChip key={tag.id} tag={tag} />)
                   : null}
+                {item.lot_ids && item.lot_ids.length > 0 && (
+                  <span
+                    className="inline-flex items-center rounded bg-slate-200 px-1.5 py-0.5 text-xs text-slate-700"
+                    title={t("costs.inLotsTitle")}
+                  >
+                    {t("costs.inLots", { count: item.lot_ids.length })}
+                  </span>
+                )}
               </div>
             </td>
             <td className="px-2 py-2 font-mono text-xs">

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import type { Unit } from "@/features/objects/types";
 import { TagPicker } from "@/components/TagPicker";
+import { useLots } from "@/features/lots/api";
 import { useProjects } from "@/features/projects/api";
 import { useTags } from "@/features/tags/api";
 import type { Tag } from "@/features/tags/types";
@@ -35,6 +36,7 @@ const UNIT_PARAM = "unit";
 const BKP_PARAM = "bkp";
 const PROJECT_PARAM = "project";
 const TAG_PARAM = "tag";
+const LOT_PARAM = "lot";
 const Q_PARAM = "q";
 
 export function parseFiltersFromParams(params: URLSearchParams): Filters {
@@ -59,6 +61,7 @@ export function parseFiltersFromParams(params: URLSearchParams): Filters {
     bkp_prefix: params.get(BKP_PARAM) || null,
     project_id: params.get(PROJECT_PARAM) || null,
     tag_ids: tagIds.length > 0 ? tagIds : undefined,
+    lot_id: params.get(LOT_PARAM) || null,
     q: params.get(Q_PARAM) || null,
   };
 }
@@ -71,6 +74,7 @@ export function CostItemFilters({
   const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const projectsQuery = useProjects(objectId);
+  const lotsQuery = useLots(objectId);
   const tagsQuery = useTags(objectId);
 
   const filters = useMemo(() => parseFiltersFromParams(params), [params]);
@@ -234,6 +238,24 @@ export function CostItemFilters({
               {(projectsQuery.data ?? []).map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">
+            {t("costs.filters.lot")}
+            <select
+              value={filters.lot_id ?? ""}
+              onChange={(e) => setScalar(LOT_PARAM, e.target.value || null)}
+              className="mt-1 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+            >
+              <option value="">{t("costs.filters.anyLot")}</option>
+              {(lotsQuery.data ?? []).map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
                 </option>
               ))}
             </select>
