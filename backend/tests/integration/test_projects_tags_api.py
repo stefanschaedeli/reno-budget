@@ -744,6 +744,110 @@ class TestCostItemFilters:
         assert item_c["id"] not in ids
 
 
+class TestIncludeTagIds:
+    """``?include_tag_ids=true`` returns per-item ``tag_ids`` in a batched query."""
+
+    async def test_default_omits_tag_ids(
+        self,
+        integration_client: AsyncClient,
+        owner: User,
+        obj_with_units: tuple[Object, list[Unit]],
+        seed_bkp: None,
+    ) -> None:
+        obj, _ = obj_with_units
+        token = await _login(integration_client, owner.email)
+
+        await integration_client.post(
+            f"/api/v1/objects/{obj.id}/cost-items",
+            headers=_auth(token, integration_client),
+            cookies=_cookies(integration_client),
+            json={
+                "bkp_code": "D01",
+                "title": "X",
+                "planned_amount_chf": "100.00",
+                "scope": "shared",
+            },
+        )
+        r = await integration_client.get(
+            f"/api/v1/objects/{obj.id}/cost-items",
+            headers=_auth(token, integration_client),
+        )
+        assert r.status_code == 200
+        for item in r.json():
+            assert item["tag_ids"] is None
+
+    async def test_include_returns_tag_ids(
+        self,
+        integration_client: AsyncClient,
+        owner: User,
+        obj_with_units: tuple[Object, list[Unit]],
+        seed_bkp: None,
+    ) -> None:
+        obj, _ = obj_with_units
+        token = await _login(integration_client, owner.email)
+
+        tag1 = (
+            await integration_client.post(
+                f"/api/v1/objects/{obj.id}/tags",
+                headers=_auth(token, integration_client),
+                cookies=_cookies(integration_client),
+                json={"key": "k1", "value": "v"},
+            )
+        ).json()
+        tag2 = (
+            await integration_client.post(
+                f"/api/v1/objects/{obj.id}/tags",
+                headers=_auth(token, integration_client),
+                cookies=_cookies(integration_client),
+                json={"key": "k2", "value": "v"},
+            )
+        ).json()
+
+        tagged = (
+            await integration_client.post(
+                f"/api/v1/objects/{obj.id}/cost-items",
+                headers=_auth(token, integration_client),
+                cookies=_cookies(integration_client),
+                json={
+                    "bkp_code": "D01",
+                    "title": "Tagged",
+                    "planned_amount_chf": "100.00",
+                    "scope": "shared",
+                },
+            )
+        ).json()
+        untagged = (
+            await integration_client.post(
+                f"/api/v1/objects/{obj.id}/cost-items",
+                headers=_auth(token, integration_client),
+                cookies=_cookies(integration_client),
+                json={
+                    "bkp_code": "D01",
+                    "title": "Untagged",
+                    "planned_amount_chf": "100.00",
+                    "scope": "shared",
+                },
+            )
+        ).json()
+
+        for t in (tag1, tag2):
+            await integration_client.post(
+                f"/api/v1/tags/{t['id']}/assignments",
+                headers=_auth(token, integration_client),
+                cookies=_cookies(integration_client),
+                json={"target_type": "cost_item", "target_id": tagged["id"]},
+            )
+
+        r = await integration_client.get(
+            f"/api/v1/objects/{obj.id}/cost-items?include_tag_ids=true",
+            headers=_auth(token, integration_client),
+        )
+        assert r.status_code == 200
+        by_id = {i["id"]: i for i in r.json()}
+        assert set(by_id[tagged["id"]]["tag_ids"]) == {tag1["id"], tag2["id"]}
+        assert by_id[untagged["id"]]["tag_ids"] == []
+
+
 # ---- Export integration ----------------------------------------------------
 
 

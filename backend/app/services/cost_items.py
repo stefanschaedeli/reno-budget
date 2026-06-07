@@ -130,6 +130,28 @@ async def list_cost_items_for_object(
     return _sort_items(items, filters.sort)
 
 
+async def list_tag_ids_for_cost_items(
+    session: AsyncSession, cost_item_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, list[uuid.UUID]]:
+    """Return a ``{cost_item_id: [tag_id, ...]}`` map for the given items.
+
+    Single batched query — used by the list endpoint to avoid N+1 fetches
+    when rendering tag chips per row. Items with no tags are not present
+    in the map (callers should ``.get(id, [])``).
+    """
+    if not cost_item_ids:
+        return {}
+    stmt = select(TagAssignment.target_id, TagAssignment.tag_id).where(
+        TagAssignment.target_type == TagTargetType.COST_ITEM,
+        TagAssignment.target_id.in_(cost_item_ids),
+    )
+    rows = (await session.execute(stmt)).all()
+    out: dict[uuid.UUID, list[uuid.UUID]] = {}
+    for target_id, tag_id in rows:
+        out.setdefault(target_id, []).append(tag_id)
+    return out
+
+
 async def _cost_items_with_any_tag(
     session: AsyncSession, tag_ids: list[uuid.UUID]
 ) -> set[uuid.UUID]:

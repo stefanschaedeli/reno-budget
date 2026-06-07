@@ -43,7 +43,17 @@ export interface CostItemFormProps {
   /** Existing cost-item id when editing; enables tag assignment persistence. */
   costItemId?: string | undefined;
   initial?: Partial<CostItemInput> | undefined;
-  onSubmit: (payload: CostItemInput) => void | Promise<void>;
+  /**
+   * Submit handler. For NEW items the form has no cost-item id to persist tag
+   * assignments against, so the selected tags are returned via ``pendingTags``
+   * so the parent can call ``assignTag(...)`` after the create resolves. For
+   * EDIT items tag changes are persisted immediately inside the form and
+   * ``pendingTags`` will be an empty list.
+   */
+  onSubmit: (
+    payload: CostItemInput,
+    pendingTags: Tag[],
+  ) => void | Promise<void>;
   onCancel?: (() => void) | undefined;
   submitting?: boolean | undefined;
 }
@@ -147,9 +157,9 @@ export function CostItemForm({
 
   const handleTagsChange = (next: Tag[]) => {
     if (!costItemId) {
-      // Cannot persist until the cost item exists; keep selection locally.
-      // Parent must read it post-submit (currently unsupported — Phase B can
-      // surface this via an explicit prop. For now, log a one-time hint.)
+      // Cannot persist until the cost item exists; the parent receives this
+      // list via ``onSubmit(payload, pendingTags)`` and runs assignTag for
+      // each id after the create mutation resolves.
       setPendingTags(next);
       return;
     }
@@ -203,7 +213,10 @@ export function CostItemForm({
       return;
     }
     setErrors(new Map());
-    void onSubmit(result.data);
+    // For new items, hand the locally-selected tags up so the parent can
+    // assign them to the freshly-created id. For edits, tag changes already
+    // persisted inline via useAssignTag/useUnassignTag — pass [] to be safe.
+    void onSubmit(result.data, costItemId ? [] : pendingTags);
   };
 
   const err = (key: string): string | undefined => errors.get(key);

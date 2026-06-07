@@ -229,6 +229,10 @@ class CostItemRead(_CostItemBase):
     updated_at: datetime
     allocations: list[CostItemAllocationOut]
     bkp_allocations: list[BkpAllocationItem] = Field(default_factory=list)
+    # Phase 11A list-view optimisation: populated only when the list endpoint
+    # is called with ``?include_tag_ids=true``; ``None`` otherwise (NOT an
+    # empty list — distinguishes "not requested" from "no tags assigned").
+    tag_ids: list[uuid.UUID] | None = None
 
 
 # ---- Filters / list query ---------------------------------------------------
@@ -252,6 +256,10 @@ class CostItemFilter(BaseModel):
     tag_id: list[uuid.UUID] | None = Field(default=None)
     q: str | None = Field(default=None, max_length=200)
     sort: str | None = Field(default=None, max_length=64)
+    # Phase 11A: when true, the list endpoint includes the per-item ``tag_ids``
+    # in each response row (batched, single extra query). Disabled by default
+    # so list payloads stay small for callers that don't render chips.
+    include_tag_ids: bool = False
 
 
 # ---- Internal helpers -------------------------------------------------------

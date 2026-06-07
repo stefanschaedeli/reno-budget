@@ -76,6 +76,9 @@ export const costItemSchema = z.object({
   updated_at: z.string(),
   allocations: z.array(costItemAllocationSchema),
   bkp_allocations: z.array(bkpAllocationItemSchema).default([]),
+  // Phase 11A: populated only when the list endpoint is called with
+  // ``?include_tag_ids=true``; ``null`` means "not requested" (NOT "no tags").
+  tag_ids: z.array(z.string().uuid()).nullable().optional(),
 });
 export type CostItem = z.infer<typeof costItemSchema>;
 
@@ -178,6 +181,8 @@ export interface CostItemFilters {
   /** Tag-id OR filter — multiple tag ids are OR-ed by the backend. */
   tag_ids?: string[] | undefined;
   q?: string | null | undefined;
+  /** When true the list includes per-item ``tag_ids`` (one extra batched query). */
+  include_tag_ids?: boolean | undefined;
 }
 
 // --- BKP catalog -----------------------------------------------------------

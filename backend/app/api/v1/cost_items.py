@@ -42,6 +42,7 @@ from app.services.cost_items import (
     delete_cost_item,
     get_cost_item,
     list_cost_items_for_object,
+    list_tag_ids_for_cost_items,
     update_cost_item,
 )
 from app.services.rbac import ObjectAccess
@@ -82,11 +83,23 @@ async def list_items(
 
     Caller MUST hold >=VIEWER for ``object_id``. Scoped memberships see only
     items whose allocations touch their allowed units.
+
+    When ``include_tag_ids=true`` is passed, each returned item carries the
+    ``tag_ids`` field populated from a single batched ``TagAssignment`` query
+    — this keeps the cost-items list page from N+1-ing per-row tag fetches.
     """
     items = await list_cost_items_for_object(
         session, object_id=object_id, access=access, filters=filters
     )
-    return [_to_read(i) for i in items]
+    if not filters.include_tag_ids:
+        return [_to_read(i) for i in items]
+    tag_map = await list_tag_ids_for_cost_items(session, [i.id for i in items])
+    result: list[CostItemRead] = []
+    for i in items:
+        read = _to_read(i)
+        # Pydantic v2: model_copy(update=...) preserves the rest of the dump.
+        result.append(read.model_copy(update={"tag_ids": tag_map.get(i.id, [])}))
+    return result
 
 
 @router.post(

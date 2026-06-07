@@ -10,6 +10,8 @@ import {
 } from "@/api/costs";
 import { getObject } from "@/features/objects/api";
 import type { ObjectDetail } from "@/features/objects/types";
+import { assignTag, useTags } from "@/features/tags/api";
+import type { Tag } from "@/features/tags/types";
 import { CostItemBoard } from "./CostItemBoard";
 import { CostItemFilters } from "./CostItemFilters";
 import { CostItemForm } from "./CostItemForm";
@@ -30,6 +32,7 @@ export function CostsPage(): JSX.Element {
   const [tab, setTab] = useState<"list" | "board">("list");
   const [filters, setFilters] = useState<Filters>({});
   const [editing, setEditing] = useState<CostItem | "new" | null>(null);
+  const [tagAssignError, setTagAssignError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!objectId) return;
@@ -50,7 +53,11 @@ export function CostsPage(): JSX.Element {
     };
   }, [objectId, t]);
 
-  const costItemsQuery = useCostItems(objectId ?? "", filters);
+  const costItemsQuery = useCostItems(objectId ?? "", {
+    ...filters,
+    include_tag_ids: true,
+  });
+  const tagsQuery = useTags(objectId ?? "");
   const createMut = useCreateCostItem(objectId ?? "");
   const updateMut = useUpdateCostItem(
     objectId ?? "",
@@ -69,9 +76,27 @@ export function CostsPage(): JSX.Element {
       </p>
     );
 
-  const handleSubmit = async (payload: CostItemInput) => {
+  const handleSubmit = async (payload: CostItemInput, pendingTags: Tag[]) => {
     if (editing === "new") {
-      await createMut.mutateAsync(payload);
+      const created = await createMut.mutateAsync(payload);
+      // Assign any tags the user picked during creation. The form holds them
+      // locally until the cost item id exists; now that it does, fan out the
+      // assignments. Failures are non-fatal: the item was created and the
+      // user can retry from the detail/edit view.
+      if (pendingTags.length > 0) {
+        const results = await Promise.allSettled(
+          pendingTags.map((tag) =>
+            assignTag(tag.id, {
+              target_type: "cost_item",
+              target_id: created.id,
+            }),
+          ),
+        );
+        const failed = results.filter((r) => r.status === "rejected").length;
+        if (failed > 0) {
+          setTagAssignError(t("costs.tagAssignPartial", { count: failed }));
+        }
+      }
     } else if (editing) {
       await updateMut.mutateAsync(payload);
     }
@@ -135,6 +160,24 @@ export function CostsPage(): JSX.Element {
         </button>
       </div>
 
+      {tagAssignError && (
+        <div
+          role="alert"
+          className="mb-3 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span>{tagAssignError}</span>
+            <button
+              type="button"
+              onClick={() => setTagAssignError(null)}
+              aria-label={t("common.close")}
+              className="text-amber-900 hover:text-amber-700"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
       {costItemsQuery.isLoading && (
         <p className="text-slate-500">{t("common.loading")}</p>
       )}
@@ -144,7 +187,11 @@ export function CostsPage(): JSX.Element {
       {!costItemsQuery.isLoading && !costItemsQuery.isError && (
         <>
           {tab === "list" ? (
-            <CostItemList items={items} onRowClick={(c) => setEditing(c)} />
+            <CostItemList
+              items={items}
+              tags={tagsQuery.data ?? []}
+              onRowClick={(c) => setEditing(c)}
+            />
           ) : (
             <CostItemBoard
               objectId={objectId}

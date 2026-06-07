@@ -45,6 +45,7 @@ export const de = {
     loading: "Wird geladen…",
     error: "Es ist ein Fehler aufgetreten.",
     submitting: "Wird gesendet…",
+    close: "Schliessen",
   },
   objects: {
     list: {
@@ -168,6 +169,8 @@ export const de = {
     project: "Projekt",
     projectNone: "Kein Projekt",
     tags: "Tags",
+    tagAssignPartial:
+      "Kostenposition gespeichert, aber {{count}} Tag(s) konnten nicht zugewiesen werden. Bitte im Detail erneut versuchen.",
     allocations: {
       sum: "Summe: {{sum}}‰",
       sumHint: "muss 1000‰ ergeben",

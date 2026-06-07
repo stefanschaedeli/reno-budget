@@ -47,6 +47,7 @@ function filtersToQuery(filters: CostItemFilters): string {
     for (const tid of filters.tag_ids) params.append("tag_id", tid);
   }
   if (filters.q) params.set("q", filters.q);
+  if (filters.include_tag_ids) params.set("include_tag_ids", "true");
   const qs = params.toString();
   return qs ? `?${qs}` : "";
 }
