@@ -14,7 +14,6 @@ RBAC is the caller's responsibility (route layer).
 from __future__ import annotations
 
 import uuid
-from datetime import date
 from decimal import Decimal
 
 from sqlalchemy import select
@@ -235,6 +234,3 @@ __all__ = [
     "list_quotes",
     "update_quote",
 ]
-
-# Silence unused import lint for ``date`` (kept for future date-typed defaults).
-_ = date

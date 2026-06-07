@@ -64,7 +64,7 @@ def _raise_for(exc: TagServiceError) -> None:
     if isinstance(exc, TagConflictError):
         raise HTTPException(status.HTTP_409_CONFLICT, str(exc))
     if isinstance(exc, TagAssignmentScopeError | TagAssignmentTargetMissingError):
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc))
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc))
     raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
 
 
@@ -302,7 +302,7 @@ async def list_target_tags(
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Los nicht gefunden")
         object_id = lot.object_id
     else:  # pragma: no cover — enum constraint above prevents this
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Zieltyp nicht erlaubt")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Zieltyp nicht erlaubt")
 
     await _require_access(session, user, object_id, ObjectRole.VIEWER)
     tags = await list_tags_for_target(session, target_type=target_type, target_id=target_id)

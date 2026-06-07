@@ -61,7 +61,7 @@ def _raise_for(exc: LotServiceError) -> None:
     if isinstance(exc, LotNotFoundError):
         raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc))
     if isinstance(exc, LotMembershipScopeError | LotMembershipTargetMissingError):
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc))
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc))
     raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
 
 

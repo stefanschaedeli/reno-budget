@@ -50,7 +50,7 @@ def _raise_for(exc: QuoteServiceError) -> None:
     if isinstance(exc, QuoteNotFoundError):
         raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc))
     if isinstance(exc, QuoteScopeError | QuoteStatusForbiddenError):
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc))
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc))
     if isinstance(exc, QuoteAwardConflictError):
         raise HTTPException(status.HTTP_409_CONFLICT, str(exc))
     if isinstance(exc, QuoteDeleteForbiddenError):
