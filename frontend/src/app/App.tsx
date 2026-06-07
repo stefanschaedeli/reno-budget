@@ -19,6 +19,8 @@ import { ProjectsPage } from "@/features/projects/ProjectsPage";
 import { ProjectDetailPage } from "@/features/projects/ProjectDetailPage";
 import { LotsPage } from "@/features/lots/LotsPage";
 import { LotDetailPage } from "@/features/lots/LotDetailPage";
+import { SuppliersPage } from "@/features/suppliers/SuppliersPage";
+import { SupplierDetailPage } from "@/features/suppliers/SupplierDetailPage";
 
 /**
  * Single QueryClient for the whole app. Defaults are conservative:
@@ -150,6 +152,22 @@ export function App(): JSX.Element {
             element={
               <RequireAuth>
                 <LotDetailPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/objekte/:objectId/lieferanten"
+            element={
+              <RequireAuth>
+                <SuppliersPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/lieferanten/:supplierId"
+            element={
+              <RequireAuth>
+                <SupplierDetailPage />
               </RequireAuth>
             }
           />

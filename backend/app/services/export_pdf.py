@@ -30,11 +30,17 @@ from reportlab.platypus import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import __version__
+from sqlalchemy import select
+
+from app.models.cost import CostItem
+from app.models.lot import Lot
+from app.models.project import Project
 from app.repositories.cost_item import list_cost_items as repo_list_cost_items
 from app.repositories.object import get_object
 from app.services.bkp_shares import iter_bkp_shares
 from app.services.budgets import compute_reserve_plan
 from app.services.export_xlsx import build_export_filename
+from app.services.lots import count_cost_items_per_lot
 from app.services.rbac import ObjectAccess
 from app.services.renofond import compute_projection
 
@@ -209,6 +215,95 @@ async def build_pdf(
             )
         )
         story.append(top_table)
+
+    # ---- Projects summary (Phase C) ----
+    projects = (
+        await session.execute(
+            select(Project)
+            .where(Project.object_id == object_id)
+            .order_by(Project.created_at)
+        )
+    ).scalars().all()
+    if projects:
+        story.append(Paragraph("Projekte", h2_style))
+        proj_rows: list[list[object]] = [["Projekt", "Status", "Jahr", "Geplant CHF"]]
+        for p in projects:
+            items = list(
+                (
+                    await session.execute(
+                        select(CostItem).where(CostItem.project_id == p.id)
+                    )
+                ).scalars().all()
+            )
+            total = Decimal("0")
+            for it in items:
+                if it.planned_amount_chf is not None:
+                    total += it.planned_amount_chf
+            proj_rows.append(
+                [
+                    p.name,
+                    str(p.status),
+                    str(p.planned_year) if p.planned_year is not None else "—",
+                    _fmt_chf(total),
+                ]
+            )
+        proj_table = Table(proj_rows, colWidths=[70 * mm, 40 * mm, 20 * mm, 40 * mm])
+        proj_table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), _TABLE_HEADER_BG),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), _TABLE_HEADER_FG),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("ALIGN", (3, 1), (3, -1), "RIGHT"),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.2, colors.lightgrey),
+                    ("BOX", (0, 0), (-1, -1), 0.4, colors.grey),
+                ]
+            )
+        )
+        story.append(proj_table)
+
+    # ---- Lots summary (Phase C) ----
+    lots = (
+        await session.execute(
+            select(Lot).where(Lot.object_id == object_id).order_by(Lot.created_at)
+        )
+    ).scalars().all()
+    if lots:
+        story.append(Paragraph("Lose", h2_style))
+        counts = await count_cost_items_per_lot(
+            session, lot_ids=[lot.id for lot in lots]
+        )
+        lot_rows: list[list[object]] = [["Los", "Status", "Positionen", "Vergeben CHF"]]
+        for lot in lots:
+            awarded_amount = "—"
+            if lot.awarded_quote_id is not None:
+                from app.models.quote import Quote as _Q
+
+                q = await session.get(_Q, lot.awarded_quote_id)
+                if q is not None:
+                    awarded_amount = _fmt_chf(q.amount_chf)
+            lot_rows.append(
+                [
+                    lot.name,
+                    str(lot.status),
+                    counts.get(lot.id, 0),
+                    awarded_amount,
+                ]
+            )
+        lot_table = Table(lot_rows, colWidths=[70 * mm, 40 * mm, 20 * mm, 40 * mm])
+        lot_table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), _TABLE_HEADER_BG),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), _TABLE_HEADER_FG),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("ALIGN", (3, 1), (3, -1), "RIGHT"),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.2, colors.lightgrey),
+                    ("BOX", (0, 0), (-1, -1), 0.4, colors.grey),
+                ]
+            )
+        )
+        story.append(lot_table)
 
     # ---- Underfunding hint ----
     if projection.underfunding_years:

@@ -21,7 +21,9 @@ from app.api.v1 import health
 from app.api.v1 import lots as lots_router
 from app.api.v1 import objects as objects_router
 from app.api.v1 import projects as projects_router
+from app.api.v1 import quotes as quotes_router
 from app.api.v1 import renofond as renofond_router
+from app.api.v1 import suppliers as suppliers_router
 from app.api.v1 import tags as tags_router
 from app.core.config import get_settings
 from app.core.security_headers import SecurityHeadersMiddleware
@@ -69,6 +71,10 @@ def create_app() -> FastAPI:
     app.include_router(tags_router.router_objects, prefix=settings.api_prefix)
     app.include_router(tags_router.router_tags, prefix=settings.api_prefix)
     app.include_router(tags_router.router_target_tags, prefix=settings.api_prefix)
+    app.include_router(suppliers_router.router_objects, prefix=settings.api_prefix)
+    app.include_router(suppliers_router.router_suppliers, prefix=settings.api_prefix)
+    app.include_router(quotes_router.router_lots, prefix=settings.api_prefix)
+    app.include_router(quotes_router.router_quotes, prefix=settings.api_prefix)
 
     return app
 

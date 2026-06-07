@@ -75,10 +75,16 @@ class Lot(Base):
         default=LotStatus.DRAFT,
     )
     tender_deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
-    # NOTE: Phase C will add the FK constraint to ``quotes.id``. We keep the
-    # column nullable without a constraint now so the schema stays stable
-    # and Phase C only adds the ALTER TABLE … ADD CONSTRAINT (no backfill).
-    awarded_quote_id = Column(UUID(as_uuid=True), nullable=True)
+    # Phase C completes the FK constraint to ``quotes.id``. ON DELETE
+    # SET NULL: a quote can be hard-deleted only when it is NOT the
+    # awarded one (enforced at the service layer); but if a downstream
+    # admin task ever bypasses that, we'd rather preserve the lot with a
+    # null pointer than cascade-destroy it.
+    awarded_quote_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("quotes.id", ondelete="SET NULL", use_alter=True, name="fk_lots_awarded_quote_id"),
+        nullable=True,
+    )
     archived_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )

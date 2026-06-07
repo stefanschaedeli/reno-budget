@@ -72,6 +72,12 @@ export function ObjectDetailPage(): JSX.Element {
             {t("lots.title")}
           </Link>
           <Link
+            to={`/objekte/${obj.id}/lieferanten`}
+            className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
+          >
+            {t("suppliers.title")}
+          </Link>
+          <Link
             to={`/objekte/${obj.id}/audit`}
             className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
           >

@@ -119,6 +119,11 @@ describe("LotDetailPage", () => {
       },
       {
         match: (url, init) =>
+          (init.method ?? "GET") === "GET" && url.includes(`/lots/${LOT_ID}/quotes`),
+        body: [],
+      },
+      {
+        match: (url, init) =>
           (init.method ?? "GET") === "GET" && url.includes(`/lots/${LOT_ID}`),
         body: lot,
       },
@@ -131,6 +136,11 @@ describe("LotDetailPage", () => {
         match: (url, init) =>
           (init.method ?? "GET") === "GET" && url.includes(`/objects/${OBJ_ID}/cost-items`),
         body: [memberA],
+      },
+      {
+        match: (url, init) =>
+          (init.method ?? "GET") === "GET" && url.includes(`/objects/${OBJ_ID}/suppliers`),
+        body: [],
       },
     ]);
     renderRoute();
@@ -167,6 +177,11 @@ describe("LotDetailPage", () => {
       },
       {
         match: (url, init) =>
+          (init.method ?? "GET") === "GET" && url.includes(`/lots/${LOT_ID}/quotes`),
+        body: [],
+      },
+      {
+        match: (url, init) =>
           (init.method ?? "GET") === "GET" && url.includes(`/lots/${LOT_ID}`),
         body: lot,
       },
@@ -179,6 +194,16 @@ describe("LotDetailPage", () => {
         match: (url, init) =>
           (init.method ?? "GET") === "GET" && url.includes(`/objects/${OBJ_ID}/cost-items`),
         body: [itemA, itemB],
+      },
+      {
+        match: (url, init) =>
+          (init.method ?? "GET") === "GET" && url.includes(`/objects/${OBJ_ID}/suppliers`),
+        body: [],
+      },
+      {
+        match: (url, init) =>
+          (init.method ?? "GET") === "GET" && url.includes(`/lots/${LOT_ID}/quotes`),
+        body: [],
       },
     ]);
     renderRoute();

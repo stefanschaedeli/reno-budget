@@ -30,6 +30,13 @@ from app.models.project import (  # noqa: F401
     Project,
     ProjectStatus,
 )
+from app.models.quote import (  # noqa: F401
+    Quote,
+    QuoteStatus,
+)
+from app.models.supplier import (  # noqa: F401
+    Supplier,
+)
 from app.models.tag import (  # noqa: F401
     Tag,
     TagAssignment,

@@ -14,6 +14,7 @@ from datetime import date, datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.lot import LotStatus
+from app.schemas.quote import QuoteRead
 
 
 class _LotBase(BaseModel):
@@ -57,3 +58,4 @@ class LotRead(_LotBase):
     updated_at: datetime
     cost_item_count: int = 0
     cost_item_ids: list[uuid.UUID] | None = None
+    awarded_quote: QuoteRead | None = None

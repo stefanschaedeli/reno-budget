@@ -11,6 +11,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useCostItems } from "@/api/costs";
 import { TagChip } from "@/components/TagChip";
 import { formatChf } from "@/features/costs/types";
+import { QuotesPanel } from "@/features/quotes/QuotesPanel";
 import { useTagsForTarget } from "@/features/tags/api";
 import { LotForm } from "./LotForm";
 import {
@@ -239,6 +240,12 @@ export function LotDetailPage(): JSX.Element {
           </table>
         )}
       </section>
+
+      <QuotesPanel
+        lotId={lot.id}
+        objectId={lot.object_id}
+        lotStatus={lot.status}
+      />
 
       <section className="border-t border-slate-200 pt-4">
         <div className="flex gap-2">

@@ -129,6 +129,11 @@ class TestExports:
         wb = load_workbook(io.BytesIO(r.content))
         assert "Kostenpositionen" in wb.sheetnames
         assert "Budget" in wb.sheetnames
+        # Phase C — procurement sheets present even when empty.
+        assert "Projekte" in wb.sheetnames
+        assert "Lose" in wb.sheetnames
+        assert "Lieferanten" in wb.sheetnames
+        assert "Angebote" in wb.sheetnames
 
     async def test_pdf_download_starts_with_pdf_magic(
         self,

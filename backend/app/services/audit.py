@@ -70,6 +70,16 @@ ACTION_LOT_DELETE = "lot.delete"
 ACTION_LOT_ADD_ITEM = "lot.add_item"
 ACTION_LOT_REMOVE_ITEM = "lot.remove_item"
 
+ACTION_SUPPLIER_CREATE = "supplier.create"
+ACTION_SUPPLIER_UPDATE = "supplier.update"
+ACTION_SUPPLIER_ARCHIVE = "supplier.archive"
+ACTION_SUPPLIER_DELETE = "supplier.delete"
+
+ACTION_QUOTE_CREATE = "quote.create"
+ACTION_QUOTE_UPDATE = "quote.update"
+ACTION_QUOTE_DELETE = "quote.delete"
+ACTION_QUOTE_AWARD = "quote.award"
+
 ACTION_TAG_CREATE = "tag.create"
 ACTION_TAG_UPDATE = "tag.update"
 ACTION_TAG_DELETE = "tag.delete"
