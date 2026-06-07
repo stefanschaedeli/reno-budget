@@ -30,11 +30,14 @@ from sqlalchemy.orm import selectinload
 
 from app.models.cost import (
     CostItem,
+    CostItemBkpAllocation,
     CostItemPriority,
     CostItemScope,
     CostItemUnitAllocation,
 )
+from app.models.lot import LotCostItem
 from app.models.object import ObjectRole, Unit
+from app.models.tag import TagAssignment, TagTargetType
 from app.models.user import User
 from app.repositories.bkp import get_bkp_code
 from app.repositories.cost_item import (
@@ -48,12 +51,18 @@ from app.repositories.cost_item import (
 )
 from app.repositories.object import list_units
 from app.schemas.cost import (
+    BkpAllocationItem,
     CostItemAllocationIn,
     CostItemCreate,
     CostItemFilter,
     CostItemUpdate,
 )
-from app.services.allocations import AllocationError, validate_allocation_sum
+from app.services.allocations import (
+    AllocationError,
+    BkpAllocationError,
+    validate_allocation_sum,
+    validate_bkp_allocation_sum,
+)
 from app.services.rbac import ObjectAccess
 
 # ---- Exceptions -------------------------------------------------------------
@@ -83,6 +92,10 @@ class ScopeViolationError(CostItemServiceError):
     """A scoped editor tried to act on units outside their allowed set."""
 
 
+class UnknownProjectError(CostItemServiceError):
+    """The provided ``project_id`` does not exist or belongs to another object."""
+
+
 # ---- Read paths -------------------------------------------------------------
 
 
@@ -110,7 +123,79 @@ async def list_cost_items_for_object(
     if filters.unit_id is not None:
         target = filters.unit_id
         items = [i for i in items if any(a.unit_id == target for a in i.allocations)]
+    if filters.tag_id:
+        # any-of: keep items carrying at least one of the requested tags via
+        # a TagAssignment row targeting the cost_item polymorphically.
+        tagged_ids = await _cost_items_with_any_tag(session, filters.tag_id)
+        items = [i for i in items if i.id in tagged_ids]
+    if filters.lot_id is not None:
+        member_ids = await _cost_items_in_lot(session, filters.lot_id)
+        items = [i for i in items if i.id in member_ids]
     return _sort_items(items, filters.sort)
+
+
+async def _cost_items_in_lot(
+    session: AsyncSession, lot_id: uuid.UUID
+) -> set[uuid.UUID]:
+    """Return the set of cost_item IDs that are members of ``lot_id``."""
+    stmt = select(LotCostItem.cost_item_id).where(LotCostItem.lot_id == lot_id)
+    rows = (await session.execute(stmt)).scalars().all()
+    return set(rows)
+
+
+async def list_lot_ids_for_cost_items(
+    session: AsyncSession, cost_item_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, list[uuid.UUID]]:
+    """Return a ``{cost_item_id: [lot_id, ...]}`` map for the given items.
+
+    Single batched query — used by the list endpoint to avoid N+1 fetches
+    when rendering lot-membership badges per row. Items with no lots are
+    not present in the map (callers should ``.get(id, [])``).
+    """
+    if not cost_item_ids:
+        return {}
+    stmt = select(LotCostItem.cost_item_id, LotCostItem.lot_id).where(
+        LotCostItem.cost_item_id.in_(cost_item_ids)
+    )
+    rows = (await session.execute(stmt)).all()
+    out: dict[uuid.UUID, list[uuid.UUID]] = {}
+    for cost_item_id, lot_id in rows:
+        out.setdefault(cost_item_id, []).append(lot_id)
+    return out
+
+
+async def list_tag_ids_for_cost_items(
+    session: AsyncSession, cost_item_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, list[uuid.UUID]]:
+    """Return a ``{cost_item_id: [tag_id, ...]}`` map for the given items.
+
+    Single batched query — used by the list endpoint to avoid N+1 fetches
+    when rendering tag chips per row. Items with no tags are not present
+    in the map (callers should ``.get(id, [])``).
+    """
+    if not cost_item_ids:
+        return {}
+    stmt = select(TagAssignment.target_id, TagAssignment.tag_id).where(
+        TagAssignment.target_type == TagTargetType.COST_ITEM,
+        TagAssignment.target_id.in_(cost_item_ids),
+    )
+    rows = (await session.execute(stmt)).all()
+    out: dict[uuid.UUID, list[uuid.UUID]] = {}
+    for target_id, tag_id in rows:
+        out.setdefault(target_id, []).append(tag_id)
+    return out
+
+
+async def _cost_items_with_any_tag(
+    session: AsyncSession, tag_ids: list[uuid.UUID]
+) -> set[uuid.UUID]:
+    """Return the set of cost_item IDs assigned to any of ``tag_ids``."""
+    stmt = select(TagAssignment.target_id).where(
+        TagAssignment.target_type == TagTargetType.COST_ITEM,
+        TagAssignment.tag_id.in_(tag_ids),
+    )
+    rows = (await session.execute(stmt)).scalars().all()
+    return set(rows)
 
 
 async def get_cost_item(
@@ -156,9 +241,12 @@ async def create_cost_item(
     """
     _require_editor(access)
 
-    bkp = await get_bkp_code(session, payload.bkp_code)
-    if bkp is None:
-        raise UnknownBkpCodeError(f"eBKP-H Code '{payload.bkp_code}' existiert nicht")
+    if payload.bkp_code is not None:
+        bkp = await get_bkp_code(session, payload.bkp_code)
+        if bkp is None:
+            raise UnknownBkpCodeError(f"eBKP-H Code '{payload.bkp_code}' existiert nicht")
+
+    bkp_allocs_in = await _resolve_bkp_allocations(session, payload.bkp_allocations)
 
     units = await list_units(session, object_id)
     allocations = await _resolve_allocations(
@@ -168,9 +256,13 @@ async def create_cost_item(
     )
     _enforce_scope_on_allocations(access, allocations)
 
+    if payload.project_id is not None:
+        await _ensure_project_in_object(session, object_id, payload.project_id)
+
     item = CostItem(
         object_id=object_id,
         bkp_code=payload.bkp_code,
+        project_id=payload.project_id,
         npk_code=payload.npk_code,
         title=payload.title.strip(),
         description=payload.description,
@@ -194,6 +286,14 @@ async def create_cost_item(
                 cost_item_id=item.id,
                 unit_id=a.unit_id,
                 share_permille=a.share_permille,
+            )
+        )
+    for ba in bkp_allocs_in:
+        session.add(
+            CostItemBkpAllocation(
+                cost_item_id=item.id,
+                bkp_code=ba.bkp_code,
+                share_permille=ba.share_permille,
             )
         )
     await session.flush()
@@ -222,11 +322,33 @@ async def update_cost_item(
 
     update_dict = payload.model_dump(exclude_unset=True)
     new_allocations_in = update_dict.pop("allocations", None)
+    new_bkp_allocations_in = update_dict.pop("bkp_allocations", None)
 
-    if "bkp_code" in update_dict:
+    if "bkp_code" in update_dict and update_dict["bkp_code"] is not None:
         bkp = await get_bkp_code(session, update_dict["bkp_code"])
         if bkp is None:
             raise UnknownBkpCodeError(f"eBKP-H Code '{update_dict['bkp_code']}' existiert nicht")
+
+    if "project_id" in update_dict and update_dict["project_id"] is not None:
+        await _ensure_project_in_object(session, object_id, update_dict["project_id"])
+
+    # Validate + materialise the new BKP allocation set (replace-all semantics).
+    bkp_allocs_in: list[BkpAllocationItem] | None = None
+    if new_bkp_allocations_in is not None:
+        as_models = [BkpAllocationItem(**a) for a in new_bkp_allocations_in]
+        bkp_allocs_in = await _resolve_bkp_allocations(session, as_models)
+
+    # Enforce XOR rule on the merged state (existing item + patch fields).
+    # If the caller is switching to multi-BKP (non-empty list submitted) and
+    # didn't explicitly clear bkp_code, we set it to NULL automatically — the
+    # schema validator already rejected the case where both are explicit.
+    if bkp_allocs_in is not None and bkp_allocs_in:
+        if "bkp_code" not in update_dict:
+            item.bkp_code = None
+        elif update_dict["bkp_code"] is not None:
+            raise InvalidAllocationError(
+                "bkp_code und bkp_allocations dürfen nicht gleichzeitig gesetzt sein"
+            )
 
     for field, value in update_dict.items():
         setattr(item, field, value)
@@ -251,6 +373,9 @@ async def update_cost_item(
             item,
             ((a.unit_id, a.share_permille) for a in allocations),
         )
+
+    if bkp_allocs_in is not None:
+        await _replace_bkp_allocations(session, item, bkp_allocs_in)
 
     await session.flush()
     return await _reload(session, item.id)
@@ -319,6 +444,72 @@ async def _resolve_allocations(
     return list(provided)
 
 
+async def _ensure_project_in_object(
+    session: AsyncSession,
+    object_id: uuid.UUID,
+    project_id: uuid.UUID,
+) -> None:
+    """Validate that ``project_id`` exists and belongs to ``object_id``.
+
+    Raises :class:`UnknownProjectError` (translated to 400 in the route).
+    """
+    from app.models.project import Project
+
+    stmt = select(Project).where(Project.id == project_id)
+    project = (await session.execute(stmt)).scalar_one_or_none()
+    if project is None or project.object_id != object_id:
+        raise UnknownProjectError("Projekt nicht gefunden in diesem Objekt")
+
+
+async def _resolve_bkp_allocations(
+    session: AsyncSession,
+    provided: list[BkpAllocationItem] | None,
+) -> list[BkpAllocationItem]:
+    """Validate a multi-BKP allocation set and return it (possibly empty).
+
+    ``None`` means "no list was submitted, keep the existing rows" — callers
+    detect that case before calling us. An empty list is allowed and means
+    "drop all multi-BKP shares" (the item then falls back to singleton
+    ``bkp_code``, or stays uncategorised if that is also NULL).
+
+    Validates: every ``bkp_code`` exists in the catalogue; the share sum is
+    1000 (or empty); each share is in 0..1000. Raises
+    :class:`UnknownBkpCodeError` / :class:`InvalidAllocationError`.
+    """
+    if provided is None or not provided:
+        return []
+    try:
+        validate_bkp_allocation_sum(a.share_permille for a in provided)
+    except BkpAllocationError as exc:
+        raise InvalidAllocationError(str(exc)) from exc
+    for a in provided:
+        bkp = await get_bkp_code(session, a.bkp_code)
+        if bkp is None:
+            raise UnknownBkpCodeError(f"eBKP-H Code '{a.bkp_code}' existiert nicht")
+    return list(provided)
+
+
+async def _replace_bkp_allocations(
+    session: AsyncSession,
+    item: CostItem,
+    new_rows: list[BkpAllocationItem],
+) -> None:
+    """Replace-all semantics for the per-item BKP allocation rows."""
+    from sqlalchemy import delete as _delete
+
+    await session.execute(
+        _delete(CostItemBkpAllocation).where(CostItemBkpAllocation.cost_item_id == item.id)
+    )
+    for a in new_rows:
+        session.add(
+            CostItemBkpAllocation(
+                cost_item_id=item.id,
+                bkp_code=a.bkp_code,
+                share_permille=a.share_permille,
+            )
+        )
+
+
 def _enforce_scope_on_allocations(
     access: ObjectAccess, allocations: Sequence[CostItemAllocationIn]
 ) -> None:
@@ -339,14 +530,27 @@ def _enforce_scope_on_allocations(
 
 
 async def _reload(session: AsyncSession, cost_item_id: uuid.UUID) -> CostItem:
-    """Re-fetch a cost item with allocations eagerly loaded for the response."""
+    """Re-fetch a cost item with allocations + BKP allocations eagerly loaded.
+
+    Both ``selectinload`` clauses are required: the response schema reads
+    ``bkp_allocations`` and async sessions raise on lazy-load attempts. We
+    expire the cached entity first so freshly-inserted allocation rows on
+    the collections show up (identity-map hit would otherwise keep the
+    stale collection from the pre-mutation fetch).
+    """
+    existing = await session.get(CostItem, cost_item_id)
+    if existing is not None:
+        await session.refresh(existing, attribute_names=["allocations", "bkp_allocations"])
+        return existing
     stmt = (
         select(CostItem)
         .where(CostItem.id == cost_item_id)
-        .options(selectinload(CostItem.allocations))
+        .options(
+            selectinload(CostItem.allocations),
+            selectinload(CostItem.bkp_allocations),
+        )
     )
-    result = (await session.execute(stmt)).scalar_one()
-    return result
+    return (await session.execute(stmt)).scalar_one()
 
 
 def _apply_filter(item: CostItem, filters: CostItemFilter) -> CostItem | None:
@@ -361,7 +565,10 @@ def _apply_filter(item: CostItem, filters: CostItemFilter) -> CostItem | None:
         return None
     if filters.planned_year is not None and item.planned_year != filters.planned_year:
         return None
-    if filters.bkp_code is not None and not item.bkp_code.startswith(filters.bkp_code):
+    if filters.bkp_code is not None:
+        if item.bkp_code is None or not item.bkp_code.startswith(filters.bkp_code):
+            return None
+    if filters.project_id is not None and item.project_id != filters.project_id:
         return None
     if filters.q is not None:
         needle = filters.q.strip().lower()

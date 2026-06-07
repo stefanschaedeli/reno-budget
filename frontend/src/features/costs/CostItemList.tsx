@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { TagChip } from "@/components/TagChip";
+import type { Tag } from "@/features/tags/types";
 import { type CostItem, formatChf } from "./types";
 
 /**
@@ -10,6 +12,12 @@ import { type CostItem, formatChf } from "./types";
  */
 export interface CostItemListProps {
   items: CostItem[];
+  /**
+   * All tags defined for this object. Used to materialise tag chips per row
+   * from each item's ``tag_ids`` list — the parent prefetches once and
+   * passes the lookup down to avoid N+1 fetches.
+   */
+  tags?: Tag[];
   onRowClick: (item: CostItem) => void;
 }
 
@@ -58,7 +66,7 @@ function compareItems(a: CostItem, b: CostItem, key: SortKey): number {
     case "title":
       return a.title.localeCompare(b.title, "de");
     case "bkp_code":
-      return a.bkp_code.localeCompare(b.bkp_code, "de");
+      return (a.bkp_code ?? "").localeCompare(b.bkp_code ?? "", "de");
     case "status":
       return a.status.localeCompare(b.status, "de");
   }
@@ -66,6 +74,7 @@ function compareItems(a: CostItem, b: CostItem, key: SortKey): number {
 
 export function CostItemList({
   items,
+  tags = [],
   onRowClick,
 }: CostItemListProps): JSX.Element {
   const { t } = useTranslation();
@@ -73,6 +82,12 @@ export function CostItemList({
     key: "title",
     dir: "asc",
   });
+
+  const tagById = useMemo(() => {
+    const m = new Map<string, Tag>();
+    for (const t of tags) m.set(t.id, t);
+    return m;
+  }, [tags]);
 
   const sorted = useMemo(() => {
     const copy = items.slice();
@@ -133,8 +148,32 @@ export function CostItemList({
             onClick={() => onRowClick(item)}
             className="cursor-pointer border-b border-slate-200 hover:bg-slate-50"
           >
-            <td className="px-2 py-2 font-medium">{item.title}</td>
-            <td className="px-2 py-2 font-mono text-xs">{item.bkp_code}</td>
+            <td className="px-2 py-2 font-medium">
+              <div className="flex flex-wrap items-center gap-1">
+                <span>{item.title}</span>
+                {item.tag_ids
+                  ? item.tag_ids
+                      .map((id) => tagById.get(id))
+                      .filter((t): t is Tag => Boolean(t))
+                      .map((tag) => <TagChip key={tag.id} tag={tag} />)
+                  : null}
+                {item.lot_ids && item.lot_ids.length > 0 && (
+                  <span
+                    className="inline-flex items-center rounded bg-slate-200 px-1.5 py-0.5 text-xs text-slate-700"
+                    title={t("costs.inLotsTitle")}
+                  >
+                    {t("costs.inLots", { count: item.lot_ids.length })}
+                  </span>
+                )}
+              </div>
+            </td>
+            <td className="px-2 py-2 font-mono text-xs">
+              {item.bkp_code ?? (
+                <span className="text-slate-400 italic">
+                  {t("costs.uncategorised")}
+                </span>
+              )}
+            </td>
             <td className="px-2 py-2">{t(`costs.status.${item.status}`)}</td>
             <td className="px-2 py-2">
               {t(`costs.priority.${item.priority}`)}

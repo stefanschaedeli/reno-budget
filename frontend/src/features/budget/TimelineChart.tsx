@@ -220,7 +220,9 @@ export function TimelineChart({ objectId }: TimelineChartProps): JSX.Element {
                 <li key={it.id} className="flex justify-between py-1">
                   <span>
                     <span className="font-medium">{it.title}</span>
-                    <span className="ml-2 text-slate-500">{it.bkp_code}</span>
+                    <span className="ml-2 text-slate-500">
+                      {it.bkp_code ?? t("costs.uncategorised")}
+                    </span>
                   </span>
                   <span className="text-slate-700">
                     {formatChfRounded(it.planned_amount_chf)}

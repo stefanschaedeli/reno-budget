@@ -37,10 +37,13 @@ from app.services.cost_items import (
     InvalidAllocationError,
     ScopeViolationError,
     UnknownBkpCodeError,
+    UnknownProjectError,
     create_cost_item,
     delete_cost_item,
     get_cost_item,
     list_cost_items_for_object,
+    list_lot_ids_for_cost_items,
+    list_tag_ids_for_cost_items,
     update_cost_item,
 )
 from app.services.rbac import ObjectAccess
@@ -62,7 +65,7 @@ def _raise_for(exc: CostItemServiceError) -> None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc))
     if isinstance(exc, CostItemPermissionError | ScopeViolationError):
         raise HTTPException(status.HTTP_403_FORBIDDEN, str(exc))
-    if isinstance(exc, UnknownBkpCodeError | InvalidAllocationError):
+    if isinstance(exc, UnknownBkpCodeError | InvalidAllocationError | UnknownProjectError):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
     raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
 
@@ -81,11 +84,34 @@ async def list_items(
 
     Caller MUST hold >=VIEWER for ``object_id``. Scoped memberships see only
     items whose allocations touch their allowed units.
+
+    When ``include_tag_ids=true`` is passed, each returned item carries the
+    ``tag_ids`` field populated from a single batched ``TagAssignment`` query
+    — this keeps the cost-items list page from N+1-ing per-row tag fetches.
     """
     items = await list_cost_items_for_object(
         session, object_id=object_id, access=access, filters=filters
     )
-    return [_to_read(i) for i in items]
+    if not filters.include_tag_ids and not filters.include_lot_ids:
+        return [_to_read(i) for i in items]
+    ids = [i.id for i in items]
+    tag_map = (
+        await list_tag_ids_for_cost_items(session, ids) if filters.include_tag_ids else {}
+    )
+    lot_map = (
+        await list_lot_ids_for_cost_items(session, ids) if filters.include_lot_ids else {}
+    )
+    result: list[CostItemRead] = []
+    for i in items:
+        read = _to_read(i)
+        patch: dict[str, list[uuid.UUID]] = {}
+        if filters.include_tag_ids:
+            patch["tag_ids"] = tag_map.get(i.id, [])
+        if filters.include_lot_ids:
+            patch["lot_ids"] = lot_map.get(i.id, [])
+        # Pydantic v2: model_copy(update=...) preserves the rest of the dump.
+        result.append(read.model_copy(update=patch))
+    return result
 
 
 @router.post(

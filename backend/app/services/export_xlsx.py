@@ -38,12 +38,23 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy import select
+
 from app.models.cost import CostItem
+from app.models.lot import Lot
 from app.models.object import Object, Unit
+from app.models.project import Project
+from app.models.quote import Quote
+from app.models.supplier import Supplier
 from app.repositories.bkp import list_bkp_codes
 from app.repositories.cost_item import list_cost_items as repo_list_cost_items
 from app.repositories.object import get_object, list_units
+from app.services.bkp_shares import iter_bkp_shares
 from app.services.budgets import compute_reserve_plan, compute_timeline
+from app.services.lots import (
+    count_cost_items_per_lot,
+    list_cost_item_ids_for_lot,
+)
 from app.services.rbac import ObjectAccess
 
 # Column titles (German) for the Kostenpositionen sheet, in display order.
@@ -66,6 +77,41 @@ _BUDGET_HEADERS: tuple[str, ...] = (
     "Geplant CHF",
     "Geplant inflationsbereinigt CHF",
     "Effektiv CHF",
+)
+
+# Phase C — procurement sheets.
+_PROJECT_HEADERS: tuple[str, ...] = (
+    "Name",
+    "Status",
+    "Geplantes Jahr",
+    "Positionen",
+    "Geplant CHF",
+)
+
+_LOT_HEADERS: tuple[str, ...] = (
+    "Name",
+    "Status",
+    "Eingabetermin",
+    "Positionen",
+    "Geplant CHF",
+    "Vergeben an",
+    "Vergeben CHF",
+)
+
+_SUPPLIER_HEADERS: tuple[str, ...] = (
+    "Name",
+    "E-Mail",
+    "Telefon",
+    "Adresse",
+    "Archiviert",
+)
+
+_QUOTE_HEADERS: tuple[str, ...] = (
+    "Los",
+    "Lieferant",
+    "Betrag CHF",
+    "Eingangsdatum",
+    "Status",
 )
 
 # German display labels for enum-ish values (kept short for column widths).
@@ -139,7 +185,7 @@ def _allocations_cell(item: CostItem, units_by_id: dict[uuid.UUID, Unit]) -> str
     # same string (helps diff-friendliness when users version the exports).
     sorted_allocs = sorted(
         item.allocations,
-        key=lambda a: (units_by_id[a.unit_id].label if a.unit_id in units_by_id else ""),
+        key=lambda a: units_by_id[a.unit_id].label if a.unit_id in units_by_id else "",
     )
     for a in sorted_allocs:
         unit = units_by_id.get(a.unit_id)
@@ -148,9 +194,7 @@ def _allocations_cell(item: CostItem, units_by_id: dict[uuid.UUID, Unit]) -> str
     return " | ".join(parts)
 
 
-def _scope_factor_for_item(
-    item: CostItem, allowed: frozenset[uuid.UUID] | None
-) -> Decimal:
+def _scope_factor_for_item(item: CostItem, allowed: frozenset[uuid.UUID] | None) -> Decimal:
     """Pro-rating factor for a cost item under the caller's unit scope.
 
     Mirrors :func:`app.services.budgets._scope_factor` so the XLSX numbers
@@ -222,32 +266,49 @@ async def _write_cost_items_sheet(
             # consistent with what the user sees on screen.
             continue
 
-        planned = (
-            item.planned_amount_chf * factor if item.planned_amount_chf is not None else None
-        )
-        actual = (
-            item.actual_amount_chf * factor if item.actual_amount_chf is not None else None
-        )
+        # One row per (item, bkp_share). Single-BKP items emit one row at
+        # 1000‰; multi-BKP items emit one row per allocation; uncategorised
+        # items emit one row with BKP "—" so they remain visible.
+        for code, share_permille in iter_bkp_shares(item):
+            share_frac = Decimal(share_permille) / Decimal(1000)
+            planned = (
+                item.planned_amount_chf * factor * share_frac
+                if item.planned_amount_chf is not None
+                else None
+            )
+            actual = (
+                item.actual_amount_chf * factor * share_frac
+                if item.actual_amount_chf is not None
+                else None
+            )
 
-        ws.cell(row=row, column=1, value=item.bkp_code)
-        ws.cell(row=row, column=2, value=bkp_label.get(item.bkp_code, ""))
-        ws.cell(row=row, column=3, value=item.title)
-        ws.cell(row=row, column=4, value=_STATUS_DE.get(str(item.status), str(item.status)))
-        ws.cell(row=row, column=5, value=_PRIORITY_DE.get(str(item.priority), str(item.priority)))
-        ws.cell(row=row, column=6, value=item.planned_year)
-        planned_value = float(planned) if planned is not None else None
-        planned_cell = ws.cell(row=row, column=7, value=planned_value)
-        planned_cell.number_format = _CHF_FORMAT
-        actual_value = float(actual) if actual is not None else None
-        actual_cell = ws.cell(row=row, column=8, value=actual_value)
-        actual_cell.number_format = _CHF_FORMAT
-        ws.cell(row=row, column=9, value=item.actual_date)
-        ws.cell(row=row, column=10, value=_allocations_cell(item, units_by_id))
-        # NPK stub: real codes will be validated against the SIA catalogue
-        # in a future phase; today we just round-trip whatever the user
-        # entered (may be empty).
-        ws.cell(row=row, column=11, value=item.npk_code or "")
-        row += 1
+            ws.cell(row=row, column=1, value=code if code is not None else "—")
+            ws.cell(row=row, column=2, value=bkp_label.get(code, "") if code else "")
+            ws.cell(row=row, column=3, value=item.title)
+            ws.cell(
+                row=row,
+                column=4,
+                value=_STATUS_DE.get(str(item.status), str(item.status)),
+            )
+            ws.cell(
+                row=row,
+                column=5,
+                value=_PRIORITY_DE.get(str(item.priority), str(item.priority)),
+            )
+            ws.cell(row=row, column=6, value=item.planned_year)
+            planned_value = float(planned) if planned is not None else None
+            planned_cell = ws.cell(row=row, column=7, value=planned_value)
+            planned_cell.number_format = _CHF_FORMAT
+            actual_value = float(actual) if actual is not None else None
+            actual_cell = ws.cell(row=row, column=8, value=actual_value)
+            actual_cell.number_format = _CHF_FORMAT
+            ws.cell(row=row, column=9, value=item.actual_date)
+            ws.cell(row=row, column=10, value=_allocations_cell(item, units_by_id))
+            # NPK stub: real codes will be validated against the SIA catalogue
+            # in a future phase; today we just round-trip whatever the user
+            # entered (may be empty).
+            ws.cell(row=row, column=11, value=item.npk_code or "")
+            row += 1
 
 
 async def _write_budget_sheet(
@@ -306,6 +367,158 @@ async def _write_budget_sheet(
     _kv("Pro-rated (Anteilig)", "ja" if reserve.scope_pro_rated else "nein")
 
 
+async def _sum_planned_for_items(
+    items: list[CostItem],
+) -> Decimal:
+    """Sum ``planned_amount_chf`` for a list of cost items (None → 0)."""
+    total = Decimal("0")
+    for it in items:
+        if it.planned_amount_chf is not None:
+            total += it.planned_amount_chf
+    return total
+
+
+async def _write_projects_sheet(
+    ws: Worksheet,
+    session: AsyncSession,
+    object_id: uuid.UUID,
+) -> None:
+    """One row per project: name, status, planned_year, item count, total planned."""
+    _format_header(ws, _PROJECT_HEADERS)
+    _autosize(ws, _PROJECT_HEADERS)
+    rows = (
+        await session.execute(
+            select(Project)
+            .where(Project.object_id == object_id)
+            .order_by(Project.created_at)
+        )
+    ).scalars().all()
+    row = 2
+    for p in rows:
+        items = list(
+            (
+                await session.execute(
+                    select(CostItem).where(CostItem.project_id == p.id)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        total = await _sum_planned_for_items(items)
+        ws.cell(row=row, column=1, value=p.name)
+        ws.cell(row=row, column=2, value=str(p.status))
+        ws.cell(row=row, column=3, value=p.planned_year)
+        ws.cell(row=row, column=4, value=len(items))
+        cell = ws.cell(row=row, column=5, value=float(total))
+        cell.number_format = _CHF_FORMAT
+        row += 1
+
+
+async def _write_lots_sheet(
+    ws: Worksheet,
+    session: AsyncSession,
+    object_id: uuid.UUID,
+) -> None:
+    """One row per lot: name, status, deadline, member count, total, awarded info."""
+    _format_header(ws, _LOT_HEADERS)
+    _autosize(ws, _LOT_HEADERS)
+    lots = (
+        await session.execute(
+            select(Lot).where(Lot.object_id == object_id).order_by(Lot.created_at)
+        )
+    ).scalars().all()
+    counts = await count_cost_items_per_lot(session, lot_ids=[lot.id for lot in lots])
+    row = 2
+    for lot in lots:
+        # Member ids -> cost items -> planned sum.
+        ids = await list_cost_item_ids_for_lot(session, lot_id=lot.id)
+        members: list[CostItem] = []
+        if ids:
+            members = list(
+                (
+                    await session.execute(
+                        select(CostItem).where(CostItem.id.in_(ids))
+                    )
+                )
+                .scalars()
+                .all()
+            )
+        total = await _sum_planned_for_items(members)
+
+        awarded_supplier = ""
+        awarded_amount: float | None = None
+        if lot.awarded_quote_id is not None:
+            q = await session.get(Quote, lot.awarded_quote_id)
+            if q is not None:
+                sup = await session.get(Supplier, q.supplier_id)
+                if sup is not None:
+                    awarded_supplier = sup.name
+                awarded_amount = float(q.amount_chf)
+
+        ws.cell(row=row, column=1, value=lot.name)
+        ws.cell(row=row, column=2, value=str(lot.status))
+        ws.cell(row=row, column=3, value=lot.tender_deadline)
+        ws.cell(row=row, column=4, value=counts.get(lot.id, 0))
+        c5 = ws.cell(row=row, column=5, value=float(total))
+        c5.number_format = _CHF_FORMAT
+        ws.cell(row=row, column=6, value=awarded_supplier)
+        c7 = ws.cell(row=row, column=7, value=awarded_amount)
+        c7.number_format = _CHF_FORMAT
+        row += 1
+
+
+async def _write_suppliers_sheet(
+    ws: Worksheet,
+    session: AsyncSession,
+    object_id: uuid.UUID,
+) -> None:
+    """One row per supplier (including archived for the audit trail)."""
+    _format_header(ws, _SUPPLIER_HEADERS)
+    _autosize(ws, _SUPPLIER_HEADERS)
+    rows = (
+        await session.execute(
+            select(Supplier)
+            .where(Supplier.object_id == object_id)
+            .order_by(Supplier.name)
+        )
+    ).scalars().all()
+    row = 2
+    for s in rows:
+        ws.cell(row=row, column=1, value=s.name)
+        ws.cell(row=row, column=2, value=s.contact_email or "")
+        ws.cell(row=row, column=3, value=s.contact_phone or "")
+        ws.cell(row=row, column=4, value=s.address or "")
+        ws.cell(row=row, column=5, value="ja" if s.archived_at is not None else "nein")
+        row += 1
+
+
+async def _write_quotes_sheet(
+    ws: Worksheet,
+    session: AsyncSession,
+    object_id: uuid.UUID,
+) -> None:
+    """One row per quote across all lots of the object."""
+    _format_header(ws, _QUOTE_HEADERS)
+    _autosize(ws, _QUOTE_HEADERS)
+    # Join via lot to filter by object.
+    stmt = (
+        select(Quote, Lot, Supplier)
+        .join(Lot, Quote.lot_id == Lot.id)
+        .join(Supplier, Quote.supplier_id == Supplier.id)
+        .where(Lot.object_id == object_id)
+        .order_by(Lot.name, Quote.received_at.desc())
+    )
+    row = 2
+    for q, lot, sup in (await session.execute(stmt)).all():
+        ws.cell(row=row, column=1, value=lot.name)
+        ws.cell(row=row, column=2, value=sup.name)
+        c = ws.cell(row=row, column=3, value=float(q.amount_chf))
+        c.number_format = _CHF_FORMAT
+        ws.cell(row=row, column=4, value=q.received_at)
+        ws.cell(row=row, column=5, value=str(q.status))
+        row += 1
+
+
 async def build_xlsx(
     session: AsyncSession,
     object_id: uuid.UUID,
@@ -329,9 +542,17 @@ async def build_xlsx(
     assert ws_items is not None
     ws_items.title = "Kostenpositionen"
     ws_budget = wb.create_sheet("Budget")
+    ws_projects = wb.create_sheet("Projekte")
+    ws_lots = wb.create_sheet("Lose")
+    ws_suppliers = wb.create_sheet("Lieferanten")
+    ws_quotes = wb.create_sheet("Angebote")
 
     await _write_cost_items_sheet(ws_items, session, object_id, access=access, units=units)
     await _write_budget_sheet(ws_budget, session, object_id, access=access, obj=obj)
+    await _write_projects_sheet(ws_projects, session, object_id)
+    await _write_lots_sheet(ws_lots, session, object_id)
+    await _write_suppliers_sheet(ws_suppliers, session, object_id)
+    await _write_quotes_sheet(ws_quotes, session, object_id)
 
     buf = io.BytesIO()
     wb.save(buf)

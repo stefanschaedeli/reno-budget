@@ -42,7 +42,14 @@ function filtersToQuery(filters: CostItemFilters): string {
   }
   if (filters.unit_id) params.set("unit_id", filters.unit_id);
   if (filters.bkp_prefix) params.set("bkp_prefix", filters.bkp_prefix);
+  if (filters.project_id) params.set("project_id", filters.project_id);
+  if (filters.tag_ids && filters.tag_ids.length > 0) {
+    for (const tid of filters.tag_ids) params.append("tag_id", tid);
+  }
+  if (filters.lot_id) params.set("lot_id", filters.lot_id);
   if (filters.q) params.set("q", filters.q);
+  if (filters.include_tag_ids) params.set("include_tag_ids", "true");
+  if (filters.include_lot_ids) params.set("include_lot_ids", "true");
   const qs = params.toString();
   return qs ? `?${qs}` : "";
 }

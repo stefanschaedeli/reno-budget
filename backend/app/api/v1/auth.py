@@ -242,7 +242,7 @@ async def accept_invitation(
         )
     except PasswordPolicyError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
         ) from exc
     except auth_svc.InvalidTokenError as exc:
         raise HTTPException(
@@ -322,7 +322,7 @@ async def confirm_password_reset(
         user = await auth_svc.confirm_password_reset(session, payload.token, payload.new_password)
     except PasswordPolicyError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
         ) from exc
     except auth_svc.InvalidTokenError as exc:
         raise HTTPException(

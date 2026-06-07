@@ -1,11 +1,22 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Unit } from "@/features/objects/types";
+import { useBkpCodes } from "@/api/bkp";
+import { useProjects } from "@/features/projects/api";
+import { BkpAllocationEditor } from "@/components/BkpAllocationEditor";
+import { TagPicker } from "@/components/TagPicker";
+import {
+  useAssignTag,
+  useTagsForTarget,
+  useUnassignTag,
+} from "@/features/tags/api";
+import type { Tag } from "@/features/tags/types";
 import { AllocationEditor, wertquoteDefaults } from "./AllocationEditor";
 import { BkpCodePicker } from "./BkpCodePicker";
 import {
   COST_PRIORITIES,
   COST_STATUSES,
+  type BkpAllocationItem,
   type CostItemAllocation,
   type CostItemInput,
   type CostPriority,
@@ -28,14 +39,28 @@ import {
  */
 export interface CostItemFormProps {
   units: Unit[];
+  objectId: string;
+  /** Existing cost-item id when editing; enables tag assignment persistence. */
+  costItemId?: string | undefined;
   initial?: Partial<CostItemInput> | undefined;
-  onSubmit: (payload: CostItemInput) => void | Promise<void>;
+  /**
+   * Submit handler. For NEW items the form has no cost-item id to persist tag
+   * assignments against, so the selected tags are returned via ``pendingTags``
+   * so the parent can call ``assignTag(...)`` after the create resolves. For
+   * EDIT items tag changes are persisted immediately inside the form and
+   * ``pendingTags`` will be an empty list.
+   */
+  onSubmit: (
+    payload: CostItemInput,
+    pendingTags: Tag[],
+  ) => void | Promise<void>;
   onCancel?: (() => void) | undefined;
   submitting?: boolean | undefined;
 }
 
 interface FormState {
   bkp_code: string;
+  project_id: string;
   npk_code: string;
   title: string;
   description: string;
@@ -49,11 +74,16 @@ interface FormState {
   warranty_until: string;
   scope: CostScope;
   allocations: CostItemAllocation[];
+  bkp_allocations: BkpAllocationItem[];
+  /** When true, the single bkp_code picker is hidden and bkp_allocations is used. */
+  detailedBkp: boolean;
 }
 
 function emptyState(units: Unit[], initial?: Partial<CostItemInput>): FormState {
+  const bkpAllocs = initial?.bkp_allocations ?? [];
   return {
     bkp_code: initial?.bkp_code ?? "",
+    project_id: initial?.project_id ?? "",
     npk_code: initial?.npk_code ?? "",
     title: initial?.title ?? "",
     description: initial?.description ?? "",
@@ -69,12 +99,17 @@ function emptyState(units: Unit[], initial?: Partial<CostItemInput>): FormState 
     allocations:
       initial?.allocations ??
       (initial?.scope === "unit" ? [] : wertquoteDefaults(units)),
+    bkp_allocations: bkpAllocs,
+    detailedBkp: bkpAllocs.length > 0,
   };
 }
 
 function stateToPayload(s: FormState): unknown {
   return {
-    bkp_code: s.bkp_code,
+    // When using detailed multi-BKP, the singleton must be null per the
+    // backend XOR rule.
+    bkp_code: s.detailedBkp ? null : s.bkp_code || null,
+    project_id: s.project_id || null,
     npk_code: s.npk_code || null,
     title: s.title,
     description: s.description || null,
@@ -88,11 +123,14 @@ function stateToPayload(s: FormState): unknown {
     warranty_until: s.warranty_until || null,
     scope: s.scope,
     allocations: s.allocations,
+    bkp_allocations: s.detailedBkp ? s.bkp_allocations : [],
   };
 }
 
 export function CostItemForm({
   units,
+  objectId,
+  costItemId,
   initial,
   onSubmit,
   onCancel,
@@ -103,6 +141,49 @@ export function CostItemForm({
     emptyState(units, initial),
   );
   const [errors, setErrors] = useState<Map<string, string>>(() => new Map());
+
+  const projectsQuery = useProjects(objectId);
+  const bkpCodesQuery = useBkpCodes();
+  const tagsQuery = useTagsForTarget(
+    "cost_item",
+    costItemId ?? "",
+  );
+  const assignTagMut = useAssignTag();
+  const unassignTagMut = useUnassignTag();
+  // For new items, tag selections live in local state until parent commits.
+  const [pendingTags, setPendingTags] = useState<Tag[]>([]);
+
+  const selectedTags = costItemId ? (tagsQuery.data ?? []) : pendingTags;
+
+  const handleTagsChange = (next: Tag[]) => {
+    if (!costItemId) {
+      // Cannot persist until the cost item exists; the parent receives this
+      // list via ``onSubmit(payload, pendingTags)`` and runs assignTag for
+      // each id after the create mutation resolves.
+      setPendingTags(next);
+      return;
+    }
+    const current = new Set(selectedTags.map((t) => t.id));
+    const nextIds = new Set(next.map((t) => t.id));
+    for (const tag of next) {
+      if (!current.has(tag.id)) {
+        void assignTagMut.mutateAsync({
+          tagId: tag.id,
+          targetType: "cost_item",
+          targetId: costItemId,
+        });
+      }
+    }
+    for (const tag of selectedTags) {
+      if (!nextIds.has(tag.id)) {
+        void unassignTagMut.mutateAsync({
+          tagId: tag.id,
+          targetType: "cost_item",
+          targetId: costItemId,
+        });
+      }
+    }
+  };
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setState((prev) => ({ ...prev, [key]: value }));
@@ -132,7 +213,10 @@ export function CostItemForm({
       return;
     }
     setErrors(new Map());
-    void onSubmit(result.data);
+    // For new items, hand the locally-selected tags up so the parent can
+    // assign them to the freshly-created id. For edits, tag changes already
+    // persisted inline via useAssignTag/useUnassignTag — pass [] to be safe.
+    void onSubmit(result.data, costItemId ? [] : pendingTags);
   };
 
   const err = (key: string): string | undefined => errors.get(key);
@@ -156,14 +240,63 @@ export function CostItemForm({
       </div>
 
       <div>
-        <p className="mb-1 text-sm font-medium">{t("costs.fields.bkp")}</p>
-        <BkpCodePicker
-          value={state.bkp_code || null}
-          onChange={(code) => update("bkp_code", code)}
-        />
-        {err("bkp_code") && (
-          <p className="text-xs text-red-700">{err("bkp_code")}</p>
+        <label className="mb-1 inline-flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={state.detailedBkp}
+            onChange={(e) => update("detailedBkp", e.target.checked)}
+          />
+          {t("costs.bkpAllocations.toggle")}
+        </label>
+        <p className="mb-2 text-xs text-slate-500">
+          {t("costs.bkpAllocations.toggleHint")}
+        </p>
+        {!state.detailedBkp ? (
+          <>
+            <p className="mb-1 text-sm font-medium">{t("costs.fields.bkp")}</p>
+            <BkpCodePicker
+              value={state.bkp_code || null}
+              onChange={(code) => update("bkp_code", code ?? "")}
+            />
+            {err("bkp_code") && (
+              <p className="text-xs text-red-700">{err("bkp_code")}</p>
+            )}
+          </>
+        ) : (
+          <BkpAllocationEditor
+            value={state.bkp_allocations}
+            onChange={(next) => update("bkp_allocations", next)}
+            bkpCodes={bkpCodesQuery.data ?? []}
+          />
         )}
+        {err("bkp_allocations") && (
+          <p className="text-xs text-red-700">{err("bkp_allocations")}</p>
+        )}
+      </div>
+
+      <label className="block text-sm">
+        <span className="mb-1 block font-medium">{t("costs.project")}</span>
+        <select
+          value={state.project_id}
+          onChange={(e) => update("project_id", e.target.value)}
+          className="w-full rounded border border-slate-300 px-2 py-1"
+        >
+          <option value="">{t("costs.projectNone")}</option>
+          {(projectsQuery.data ?? []).map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <div>
+        <p className="mb-1 text-sm font-medium">{t("costs.tags")}</p>
+        <TagPicker
+          objectId={objectId}
+          value={selectedTags}
+          onChange={handleTagsChange}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3">

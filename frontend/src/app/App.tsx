@@ -15,6 +15,12 @@ import { BudgetPage } from "@/features/budget/BudgetPage";
 import { FinancesPage } from "@/features/budget/FinancesPage";
 import { RenofondPage } from "@/features/renofond/RenofondPage";
 import { GlobalAuditPage, ObjectAuditPage } from "@/features/audit/AuditPage";
+import { ProjectsPage } from "@/features/projects/ProjectsPage";
+import { ProjectDetailPage } from "@/features/projects/ProjectDetailPage";
+import { LotsPage } from "@/features/lots/LotsPage";
+import { LotDetailPage } from "@/features/lots/LotDetailPage";
+import { SuppliersPage } from "@/features/suppliers/SuppliersPage";
+import { SupplierDetailPage } from "@/features/suppliers/SupplierDetailPage";
 
 /**
  * Single QueryClient for the whole app. Defaults are conservative:
@@ -114,6 +120,54 @@ export function App(): JSX.Element {
             element={
               <RequireAuth>
                 <FinancesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/objekte/:objectId/projekte"
+            element={
+              <RequireAuth>
+                <ProjectsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/projects/:projectId"
+            element={
+              <RequireAuth>
+                <ProjectDetailPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/objekte/:objectId/lose"
+            element={
+              <RequireAuth>
+                <LotsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/lose/:lotId"
+            element={
+              <RequireAuth>
+                <LotDetailPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/objekte/:objectId/lieferanten"
+            element={
+              <RequireAuth>
+                <SuppliersPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/lieferanten/:supplierId"
+            element={
+              <RequireAuth>
+                <SupplierDetailPage />
               </RequireAuth>
             }
           />

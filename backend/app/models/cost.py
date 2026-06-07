@@ -46,6 +46,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
 
+# Imported only for type-checking the ``Project`` forward reference in the
+# ``project`` relationship. The runtime import happens inside ``app.models``
+# (registration order in ``__init__.py``).
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.project import Project  # noqa: F401
+
 
 def _utcnow() -> datetime:
     """Tz-aware UTC ``datetime`` for timestamp defaults."""
@@ -139,10 +147,21 @@ class CostItem(Base):
         nullable=False,
         index=True,
     )
-    bkp_code: Mapped[str] = mapped_column(
+    # NULLable since Phase 11A — a cost item may have *multiple* BKP shares
+    # via :class:`CostItemBkpAllocation`, in which case this column is left
+    # NULL and the allocations table is consulted. When the column IS set,
+    # it represents the single full-share (1000‰) BKP for that item.
+    bkp_code: Mapped[str | None] = mapped_column(
         String(16),
         ForeignKey("bkp_codes.code", ondelete="RESTRICT"),
-        nullable=False,
+        nullable=True,
+        index=True,
+    )
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        # SET NULL: deleting a project keeps its cost items but unlinks them.
+        ForeignKey("projects.id", ondelete="SET NULL"),
+        nullable=True,
         index=True,
     )
     # NPK (Normpositionen-Katalog) is the SIA item-level catalogue. Stubbed
@@ -190,6 +209,19 @@ class CostItem(Base):
     allocations: Mapped[list[CostItemUnitAllocation]] = relationship(
         back_populates="cost_item",
         cascade="all, delete-orphan",
+    )
+    bkp_allocations: Mapped[list[CostItemBkpAllocation]] = relationship(
+        back_populates="cost_item",
+        cascade="all, delete-orphan",
+    )
+    project: Mapped["Project | None"] = relationship(  # noqa: F821
+        back_populates="cost_items",
+    )
+    # Many-to-many membership in tender lots (Phase 11B). The secondary
+    # table is ``lot_cost_items``; cascade behaviour lives on the FKs.
+    lots: Mapped[list["Lot"]] = relationship(  # noqa: F821
+        secondary="lot_cost_items",
+        back_populates="cost_items",
     )
 
     __table_args__ = (
@@ -247,4 +279,43 @@ class CostItemUnitAllocation(Base):
             name="ck_cost_item_alloc_share_range",
         ),
         Index("ix_cost_item_alloc_unit_id", "unit_id"),
+    )
+
+
+class CostItemBkpAllocation(Base):
+    """Splits a :class:`CostItem` across multiple eBKP-H codes.
+
+    Used when a single line item spans several Hauptgruppen (e.g. a full
+    bathroom refit that touches sanitary + electrical + finishings). The
+    composite PK ``(cost_item_id, bkp_code)`` enforces uniqueness; the
+    sum-to-1000‰ invariant spans rows and is enforced in the service layer
+    by :func:`app.services.allocations.validate_bkp_allocation_sum`.
+
+    When a cost item has at least one row here, the singleton
+    :attr:`CostItem.bkp_code` column is left NULL — the allocations table is
+    the source of truth.
+    """
+
+    __tablename__ = "cost_item_bkp_allocations"
+
+    cost_item_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("cost_items.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    bkp_code: Mapped[str] = mapped_column(
+        String(16),
+        ForeignKey("bkp_codes.code", ondelete="RESTRICT"),
+        primary_key=True,
+    )
+    share_permille: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    cost_item: Mapped[CostItem] = relationship(back_populates="bkp_allocations")
+
+    __table_args__ = (
+        CheckConstraint(
+            "share_permille BETWEEN 0 AND 1000",
+            name="ck_cost_item_bkp_alloc_share_range",
+        ),
+        Index("ix_cost_item_bkp_alloc_bkp_code", "bkp_code"),
     )

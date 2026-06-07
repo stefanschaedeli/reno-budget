@@ -87,7 +87,7 @@ export function CostItemBoard({
                 <div className="font-medium">{item.title}</div>
                 <div className="mt-1 flex items-center justify-between text-xs text-slate-600">
                   <span className="rounded bg-slate-200 px-1 font-mono">
-                    {item.bkp_code}
+                    {item.bkp_code ?? t("costs.uncategorised")}
                   </span>
                   <span>{item.planned_year ?? "—"}</span>
                 </div>
