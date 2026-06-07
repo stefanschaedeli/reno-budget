@@ -15,10 +15,20 @@ from app.models.audit import (  # noqa: F401
 from app.models.cost import (  # noqa: F401
     BkpCode,
     CostItem,
+    CostItemBkpAllocation,
     CostItemPriority,
     CostItemScope,
     CostItemStatus,
     CostItemUnitAllocation,
+)
+from app.models.project import (  # noqa: F401
+    Project,
+    ProjectStatus,
+)
+from app.models.tag import (  # noqa: F401
+    Tag,
+    TagAssignment,
+    TagTargetType,
 )
 from app.models.object import (  # noqa: F401
     ContributionMode,

@@ -20,7 +20,10 @@ async def get_cost_item(session: AsyncSession, cost_item_id: uuid.UUID) -> CostI
     stmt = (
         select(CostItem)
         .where(CostItem.id == cost_item_id)
-        .options(selectinload(CostItem.allocations))
+        .options(
+            selectinload(CostItem.allocations),
+            selectinload(CostItem.bkp_allocations),
+        )
     )
     return (await session.execute(stmt)).scalar_one_or_none()
 
@@ -30,7 +33,10 @@ async def list_cost_items(session: AsyncSession, object_id: uuid.UUID) -> Sequen
     stmt = (
         select(CostItem)
         .where(CostItem.object_id == object_id)
-        .options(selectinload(CostItem.allocations))
+        .options(
+            selectinload(CostItem.allocations),
+            selectinload(CostItem.bkp_allocations),
+        )
         .order_by(CostItem.created_at)
     )
     return (await session.execute(stmt)).scalars().all()

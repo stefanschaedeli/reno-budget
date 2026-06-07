@@ -95,7 +95,9 @@ class _CostItemBase(BaseModel):
         json_encoders={Decimal: str},
     )
 
-    bkp_code: str = Field(min_length=1, max_length=16)
+    # Nullable since Phase 11A — items may instead carry multi-BKP shares
+    # via ``CostItemBkpAllocation``, or stay uncategorised entirely.
+    bkp_code: str | None = Field(default=None, min_length=1, max_length=16)
     npk_code: str | None = Field(default=None, max_length=32)
     title: str = Field(min_length=1, max_length=200)
     description: str | None = None

@@ -37,7 +37,12 @@ from app.schemas.budget import (
     TimelineResponse,
     TimelineRow,
 )
+from app.services.bkp_shares import iter_bkp_shares
 from app.services.rbac import ObjectAccess
+
+# Sentinel bucket key for cost items with no BKP attribution. Underscore
+# prefix keeps it sortable distinctly from real top-group keys (A, B, C, …).
+UNCATEGORISED_BKP_GROUP = "_uncat"
 
 # Status values that count toward the *future* (i.e. still-to-do) plan.
 _PLANNED_STATUSES: frozenset[CostItemStatus] = frozenset(
@@ -54,14 +59,19 @@ def _q(value: Decimal) -> Decimal:
     return value.quantize(_CHF_QUANT, rounding=ROUND_HALF_UP)
 
 
-def _top_group(bkp_code: str) -> str:
+def _top_group(bkp_code: str | None) -> str:
     """Return the first character of an eBKP-H code (the Hauptgruppe key).
 
     The seed catalogue uses single-letter top-level groups (A, B, C, D, ...);
     this matches the eBKP-H standard. We deliberately key buckets by the raw
     character rather than fetching the label_de — the API caller can resolve
     labels from the catalogue endpoint if it wants to render them.
+
+    Returns the :data:`UNCATEGORISED_BKP_GROUP` sentinel when ``bkp_code`` is
+    ``None`` so uncategorised items surface in their own bucket.
     """
+    if bkp_code is None:
+        return UNCATEGORISED_BKP_GROUP
     return bkp_code[:1].upper() if bkp_code else ""
 
 
@@ -298,8 +308,7 @@ class _RowAcc:
         planned: Decimal,
         allowed: frozenset[uuid.UUID] | None,
     ) -> None:
-        group = _top_group(item.bkp_code)
-        self.by_bkp_group[group][0] += planned
+        _spread_by_bkp(self.by_bkp_group, item, planned, index=0)
         self.by_status[item.status][0] += planned
         self.by_priority[item.priority][0] += planned
         _spread_by_unit(self.by_unit, item, factor, planned, allowed, index=0)
@@ -311,8 +320,7 @@ class _RowAcc:
         actual: Decimal,
         allowed: frozenset[uuid.UUID] | None,
     ) -> None:
-        group = _top_group(item.bkp_code)
-        self.by_bkp_group[group][1] += actual
+        _spread_by_bkp(self.by_bkp_group, item, actual, index=1)
         self.by_status[item.status][1] += actual
         self.by_priority[item.priority][1] += actual
         _spread_by_unit(self.by_unit, item, factor, actual, allowed, index=1)
@@ -321,6 +329,25 @@ class _RowAcc:
 def _zero_pair() -> list[Decimal]:
     """``[planned, actual]`` pair for a breakdown bucket."""
     return [Decimal("0"), Decimal("0")]
+
+
+def _spread_by_bkp(
+    bucket: dict[str, list[Decimal]],
+    item: CostItem,
+    amount: Decimal,
+    *,
+    index: int,
+) -> None:
+    """Distribute ``amount`` across the item's BKP shares.
+
+    Uses :func:`iter_bkp_shares` so single-BKP, multi-BKP, and uncategorised
+    items all flow through the same code path. Items with ``bkp_code IS
+    NULL`` land in the :data:`UNCATEGORISED_BKP_GROUP` bucket.
+    """
+    for code, share_permille in iter_bkp_shares(item):
+        group = _top_group(code)
+        share = Decimal(share_permille) / _THOUSAND
+        bucket[group][index] += amount * share
 
 
 def _spread_by_unit(

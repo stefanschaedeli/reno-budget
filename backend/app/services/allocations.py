@@ -15,6 +15,7 @@ from collections.abc import Iterable
 
 WERTQUOTE_TOTAL_PERMILLE = 1000
 ALLOCATION_TOTAL_PERMILLE = 1000
+BKP_ALLOCATION_TOTAL_PERMILLE = 1000
 
 
 class WertquoteError(ValueError):
@@ -28,6 +29,10 @@ class AllocationError(ValueError):
     cost-item misconfiguration without conflating it with object-level
     Wertquote invariants — the user-facing German messages differ too.
     """
+
+
+class BkpAllocationError(ValueError):
+    """Raised when per-cost-item BKP allocations do not sum to 1000."""
 
 
 def validate_wertquoten_sum(permille_values: Iterable[int]) -> None:
@@ -69,3 +74,29 @@ def validate_allocation_sum(permille_values: Iterable[int]) -> None:
     total = sum(values)
     if total != ALLOCATION_TOTAL_PERMILLE:
         raise AllocationError(f"Summe der Aufteilungen muss 1000‰ ergeben, aktuell {total}‰")
+
+
+def validate_bkp_allocation_sum(permille_values: Iterable[int]) -> None:
+    """Raise :class:`BkpAllocationError` unless the BKP shares sum to 1000.
+
+    Mirrors :func:`validate_allocation_sum` but for the per-cost-item BKP
+    split (Phase 11A). An **empty** iterable is allowed — it represents the
+    "no multi-BKP split, use the singleton ``CostItem.bkp_code`` instead"
+    case. When at least one row is present, the sum MUST be exactly 1000‰
+    and every value MUST be in 0..1000.
+    """
+    values = list(permille_values)
+    if not values:
+        # Empty means "no multi-BKP split"; callers fall back to the legacy
+        # single-column ``bkp_code``. That is a valid configuration.
+        return
+    for v in values:
+        if not 0 <= v <= BKP_ALLOCATION_TOTAL_PERMILLE:
+            raise BkpAllocationError(
+                f"BKP-Aufteilung {v}‰ liegt ausserhalb des erlaubten Bereichs (0-1000‰)"
+            )
+    total = sum(values)
+    if total != BKP_ALLOCATION_TOTAL_PERMILLE:
+        raise BkpAllocationError(
+            f"Summe der BKP-Aufteilungen muss 1000‰ ergeben, aktuell {total}‰"
+        )

@@ -156,9 +156,12 @@ async def create_cost_item(
     """
     _require_editor(access)
 
-    bkp = await get_bkp_code(session, payload.bkp_code)
-    if bkp is None:
-        raise UnknownBkpCodeError(f"eBKP-H Code '{payload.bkp_code}' existiert nicht")
+    if payload.bkp_code is not None:
+        bkp = await get_bkp_code(session, payload.bkp_code)
+        if bkp is None:
+            raise UnknownBkpCodeError(
+                f"eBKP-H Code '{payload.bkp_code}' existiert nicht"
+            )
 
     units = await list_units(session, object_id)
     allocations = await _resolve_allocations(
@@ -223,10 +226,12 @@ async def update_cost_item(
     update_dict = payload.model_dump(exclude_unset=True)
     new_allocations_in = update_dict.pop("allocations", None)
 
-    if "bkp_code" in update_dict:
+    if "bkp_code" in update_dict and update_dict["bkp_code"] is not None:
         bkp = await get_bkp_code(session, update_dict["bkp_code"])
         if bkp is None:
-            raise UnknownBkpCodeError(f"eBKP-H Code '{update_dict['bkp_code']}' existiert nicht")
+            raise UnknownBkpCodeError(
+                f"eBKP-H Code '{update_dict['bkp_code']}' existiert nicht"
+            )
 
     for field, value in update_dict.items():
         setattr(item, field, value)
@@ -361,8 +366,9 @@ def _apply_filter(item: CostItem, filters: CostItemFilter) -> CostItem | None:
         return None
     if filters.planned_year is not None and item.planned_year != filters.planned_year:
         return None
-    if filters.bkp_code is not None and not item.bkp_code.startswith(filters.bkp_code):
-        return None
+    if filters.bkp_code is not None:
+        if item.bkp_code is None or not item.bkp_code.startswith(filters.bkp_code):
+            return None
     if filters.q is not None:
         needle = filters.q.strip().lower()
         if needle and needle not in item.title.lower():
