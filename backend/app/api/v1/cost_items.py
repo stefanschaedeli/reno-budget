@@ -37,6 +37,7 @@ from app.services.cost_items import (
     InvalidAllocationError,
     ScopeViolationError,
     UnknownBkpCodeError,
+    UnknownProjectError,
     create_cost_item,
     delete_cost_item,
     get_cost_item,
@@ -62,7 +63,7 @@ def _raise_for(exc: CostItemServiceError) -> None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc))
     if isinstance(exc, CostItemPermissionError | ScopeViolationError):
         raise HTTPException(status.HTTP_403_FORBIDDEN, str(exc))
-    if isinstance(exc, UnknownBkpCodeError | InvalidAllocationError):
+    if isinstance(exc, UnknownBkpCodeError | InvalidAllocationError | UnknownProjectError):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
     raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
 

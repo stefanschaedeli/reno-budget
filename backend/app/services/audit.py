@@ -58,6 +58,17 @@ ACTION_RESERVE_CONTRIBUTION_DELETE = "reserve_contribution.delete"
 
 ACTION_BKP_CODE_CREATE = "bkp_code.create"
 
+ACTION_PROJECT_CREATE = "project.create"
+ACTION_PROJECT_UPDATE = "project.update"
+ACTION_PROJECT_ARCHIVE = "project.archive"
+ACTION_PROJECT_DELETE = "project.delete"
+
+ACTION_TAG_CREATE = "tag.create"
+ACTION_TAG_UPDATE = "tag.update"
+ACTION_TAG_DELETE = "tag.delete"
+ACTION_TAG_ASSIGN = "tag.assign"
+ACTION_TAG_UNASSIGN = "tag.unassign"
+
 # Worker (Phase 9). System-driven; ``actor_email`` is the synthetic
 # ``worker@reno-budget.local`` identity since there's no logged-in caller.
 ACTION_WORKER_BACKUP = "worker.backup"

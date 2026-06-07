@@ -43,6 +43,7 @@ from app.models.object import Object, Unit
 from app.repositories.bkp import list_bkp_codes
 from app.repositories.cost_item import list_cost_items as repo_list_cost_items
 from app.repositories.object import get_object, list_units
+from app.services.bkp_shares import iter_bkp_shares
 from app.services.budgets import compute_reserve_plan, compute_timeline
 from app.services.rbac import ObjectAccess
 
@@ -139,7 +140,7 @@ def _allocations_cell(item: CostItem, units_by_id: dict[uuid.UUID, Unit]) -> str
     # same string (helps diff-friendliness when users version the exports).
     sorted_allocs = sorted(
         item.allocations,
-        key=lambda a: (units_by_id[a.unit_id].label if a.unit_id in units_by_id else ""),
+        key=lambda a: units_by_id[a.unit_id].label if a.unit_id in units_by_id else "",
     )
     for a in sorted_allocs:
         unit = units_by_id.get(a.unit_id)
@@ -148,9 +149,7 @@ def _allocations_cell(item: CostItem, units_by_id: dict[uuid.UUID, Unit]) -> str
     return " | ".join(parts)
 
 
-def _scope_factor_for_item(
-    item: CostItem, allowed: frozenset[uuid.UUID] | None
-) -> Decimal:
+def _scope_factor_for_item(item: CostItem, allowed: frozenset[uuid.UUID] | None) -> Decimal:
     """Pro-rating factor for a cost item under the caller's unit scope.
 
     Mirrors :func:`app.services.budgets._scope_factor` so the XLSX numbers
@@ -222,32 +221,49 @@ async def _write_cost_items_sheet(
             # consistent with what the user sees on screen.
             continue
 
-        planned = (
-            item.planned_amount_chf * factor if item.planned_amount_chf is not None else None
-        )
-        actual = (
-            item.actual_amount_chf * factor if item.actual_amount_chf is not None else None
-        )
+        # One row per (item, bkp_share). Single-BKP items emit one row at
+        # 1000‰; multi-BKP items emit one row per allocation; uncategorised
+        # items emit one row with BKP "—" so they remain visible.
+        for code, share_permille in iter_bkp_shares(item):
+            share_frac = Decimal(share_permille) / Decimal(1000)
+            planned = (
+                item.planned_amount_chf * factor * share_frac
+                if item.planned_amount_chf is not None
+                else None
+            )
+            actual = (
+                item.actual_amount_chf * factor * share_frac
+                if item.actual_amount_chf is not None
+                else None
+            )
 
-        ws.cell(row=row, column=1, value=item.bkp_code)
-        ws.cell(row=row, column=2, value=bkp_label.get(item.bkp_code, ""))
-        ws.cell(row=row, column=3, value=item.title)
-        ws.cell(row=row, column=4, value=_STATUS_DE.get(str(item.status), str(item.status)))
-        ws.cell(row=row, column=5, value=_PRIORITY_DE.get(str(item.priority), str(item.priority)))
-        ws.cell(row=row, column=6, value=item.planned_year)
-        planned_value = float(planned) if planned is not None else None
-        planned_cell = ws.cell(row=row, column=7, value=planned_value)
-        planned_cell.number_format = _CHF_FORMAT
-        actual_value = float(actual) if actual is not None else None
-        actual_cell = ws.cell(row=row, column=8, value=actual_value)
-        actual_cell.number_format = _CHF_FORMAT
-        ws.cell(row=row, column=9, value=item.actual_date)
-        ws.cell(row=row, column=10, value=_allocations_cell(item, units_by_id))
-        # NPK stub: real codes will be validated against the SIA catalogue
-        # in a future phase; today we just round-trip whatever the user
-        # entered (may be empty).
-        ws.cell(row=row, column=11, value=item.npk_code or "")
-        row += 1
+            ws.cell(row=row, column=1, value=code if code is not None else "—")
+            ws.cell(row=row, column=2, value=bkp_label.get(code, "") if code else "")
+            ws.cell(row=row, column=3, value=item.title)
+            ws.cell(
+                row=row,
+                column=4,
+                value=_STATUS_DE.get(str(item.status), str(item.status)),
+            )
+            ws.cell(
+                row=row,
+                column=5,
+                value=_PRIORITY_DE.get(str(item.priority), str(item.priority)),
+            )
+            ws.cell(row=row, column=6, value=item.planned_year)
+            planned_value = float(planned) if planned is not None else None
+            planned_cell = ws.cell(row=row, column=7, value=planned_value)
+            planned_cell.number_format = _CHF_FORMAT
+            actual_value = float(actual) if actual is not None else None
+            actual_cell = ws.cell(row=row, column=8, value=actual_value)
+            actual_cell.number_format = _CHF_FORMAT
+            ws.cell(row=row, column=9, value=item.actual_date)
+            ws.cell(row=row, column=10, value=_allocations_cell(item, units_by_id))
+            # NPK stub: real codes will be validated against the SIA catalogue
+            # in a future phase; today we just round-trip whatever the user
+            # entered (may be empty).
+            ws.cell(row=row, column=11, value=item.npk_code or "")
+            row += 1
 
 
 async def _write_budget_sheet(

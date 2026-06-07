@@ -32,6 +32,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import __version__
 from app.repositories.cost_item import list_cost_items as repo_list_cost_items
 from app.repositories.object import get_object
+from app.services.bkp_shares import iter_bkp_shares
 from app.services.budgets import compute_reserve_plan
 from app.services.export_xlsx import build_export_filename
 from app.services.rbac import ObjectAccess
@@ -75,13 +76,26 @@ async def build_pdf(
     projection = await compute_projection(session, object_id, access=access)
     items = list(await repo_list_cost_items(session, object_id))
 
-    # Sort all items the caller can see by planned amount, descending.
-    # Items without a planned amount (actual-only) sort last via a 0 key.
-    visible_items = sorted(
-        (i for i in items if i.planned_amount_chf is not None),
-        key=lambda i: i.planned_amount_chf or Decimal("0"),
-        reverse=True,
-    )[:10]
+    # Expand items into per-BKP-share rows so multi-BKP items appear once
+    # per share (with the amount apportioned). Items without a planned
+    # amount drop out; uncategorised items render with "—" as the BKP.
+    expanded: list[tuple[str, str, int | None, Decimal]] = []
+    for i in items:
+        if i.planned_amount_chf is None:
+            continue
+        for code, share_permille in iter_bkp_shares(i):
+            share_frac = Decimal(share_permille) / Decimal(1000)
+            amount = i.planned_amount_chf * share_frac
+            expanded.append(
+                (
+                    code if code is not None else "—",
+                    i.title,
+                    i.planned_year,
+                    amount,
+                )
+            )
+    expanded.sort(key=lambda row: row[3], reverse=True)
+    visible_items = expanded[:10]
 
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -170,13 +184,13 @@ async def build_pdf(
         story.append(Paragraph("Keine geplanten Positionen vorhanden.", body_style))
     else:
         top_rows: list[list[object]] = [["BKP", "Titel", "Jahr", "Geplant CHF"]]
-        for item in visible_items:
+        for code, title, planned_year, amount in visible_items:
             top_rows.append(
                 [
-                    item.bkp_code,
-                    item.title,
-                    str(item.planned_year) if item.planned_year is not None else "—",
-                    _fmt_chf(item.planned_amount_chf or Decimal("0")),
+                    code,
+                    title,
+                    str(planned_year) if planned_year is not None else "—",
+                    _fmt_chf(amount),
                 ]
             )
         top_table = Table(top_rows, colWidths=[20 * mm, 90 * mm, 20 * mm, 40 * mm])

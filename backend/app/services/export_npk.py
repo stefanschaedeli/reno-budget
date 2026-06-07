@@ -28,6 +28,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.cost_item import list_cost_items as repo_list_cost_items
 from app.repositories.object import get_object
+from app.services.bkp_shares import iter_bkp_shares
 from app.services.export_xlsx import build_export_filename
 from app.services.rbac import ObjectAccess
 
@@ -70,40 +71,42 @@ async def build_npk(
         factor = _scope_factor(item, allowed)
         if factor == 0:
             continue
-        planned = (
-            float(item.planned_amount_chf * factor)
-            if item.planned_amount_chf is not None
-            else None
-        )
-        actual = (
-            float(item.actual_amount_chf * factor)
-            if item.actual_amount_chf is not None
-            else None
-        )
-        positions.append(
-            {
-                "kapitel": item.bkp_code[:1] if item.bkp_code else None,
-                "bkp_code": item.bkp_code,
-                "npk_code": item.npk_code or None,
-                "position_titel": item.title,
-                # Variante / Menge / Einheit are placeholders until the
-                # SIA feed lands; we surface ``null`` so consumers don't
-                # mistake "" for "no data".
-                "variante": None,
-                "menge": None,
-                "einheit": None,
-                "planung": {
-                    "jahr": item.planned_year,
-                    "betrag_chf": planned,
-                    "status": str(item.status),
-                    "prioritaet": str(item.priority),
-                },
-                "ausfuehrung": {
-                    "datum": item.actual_date.isoformat() if item.actual_date else None,
-                    "betrag_chf": actual,
-                },
-            }
-        )
+        # One JSON position per (item, bkp_share). Uncategorised shares
+        # surface as ``"kapitel": null`` / ``"bkp_code": null`` so consumers
+        # can distinguish them from real codes; never the string "None".
+        for code, share_permille in iter_bkp_shares(item):
+            share_frac = Decimal(share_permille) / Decimal(1000)
+            planned = (
+                float(item.planned_amount_chf * factor * share_frac)
+                if item.planned_amount_chf is not None
+                else None
+            )
+            actual = (
+                float(item.actual_amount_chf * factor * share_frac)
+                if item.actual_amount_chf is not None
+                else None
+            )
+            positions.append(
+                {
+                    "kapitel": code[:1] if code else None,
+                    "bkp_code": code,
+                    "npk_code": item.npk_code or None,
+                    "position_titel": item.title,
+                    "variante": None,
+                    "menge": None,
+                    "einheit": None,
+                    "planung": {
+                        "jahr": item.planned_year,
+                        "betrag_chf": planned,
+                        "status": str(item.status),
+                        "prioritaet": str(item.priority),
+                    },
+                    "ausfuehrung": {
+                        "datum": item.actual_date.isoformat() if item.actual_date else None,
+                        "betrag_chf": actual,
+                    },
+                }
+            )
 
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
