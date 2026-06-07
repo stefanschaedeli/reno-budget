@@ -25,13 +25,19 @@ export type TimelineRow = z.infer<typeof timelineRowSchema>;
 export const yearDrillItemSchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
-  bkp_code: z.string(),
+  bkp_code: z.string().nullable(),
   status: z.string(),
   priority: z.string(),
   planned_amount_chf: chfString.nullable(),
   actual_amount_chf: chfString.nullable(),
 });
 export type YearDrillItem = z.infer<typeof yearDrillItemSchema>;
+
+/**
+ * Sentinel returned by the backend's ``by_bkp_group`` map for cost items
+ * whose ``bkp_code`` is NULL (and that carry no multi-BKP allocations).
+ */
+export const UNCATEGORISED_BKP_GROUP = "_uncat";
 
 export const bkpGroupRowSchema = z.object({
   group: z.string(),

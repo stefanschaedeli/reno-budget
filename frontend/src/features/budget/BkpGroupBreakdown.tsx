@@ -47,7 +47,9 @@ export function BkpGroupBreakdown({ objectId, year }: Props): JSX.Element {
             return (
               <tr key={r.group} data-testid={`bkp-row-${r.group}`}>
                 <td className="py-1 font-medium">
-                  {r.group} {r.label}
+                  {r.group === "_uncat"
+                    ? t("budget.bkpGroup.uncategorised")
+                    : `${r.group} ${r.label}`}
                 </td>
                 <td className="py-1">
                   <div className="h-3 w-full rounded bg-slate-100">

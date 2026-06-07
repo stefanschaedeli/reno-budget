@@ -102,7 +102,11 @@ export function CostsPage(): JSX.Element {
         </button>
       </header>
 
-      <CostItemFilters units={obj.units} onChange={setFilters} />
+      <CostItemFilters
+        units={obj.units}
+        objectId={objectId}
+        onChange={setFilters}
+      />
 
       <div className="mb-3 flex gap-2 border-b border-slate-200">
         <button
@@ -160,11 +164,14 @@ export function CostsPage(): JSX.Element {
         >
           <CostItemForm
             units={obj.units}
+            objectId={objectId}
+            costItemId={editing !== "new" ? editing.id : undefined}
             initial={
               editing === "new"
                 ? undefined
                 : {
                     bkp_code: editing.bkp_code,
+                    project_id: editing.project_id ?? null,
                     npk_code: editing.npk_code,
                     title: editing.title,
                     description: editing.description,
@@ -178,6 +185,7 @@ export function CostsPage(): JSX.Element {
                     warranty_until: editing.warranty_until,
                     scope: editing.scope,
                     allocations: editing.allocations,
+                    bkp_allocations: editing.bkp_allocations,
                   }
             }
             onSubmit={handleSubmit}

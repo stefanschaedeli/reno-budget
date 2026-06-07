@@ -46,10 +46,19 @@ export const costItemAllocationSchema = z.object({
 });
 export type CostItemAllocation = z.infer<typeof costItemAllocationSchema>;
 
+/** One BKP-share row on a cost item (Phase 11A: multi-BKP allocations). */
+export const bkpAllocationItemSchema = z.object({
+  bkp_code: z.string().min(1),
+  share_permille: z.number().int().min(0).max(1000),
+});
+export type BkpAllocationItem = z.infer<typeof bkpAllocationItemSchema>;
+
 export const costItemSchema = z.object({
   id: z.string().uuid(),
   object_id: z.string().uuid(),
-  bkp_code: z.string(),
+  // Phase 11A: nullable. Items may instead carry bkp_allocations, or be uncategorised.
+  bkp_code: z.string().nullable(),
+  project_id: z.string().uuid().nullable().optional(),
   npk_code: z.string().nullable(),
   title: z.string(),
   description: z.string().nullable(),
@@ -62,10 +71,11 @@ export const costItemSchema = z.object({
   lifespan_years: z.number().int().nullable(),
   warranty_until: z.string().nullable(),
   scope: z.enum(COST_SCOPES),
-  created_by: z.string().uuid(),
+  created_by: z.string().uuid().nullable(),
   created_at: z.string(),
   updated_at: z.string(),
   allocations: z.array(costItemAllocationSchema),
+  bkp_allocations: z.array(bkpAllocationItemSchema).default([]),
 });
 export type CostItem = z.infer<typeof costItemSchema>;
 
@@ -81,7 +91,11 @@ export type CostItem = z.infer<typeof costItemSchema>;
  */
 export const costItemInputSchema = z
   .object({
-    bkp_code: z.string().min(1, "BKP-Code erforderlich"),
+    // Phase 11A: nullable singleton. If null, item must either carry
+    // bkp_allocations or be intentionally uncategorised.
+    bkp_code: z.string().min(1).nullable(),
+    project_id: z.string().uuid().nullable().optional(),
+    bkp_allocations: z.array(bkpAllocationItemSchema).optional(),
     npk_code: z.string().nullable().optional(),
     title: z.string().min(1, "Titel erforderlich").max(200),
     description: z.string().max(2000).nullable().optional(),
@@ -130,6 +144,26 @@ export const costItemInputSchema = z
         message: `Summe der Anteile muss 1000‰ ergeben (aktuell ${sum}‰)`,
       });
     }
+    // Phase 11A: multi-BKP allocations XOR singleton bkp_code.
+    const bkpAllocs = data.bkp_allocations ?? [];
+    if (bkpAllocs.length > 0) {
+      const bsum = bkpAllocs.reduce((acc, a) => acc + a.share_permille, 0);
+      if (bsum !== 1000) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["bkp_allocations"],
+          message: `Summe der BKP-Anteile muss 1000‰ ergeben (aktuell ${bsum}‰)`,
+        });
+      }
+      if (data.bkp_code) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["bkp_allocations"],
+          message:
+            "Entweder einzelner BKP-Code oder mehrere BKP-Anteile — nicht beides.",
+        });
+      }
+    }
   });
 export type CostItemInput = z.infer<typeof costItemInputSchema>;
 
@@ -140,6 +174,9 @@ export interface CostItemFilters {
   planned_year?: number | null | undefined;
   unit_id?: string | null | undefined;
   bkp_prefix?: string | null | undefined;
+  project_id?: string | null | undefined;
+  /** Tag-id OR filter — multiple tag ids are OR-ed by the backend. */
+  tag_ids?: string[] | undefined;
   q?: string | null | undefined;
 }
 

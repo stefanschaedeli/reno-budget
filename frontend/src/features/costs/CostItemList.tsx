@@ -58,7 +58,7 @@ function compareItems(a: CostItem, b: CostItem, key: SortKey): number {
     case "title":
       return a.title.localeCompare(b.title, "de");
     case "bkp_code":
-      return a.bkp_code.localeCompare(b.bkp_code, "de");
+      return (a.bkp_code ?? "").localeCompare(b.bkp_code ?? "", "de");
     case "status":
       return a.status.localeCompare(b.status, "de");
   }
@@ -134,7 +134,13 @@ export function CostItemList({
             className="cursor-pointer border-b border-slate-200 hover:bg-slate-50"
           >
             <td className="px-2 py-2 font-medium">{item.title}</td>
-            <td className="px-2 py-2 font-mono text-xs">{item.bkp_code}</td>
+            <td className="px-2 py-2 font-mono text-xs">
+              {item.bkp_code ?? (
+                <span className="text-slate-400 italic">
+                  {t("costs.uncategorised")}
+                </span>
+              )}
+            </td>
             <td className="px-2 py-2">{t(`costs.status.${item.status}`)}</td>
             <td className="px-2 py-2">
               {t(`costs.priority.${item.priority}`)}

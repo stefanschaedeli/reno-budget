@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import {
   CostItemFilters,
@@ -29,7 +30,33 @@ function LocationProbe({
   return null;
 }
 
+function withProviders(ui: React.ReactElement, route = "/objekte/x/kosten") {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return (
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>
+    </QueryClientProvider>
+  );
+}
+
+const OBJ_ID = "00000000-0000-0000-0000-000000000000";
+
 describe("CostItemFilters", () => {
+  beforeEach(() => {
+    // Mock empty tags + projects so the picker is happy.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve(
+          new Response(JSON.stringify([]), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
+        ),
+      ),
+    );
+  });
+  afterEach(() => vi.unstubAllGlobals());
   it("parses status, priority, year, unit, bkp, q from URL", () => {
     const params = new URLSearchParams(
       "status=planned&status=in_progress&priority=high&year=2027&unit=u1&bkp=C&q=fenster",
@@ -55,10 +82,12 @@ describe("CostItemFilters", () => {
     let lastSearch = "";
     const onChange = vi.fn();
     render(
-      <MemoryRouter initialEntries={["/objekte/x/kosten"]}>
-        <CostItemFilters units={units} onChange={onChange} />
-        <LocationProbe onLocation={(s) => (lastSearch = s)} />
-      </MemoryRouter>,
+      withProviders(
+        <>
+          <CostItemFilters units={units} objectId={OBJ_ID} onChange={onChange} />
+          <LocationProbe onLocation={(s) => (lastSearch = s)} />
+        </>,
+      ),
     );
 
     // initial onChange call with empty filters
@@ -78,10 +107,12 @@ describe("CostItemFilters", () => {
   it("round-trips a year value via the URL", () => {
     let lastSearch = "";
     render(
-      <MemoryRouter initialEntries={["/objekte/x/kosten"]}>
-        <CostItemFilters units={units} onChange={() => {}} />
-        <LocationProbe onLocation={(s) => (lastSearch = s)} />
-      </MemoryRouter>,
+      withProviders(
+        <>
+          <CostItemFilters units={units} objectId={OBJ_ID} onChange={() => {}} />
+          <LocationProbe onLocation={(s) => (lastSearch = s)} />
+        </>,
+      ),
     );
     const yearInput = screen.getByLabelText(/Geplantes Jahr/);
     fireEvent.change(yearInput, { target: { value: "2030" } });

@@ -2,6 +2,10 @@ import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import type { Unit } from "@/features/objects/types";
+import { TagPicker } from "@/components/TagPicker";
+import { useProjects } from "@/features/projects/api";
+import { useTags } from "@/features/tags/api";
+import type { Tag } from "@/features/tags/types";
 import {
   COST_PRIORITIES,
   COST_STATUSES,
@@ -20,6 +24,7 @@ import {
  */
 export interface CostItemFiltersProps {
   units: Unit[];
+  objectId: string;
   onChange: (filters: Filters) => void;
 }
 
@@ -28,6 +33,8 @@ const PRIORITY_PARAM = "priority";
 const YEAR_PARAM = "year";
 const UNIT_PARAM = "unit";
 const BKP_PARAM = "bkp";
+const PROJECT_PARAM = "project";
+const TAG_PARAM = "tag";
 const Q_PARAM = "q";
 
 export function parseFiltersFromParams(params: URLSearchParams): Filters {
@@ -43,24 +50,35 @@ export function parseFiltersFromParams(params: URLSearchParams): Filters {
     );
   const yearRaw = params.get(YEAR_PARAM);
   const year = yearRaw && /^\d+$/.test(yearRaw) ? Number(yearRaw) : null;
+  const tagIds = params.getAll(TAG_PARAM).filter((v) => v.length > 0);
   return {
     status: statuses.length > 0 ? statuses : undefined,
     priority: priorities.length > 0 ? priorities : undefined,
     planned_year: year,
     unit_id: params.get(UNIT_PARAM) || null,
     bkp_prefix: params.get(BKP_PARAM) || null,
+    project_id: params.get(PROJECT_PARAM) || null,
+    tag_ids: tagIds.length > 0 ? tagIds : undefined,
     q: params.get(Q_PARAM) || null,
   };
 }
 
 export function CostItemFilters({
   units,
+  objectId,
   onChange,
 }: CostItemFiltersProps): JSX.Element {
   const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
+  const projectsQuery = useProjects(objectId);
+  const tagsQuery = useTags(objectId);
 
   const filters = useMemo(() => parseFiltersFromParams(params), [params]);
+
+  const selectedTags: Tag[] = useMemo(() => {
+    const ids = new Set(filters.tag_ids ?? []);
+    return (tagsQuery.data ?? []).filter((tag) => ids.has(tag.id));
+  }, [filters.tag_ids, tagsQuery.data]);
 
   // Latest onChange in a ref so we don't re-fire when the parent rebinds it.
   const onChangeRef = useRef(onChange);
@@ -206,6 +224,24 @@ export function CostItemFilters({
 
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">
+            {t("costs.filters.project")}
+            <select
+              value={filters.project_id ?? ""}
+              onChange={(e) => setScalar(PROJECT_PARAM, e.target.value || null)}
+              className="mt-1 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+            >
+              <option value="">{t("costs.filters.anyProject")}</option>
+              {(projectsQuery.data ?? []).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">
             {t("costs.filters.search")}
             <input
               type="search"
@@ -214,6 +250,18 @@ export function CostItemFilters({
               className="mt-1 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
             />
           </label>
+        </div>
+
+        <div className="md:col-span-3">
+          <p className="mb-1 text-xs font-medium text-slate-600">
+            {t("costs.filters.tags")}
+          </p>
+          <TagPicker
+            objectId={objectId}
+            value={selectedTags}
+            onChange={(next) => setMulti(TAG_PARAM, next.map((tag) => tag.id))}
+            allowCreate={false}
+          />
         </div>
       </div>
 
