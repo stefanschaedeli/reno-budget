@@ -51,3 +51,14 @@ class ProjectRead(_ProjectBase):
     created_by: uuid.UUID | None
     created_at: datetime
     updated_at: datetime
+
+
+class ProjectListItem(ProjectRead):
+    """ProjectRead enriched with the parent object's name.
+
+    Used by the cross-object list endpoint at ``GET /api/v1/projects``
+    where rows span multiple objects and the UI needs to render the
+    parent's name without a second fetch.
+    """
+
+    object_name: str
