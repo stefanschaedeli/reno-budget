@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { ApiError } from "@/api/client";
 import { listObjects } from "./api";
+import { apiErrorMessage } from "@/lib/apiError";
 import type { ObjectPublic } from "./types";
 import { PageContainer } from "@/components/PageContainer";
 import { PageHeader } from "@/components/PageHeader";
@@ -24,7 +24,7 @@ export function ObjectsListPage(): JSX.Element {
         if (!cancelled) setObjects(data);
       } catch (e) {
         if (!cancelled)
-          setError(e instanceof ApiError ? String(e.detail) : t("common.error"));
+          setError(apiErrorMessage(e, t("common.error")));
       }
     })();
     return () => {

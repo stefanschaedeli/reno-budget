@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { ApiError } from "@/api/client";
 import { Drawer } from "@/components/Drawer";
+import { apiErrorMessage } from "@/lib/apiError";
 import { PageContainer } from "@/components/PageContainer";
 import { PageHeader } from "@/components/PageHeader";
 import {
@@ -46,9 +46,7 @@ export function CostsPage(): JSX.Element {
         if (!cancelled) setObj(data);
       } catch (e) {
         if (!cancelled)
-          setLoadError(
-            e instanceof ApiError ? String(e.detail) : t("common.error"),
-          );
+          setLoadError(apiErrorMessage(e, t("common.error")));
       }
     })();
     return () => {

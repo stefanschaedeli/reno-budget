@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { ApiError } from "@/api/client";
 import { getObject } from "./api";
+import { apiErrorMessage } from "@/lib/apiError";
 import type { ObjectDetail } from "./types";
 import { UnitEditor } from "./UnitEditor";
 import { AttachmentList } from "@/features/attachments/AttachmentList";
@@ -29,7 +29,7 @@ export function ObjectDetailPage(): JSX.Element {
         if (!cancelled) setObj(data);
       } catch (e) {
         if (!cancelled)
-          setError(e instanceof ApiError ? String(e.detail) : t("common.error"));
+          setError(apiErrorMessage(e, t("common.error")));
       }
     })();
     return () => {

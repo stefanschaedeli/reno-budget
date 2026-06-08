@@ -18,6 +18,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { ApiError } from "@/api/client";
+import { apiErrorMessage } from "@/lib/apiError";
 import { PageContainer } from "@/components/PageContainer";
 import { PageHeader } from "@/components/PageHeader";
 import { formatChfRounded, toNumber } from "@/features/budget/format";
@@ -346,7 +347,7 @@ function AddContributionForm({
       window.setTimeout(() => setSavedFlash(false), 2000);
     } catch (err) {
       setError(
-        err instanceof ApiError ? String(err.detail) : t("renofond.errors.generic"),
+        apiErrorMessage(err, t("renofond.errors.generic")),
       );
     }
   };

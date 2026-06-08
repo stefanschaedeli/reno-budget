@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ApiError } from "@/api/client";
 import { createObject } from "./api";
+import { apiErrorMessage } from "@/lib/apiError";
 import { type ObjectCreateInput, objectCreateSchema, type ObjectType, type UnitInput } from "./types";
 import { UnitEditor } from "./UnitEditor";
 import { PageContainer } from "@/components/PageContainer";
@@ -60,7 +60,7 @@ export function ObjectCreatePage(): JSX.Element {
       const created = await createObject(parsed.data);
       navigate(`/objekte/${created.id}`);
     } catch (e) {
-      setError(e instanceof ApiError ? String(e.detail) : t("common.error"));
+      setError(apiErrorMessage(e, t("common.error")));
     } finally {
       setBusy(false);
     }
