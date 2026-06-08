@@ -17,10 +17,13 @@ import { RenofondPage } from "@/features/renofond/RenofondPage";
 import { GlobalAuditPage, ObjectAuditPage } from "@/features/audit/AuditPage";
 import { ProjectsPage } from "@/features/projects/ProjectsPage";
 import { ProjectDetailPage } from "@/features/projects/ProjectDetailPage";
+import { AllProjectsPage } from "@/features/projects/AllProjectsPage";
 import { LotsPage } from "@/features/lots/LotsPage";
 import { LotDetailPage } from "@/features/lots/LotDetailPage";
+import { AllLotsPage } from "@/features/lots/AllLotsPage";
 import { SuppliersPage } from "@/features/suppliers/SuppliersPage";
 import { SupplierDetailPage } from "@/features/suppliers/SupplierDetailPage";
+import { AllSuppliersPage } from "@/features/suppliers/AllSuppliersPage";
 import { AppLayout } from "@/components/AppLayout";
 
 /**
@@ -78,6 +81,9 @@ export function App(): JSX.Element {
               <Route path="/objekte/:id/budget" element={<BudgetPage />} />
               <Route path="/objekte/:id/renofond" element={<RenofondPage />} />
               <Route path="/finanzen" element={<FinancesPage />} />
+              <Route path="/projekte" element={<AllProjectsPage />} />
+              <Route path="/lose-uebersicht" element={<AllLotsPage />} />
+              <Route path="/lieferanten-uebersicht" element={<AllSuppliersPage />} />
               <Route path="/objekte/:objectId/projekte" element={<ProjectsPage />} />
               <Route path="/projekte/:projectId" element={<ProjectDetailPage />} />
               <Route path="/objekte/:objectId/lose" element={<LotsPage />} />
