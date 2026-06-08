@@ -16,8 +16,10 @@
  */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { ApiError } from "@/api/client";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 import { formatChfRounded, toNumber } from "@/features/budget/format";
 import {
   useContributions,
@@ -41,7 +43,12 @@ const COLOR_PLANNED = "#94a3b8"; // slate-400
 export function RenofondPage(): JSX.Element {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  if (!id) return <p className="p-6 text-red-700">{t("common.error")}</p>;
+  if (!id)
+    return (
+      <PageContainer width="wide">
+        <p className="text-red-700">{t("common.error")}</p>
+      </PageContainer>
+    );
   return <RenofondPageInner objectId={id} />;
 }
 
@@ -51,38 +58,38 @@ function RenofondPageInner({ objectId }: { objectId: string }): JSX.Element {
   const contributions = useContributions(objectId);
 
   if (projection.isLoading || contributions.isLoading) {
-    return <p className="p-6 text-slate-500">{t("common.loading")}</p>;
+    return (
+      <PageContainer width="wide">
+        <p className="text-slate-500">{t("common.loading")}</p>
+      </PageContainer>
+    );
   }
   if (projection.isError) {
     const msg =
       projection.error instanceof ApiError && projection.error.status === 403
         ? t("renofond.errors.forbidden")
         : t("renofond.errors.generic");
-    return <p className="p-6 text-red-700">{msg}</p>;
+    return (
+      <PageContainer width="wide">
+        <p className="text-red-700">{msg}</p>
+      </PageContainer>
+    );
   }
   if (contributions.isError) {
-    return <p className="p-6 text-red-700">{t("renofond.errors.generic")}</p>;
+    return (
+      <PageContainer width="wide">
+        <p className="text-red-700">{t("renofond.errors.generic")}</p>
+      </PageContainer>
+    );
   }
   const proj = projection.data!;
   const contribs = contributions.data!;
   const isOwner = contribs.my_role === "owner";
 
   return (
-    <section className="mx-auto mt-8 max-w-6xl space-y-6 p-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold">{t("renofond.title")}</h2>
-          <p className="text-sm text-slate-500">{t("renofond.subtitle")}</p>
-        </div>
-        <nav className="flex gap-2 text-sm">
-          <Link
-            to={`/objekte/${objectId}/budget`}
-            className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
-          >
-            {t("renofond.backToBudget")}
-          </Link>
-        </nav>
-      </header>
+    <PageContainer width="wide">
+      <PageHeader title={t("renofond.title")} subtitle={t("renofond.subtitle")} />
+      <div className="space-y-6">
 
       {proj.underfunding_years.length > 0 && (
         <div
@@ -122,7 +129,8 @@ function RenofondPageInner({ objectId }: { objectId: string }): JSX.Element {
           </p>
         )}
       </div>
-    </section>
+      </div>
+    </PageContainer>
   );
 }
 
