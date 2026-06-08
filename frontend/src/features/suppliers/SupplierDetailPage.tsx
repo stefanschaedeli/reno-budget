@@ -6,7 +6,9 @@
  * supplier — we surface the German error message directly.
  */
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 import { SupplierForm } from "./SupplierForm";
 import {
   useArchiveSupplier,
@@ -29,16 +31,16 @@ export function SupplierDetailPage(): JSX.Element {
 
   if (supplierQuery.isLoading || !supplierId) {
     return (
-      <p className="mx-auto mt-12 max-w-3xl p-6 text-slate-500">
-        {t("common.loading")}
-      </p>
+      <PageContainer width="narrow">
+        <p className="text-slate-500">{t("common.loading")}</p>
+      </PageContainer>
     );
   }
   if (supplierQuery.isError || !supplierQuery.data) {
     return (
-      <p className="mx-auto mt-12 max-w-3xl p-6 text-red-700">
-        {t("common.error")}
-      </p>
+      <PageContainer width="narrow">
+        <p className="text-red-700">{t("common.error")}</p>
+      </PageContainer>
     );
   }
 
@@ -67,22 +69,16 @@ export function SupplierDetailPage(): JSX.Element {
   };
 
   return (
-    <section className="mx-auto mt-8 max-w-3xl p-6">
-      <header className="mb-6">
-        <h2 className="text-2xl font-semibold">{supplier.name}</h2>
-        <p className="text-slate-500">
-          {supplier.contact_email ?? "—"}
-          {supplier.archived_at && ` · ${t("suppliers.archived")}`}
-        </p>
-        <nav className="mt-3 text-sm">
-          <Link
-            to={`/objekte/${supplier.object_id}/lieferanten`}
-            className="text-slate-500 hover:underline"
-          >
-            ← {t("suppliers.backToList")}
-          </Link>
-        </nav>
-      </header>
+    <PageContainer width="narrow">
+      <PageHeader
+        title={supplier.name}
+        subtitle={
+          <>
+            {supplier.contact_email ?? "—"}
+            {supplier.archived_at && ` · ${t("suppliers.archived")}`}
+          </>
+        }
+      />
 
       <section className="mb-8">
         <h3 className="mb-3 text-lg font-medium">{t("suppliers.edit")}</h3>
@@ -119,6 +115,6 @@ export function SupplierDetailPage(): JSX.Element {
           </button>
         </div>
       </section>
-    </section>
+    </PageContainer>
   );
 }
