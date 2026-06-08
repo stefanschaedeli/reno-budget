@@ -47,44 +47,43 @@ function useObjectName(id: string | null): string | undefined {
   return q.data?.name;
 }
 
-function useProjectName(id: string | null): { name: string | undefined; objectId: string | undefined } {
+function useNamedEntity<T extends { name: string; object_id: string }>(
+  keyPrefix: string,
+  id: string | null,
+  fetcher: (id: string) => Promise<T>,
+): { name: string | undefined; objectId: string | undefined } {
   const q = useQuery({
-    queryKey: ["project-name", id],
-    queryFn: () => fetchProject(id as string),
+    queryKey: [keyPrefix, id],
+    queryFn: () => fetcher(id as string),
     enabled: !!id,
     staleTime: 60_000,
   });
+  // Return primitives so the consuming useMemo deps are stable across renders.
   return { name: q.data?.name, objectId: q.data?.object_id };
 }
 
-function useLotName(id: string | null): { name: string | undefined; objectId: string | undefined } {
-  const q = useQuery({
-    queryKey: ["lot-name", id],
-    queryFn: () => fetchLot(id as string),
-    enabled: !!id,
-    staleTime: 60_000,
-  });
-  return { name: q.data?.name, objectId: q.data?.object_id };
+interface BreadcrumbInputs {
+  objectName: string | undefined;
+  projectName: string | undefined;
+  projectParentObjectId: string | undefined;
+  lotName: string | undefined;
+  lotParentObjectId: string | undefined;
+  supplierName: string | undefined;
+  supplierParentObjectId: string | undefined;
 }
 
-function useSupplierName(id: string | null): { name: string | undefined; objectId: string | undefined } {
-  const q = useQuery({
-    queryKey: ["supplier-name", id],
-    queryFn: () => fetchSupplier(id as string),
-    enabled: !!id,
-    staleTime: 60_000,
-  });
-  return { name: q.data?.name, objectId: q.data?.object_id };
-}
-
-function useBreadcrumbs(
-  objectName: string | undefined,
-  projectName: { name: string | undefined; objectId: string | undefined },
-  lotName: { name: string | undefined; objectId: string | undefined },
-  supplierName: { name: string | undefined; objectId: string | undefined },
-): Crumb[] {
+function useBreadcrumbs(inputs: BreadcrumbInputs): Crumb[] {
   const { t } = useTranslation();
   const { pathname } = useLocation();
+  const {
+    objectName,
+    projectName,
+    projectParentObjectId,
+    lotName,
+    lotParentObjectId,
+    supplierName,
+    supplierParentObjectId,
+  } = inputs;
   return useMemo(() => {
     const parts = pathname.split("/").filter(Boolean);
     const crumbs: Crumb[] = [{ label: t("nav.crumb.home"), to: "/" }];
@@ -107,51 +106,62 @@ function useBreadcrumbs(
         else if (tail === "lieferanten") crumbs.push({ label: t("nav.crumb.suppliers") });
       }
     } else if (parts[0] === "projects" && parts[1]) {
-      if (projectName.objectId) {
+      if (projectParentObjectId) {
         crumbs.push({ label: t("nav.crumb.objects"), to: "/objekte" });
-        crumbs.push({ label: "…", to: `/objekte/${projectName.objectId}` });
+        crumbs.push({ label: "…", to: `/objekte/${projectParentObjectId}` });
         crumbs.push({
           label: t("nav.crumb.projects"),
-          to: `/objekte/${projectName.objectId}/projekte`,
+          to: `/objekte/${projectParentObjectId}/projekte`,
         });
       } else {
         crumbs.push({ label: t("nav.crumb.projects") });
       }
-      crumbs.push({ label: projectName.name ?? "…" });
+      crumbs.push({ label: projectName ?? "…" });
     } else if (parts[0] === "lose" && parts[1]) {
-      if (lotName.objectId) {
+      if (lotParentObjectId) {
         crumbs.push({ label: t("nav.crumb.objects"), to: "/objekte" });
-        crumbs.push({ label: "…", to: `/objekte/${lotName.objectId}` });
+        crumbs.push({ label: "…", to: `/objekte/${lotParentObjectId}` });
         crumbs.push({
           label: t("nav.crumb.lots"),
-          to: `/objekte/${lotName.objectId}/lose`,
+          to: `/objekte/${lotParentObjectId}/lose`,
         });
       } else {
         crumbs.push({ label: t("nav.crumb.lots") });
       }
-      crumbs.push({ label: lotName.name ?? "…" });
+      crumbs.push({ label: lotName ?? "…" });
     } else if (parts[0] === "lieferanten" && parts[1]) {
-      if (supplierName.objectId) {
+      if (supplierParentObjectId) {
         crumbs.push({ label: t("nav.crumb.objects"), to: "/objekte" });
-        crumbs.push({ label: "…", to: `/objekte/${supplierName.objectId}` });
+        crumbs.push({ label: "…", to: `/objekte/${supplierParentObjectId}` });
         crumbs.push({
           label: t("nav.crumb.suppliers"),
-          to: `/objekte/${supplierName.objectId}/lieferanten`,
+          to: `/objekte/${supplierParentObjectId}/lieferanten`,
         });
       } else {
         crumbs.push({ label: t("nav.crumb.suppliers") });
       }
-      crumbs.push({ label: supplierName.name ?? "…" });
+      crumbs.push({ label: supplierName ?? "…" });
     } else if (parts[0] === "finanzen") {
       crumbs.push({ label: t("nav.crumb.finances") });
     } else if (parts[0] === "admin") {
       crumbs.push({ label: t("nav.crumb.admin") });
       if (parts[1] === "audit") crumbs.push({ label: t("nav.crumb.adminAudit") });
     }
+    // Mark the last crumb as non-navigable (current page).
     const last = crumbs[crumbs.length - 1];
     if (last) delete last.to;
     return crumbs;
-  }, [pathname, objectName, projectName, lotName, supplierName, t]);
+  }, [
+    pathname,
+    objectName,
+    projectName,
+    projectParentObjectId,
+    lotName,
+    lotParentObjectId,
+    supplierName,
+    supplierParentObjectId,
+    t,
+  ]);
 }
 
 function SidebarLink({
@@ -380,18 +390,29 @@ export function AppLayout(): JSX.Element {
   const objectId = useCurrentObjectId();
   const objectName = useObjectName(objectId);
   const projectId = useCurrentDetailId("projects");
-  const projectInfo = useProjectName(projectId);
+  const { name: projectName, objectId: projectParentObjectId } =
+    useNamedEntity("project-name", projectId, fetchProject);
   const lotId = useCurrentDetailId("lose");
-  const lotInfo = useLotName(lotId);
+  const { name: lotName, objectId: lotParentObjectId } =
+    useNamedEntity("lot-name", lotId, fetchLot);
   const supplierId = useCurrentDetailId("lieferanten");
-  const supplierInfo = useSupplierName(supplierId);
+  const { name: supplierName, objectId: supplierParentObjectId } =
+    useNamedEntity("supplier-name", supplierId, fetchSupplier);
 
   // Effective object id: own /objekte/:id route OR derived from a detail page's parent.
   const effectiveObjectId =
-    objectId ?? projectInfo.objectId ?? lotInfo.objectId ?? supplierInfo.objectId ?? null;
+    objectId ?? projectParentObjectId ?? lotParentObjectId ?? supplierParentObjectId ?? null;
   const effectiveObjectName = objectName;
 
-  const crumbs = useBreadcrumbs(objectName, projectInfo, lotInfo, supplierInfo);
+  const crumbs = useBreadcrumbs({
+    objectName,
+    projectName,
+    projectParentObjectId,
+    lotName,
+    lotParentObjectId,
+    supplierName,
+    supplierParentObjectId,
+  });
 
   // Drawer state for mobile.
   const [drawerOpen, setDrawerOpen] = useState(false);
