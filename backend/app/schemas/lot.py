@@ -59,3 +59,9 @@ class LotRead(_LotBase):
     cost_item_count: int = 0
     cost_item_ids: list[uuid.UUID] | None = None
     awarded_quote: QuoteRead | None = None
+
+
+class LotListItem(LotRead):
+    """LotRead enriched with the parent object's name (cross-object listing)."""
+
+    object_name: str
