@@ -6,6 +6,8 @@ import { ApiError } from "@/api/client";
 import { createObject } from "./api";
 import { type ObjectCreateInput, objectCreateSchema, type ObjectType, type UnitInput } from "./types";
 import { UnitEditor } from "./UnitEditor";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 
 /**
  * Wizard for creating a new object. Owner-by-construction: the backend
@@ -65,8 +67,8 @@ export function ObjectCreatePage(): JSX.Element {
   };
 
   return (
-    <section className="mx-auto mt-12 max-w-3xl p-6">
-      <h2 className="mb-6 text-2xl font-semibold">{t("objects.create.title")}</h2>
+    <PageContainer width="narrow">
+      <PageHeader title={t("objects.create.title")} />
       <form onSubmit={(e) => void submit(e)} className="space-y-4">
         <label className="block">
           <span className="text-sm">{t("objects.fields.name")}</span>
@@ -134,6 +136,6 @@ export function ObjectCreatePage(): JSX.Element {
           {busy ? t("common.submitting") : t("objects.create.submit")}
         </button>
       </form>
-    </section>
+    </PageContainer>
   );
 }
