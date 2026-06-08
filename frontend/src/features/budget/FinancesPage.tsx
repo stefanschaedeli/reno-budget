@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useFinancesOverview } from "./api";
 import { formatChfRounded, toNumber } from "./format";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 
 /**
  * Cross-object roll-up. One row per object visible to the user, sorted
@@ -23,13 +25,12 @@ export function FinancesPage(): JSX.Element {
   }, [q.data]);
 
   return (
-    <section className="mx-auto mt-8 max-w-5xl space-y-4 p-6">
-      <header>
-        <h2 className="text-2xl font-semibold">{t("budget.finances.title")}</h2>
-        <p className="text-sm text-slate-500">
-          {t("budget.finances.subtitle")}
-        </p>
-      </header>
+    <PageContainer width="default">
+      <PageHeader
+        title={t("budget.finances.title")}
+        subtitle={t("budget.finances.subtitle")}
+      />
+      <div className="space-y-4">
 
       {q.isLoading && <p className="text-slate-500">{t("common.loading")}</p>}
       {q.isError && (
@@ -95,6 +96,7 @@ export function FinancesPage(): JSX.Element {
           </tbody>
         </table>
       )}
-    </section>
+      </div>
+    </PageContainer>
   );
 }
