@@ -57,6 +57,9 @@ services:
       - backups_data:/data/backups
     # Phase 9: APScheduler-based worker. Runs nightly DB backups and weekly
     # reminder digest emails. See docs/howto/worker.md for operations.
+    # Override entrypoint so only the api container runs alembic — avoids
+    # both containers racing for the migration advisory lock at startup.
+    entrypoint: []
     command: ["python", "-m", "app.worker"]
 
   web:

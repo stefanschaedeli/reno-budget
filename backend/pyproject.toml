@@ -95,12 +95,13 @@ ignore_missing_imports = true
 # ----- pytest -----
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-q --strict-markers --strict-config"
+addopts = "-q --strict-markers --strict-config -m 'not smoke'"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 markers = [
   "integration: requires a real PostgreSQL instance (testcontainers)",
   "e2e: end-to-end tests against the running API",
+  "smoke: builds and boots the production Docker image (slow; pre-deploy gate)",
 ]
 
 # ----- coverage -----
