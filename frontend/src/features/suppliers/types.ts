@@ -33,3 +33,9 @@ export type SupplierCreate = z.infer<typeof supplierCreateSchema>;
 
 export const supplierUpdateSchema = supplierCreateSchema.partial();
 export type SupplierUpdate = z.infer<typeof supplierUpdateSchema>;
+
+export const supplierListItemSchema = supplierSchema.extend({
+  object_name: z.string(),
+});
+
+export type SupplierListItem = z.infer<typeof supplierListItemSchema>;
