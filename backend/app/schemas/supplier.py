@@ -48,3 +48,9 @@ class SupplierRead(_SupplierBase):
     created_by: uuid.UUID | None
     created_at: datetime
     updated_at: datetime
+
+
+class SupplierListItem(SupplierRead):
+    """SupplierRead enriched with the parent object's name (cross-object listing)."""
+
+    object_name: str
