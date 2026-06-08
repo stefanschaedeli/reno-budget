@@ -22,7 +22,8 @@ from app.core.db import SessionDep
 from app.core.deps import CurrentUser, require_csrf, require_object_access_dep
 from app.models.object import ObjectRole
 from app.models.project import Project
-from app.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate
+from app.repositories.object import list_objects_for_user
+from app.schemas.project import ProjectCreate, ProjectListItem, ProjectRead, ProjectUpdate
 from app.services import audit as audit_svc
 from app.services.projects import (
     ProjectNotFoundError,
@@ -114,6 +115,33 @@ async def create_object_project(
     )
     await session.commit()
     return _to_read(project)
+
+
+# ---- Cross-object list ------------------------------------------------------
+
+
+@router_projects.get("", response_model=list[ProjectListItem])
+async def list_all_projects(
+    user: CurrentUser,
+    session: SessionDep,
+) -> list[ProjectListItem]:
+    """All non-archived projects across every object the user can access.
+
+    Mirrors the ``/finances/overview`` pattern: enumerate the user's objects
+    via ``list_objects_for_user`` (which joins through ``ObjectMembership``),
+    then per object call the existing service. Archived rows are excluded.
+    """
+    objects = await list_objects_for_user(session, user.id)
+    items: list[ProjectListItem] = []
+    for obj in objects:
+        rows = await list_projects(session, object_id=obj.id, include_archived=False)
+        for p in rows:
+            items.append(
+                ProjectListItem.model_validate(
+                    {**ProjectRead.model_validate(p).model_dump(), "object_name": obj.name}
+                )
+            )
+    return items
 
 
 # ---- Per-project get / patch / archive / delete ----------------------------
