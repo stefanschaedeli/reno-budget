@@ -101,7 +101,7 @@ export function ProjectsPage(): JSX.Element {
                 className="border-b border-slate-200 hover:bg-slate-50"
               >
                 <td className="px-2 py-2 font-medium">
-                  <Link to={`/projects/${p.id}`} className="hover:underline">
+                  <Link to={`/projekte/${p.id}`} className="hover:underline">
                     {p.name}
                   </Link>
                 </td>

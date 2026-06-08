@@ -79,7 +79,7 @@ export function App(): JSX.Element {
               <Route path="/objekte/:id/renofond" element={<RenofondPage />} />
               <Route path="/finanzen" element={<FinancesPage />} />
               <Route path="/objekte/:objectId/projekte" element={<ProjectsPage />} />
-              <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+              <Route path="/projekte/:projectId" element={<ProjectDetailPage />} />
               <Route path="/objekte/:objectId/lose" element={<LotsPage />} />
               <Route path="/lose/:lotId" element={<LotDetailPage />} />
               <Route path="/objekte/:objectId/lieferanten" element={<SuppliersPage />} />

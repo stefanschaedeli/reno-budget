@@ -32,7 +32,7 @@ function useCurrentObjectId(): string | null {
 }
 
 const DETAIL_ID_PATTERNS = {
-  projects: /^\/projects\/([^/]+)(?:\/|$)/,
+  projects: /^\/projekte\/([^/]+)/,
   lose: /^\/lose\/([^/]+)(?:\/|$)/,
   lieferanten: /^\/lieferanten\/([^/]+)(?:\/|$)/,
 } as const;
@@ -112,7 +112,7 @@ function useBreadcrumbs(inputs: BreadcrumbInputs): Crumb[] {
         else if (tail === "lose") crumbs.push({ label: t("nav.crumb.lots") });
         else if (tail === "lieferanten") crumbs.push({ label: t("nav.crumb.suppliers") });
       }
-    } else if (parts[0] === "projects" && parts[1]) {
+    } else if (parts[0] === "projekte" && parts[1]) {
       if (projectParentObjectId) {
         crumbs.push({ label: t("nav.crumb.objects"), to: "/objekte" });
         crumbs.push({ label: "…", to: `/objekte/${projectParentObjectId}` });
