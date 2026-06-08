@@ -11,6 +11,7 @@ const PROJECT_ROW = {
   description: null,
   status: "planned",
   planned_year: 2027,
+  rough_estimate_chf: "75000.00",
   archived_at: null,
   created_by: null,
   created_at: "2026-01-01T00:00:00Z",
@@ -32,6 +33,7 @@ describe("AllProjectsPage", () => {
       expect(screen.getByText("Dach sanieren")).toBeInTheDocument(),
     );
     expect(screen.getByText("Haus A")).toBeInTheDocument();
+    expect(screen.getByText(/Grobschätzung/)).toBeInTheDocument();
   });
 
   it("renders empty state", async () => {

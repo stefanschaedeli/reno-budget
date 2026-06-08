@@ -20,11 +20,14 @@ import enum
 import uuid
 from datetime import UTC, datetime
 
+from decimal import Decimal
+
 from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
     Integer,
+    Numeric,
     String,
     Text,
 )
@@ -69,6 +72,9 @@ class Project(Base):
         default=ProjectStatus.IDEA,
     )
     planned_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    rough_estimate_chf: Mapped[Decimal | None] = mapped_column(
+        Numeric(12, 2), nullable=True
+    )
     archived_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )

@@ -66,7 +66,7 @@ export function ProjectDetailPage(): JSX.Element {
   const handleDelete = async () => {
     if (!window.confirm(t("projects.deleteConfirm"))) return;
     await deleteMut.mutateAsync();
-    navigate(`/objekte/${project.object_id}/projekte`);
+    navigate(`/objekte/${project.object_id}`);
   };
 
   return (
@@ -98,6 +98,7 @@ export function ProjectDetailPage(): JSX.Element {
             description: project.description,
             status: project.status,
             planned_year: project.planned_year,
+            rough_estimate_chf: project.rough_estimate_chf,
           }}
           onSubmit={handleSubmit}
           submitting={updateMut.isPending}

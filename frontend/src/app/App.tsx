@@ -15,7 +15,6 @@ import { BudgetPage } from "@/features/budget/BudgetPage";
 import { FinancesPage } from "@/features/budget/FinancesPage";
 import { RenofondPage } from "@/features/renofond/RenofondPage";
 import { GlobalAuditPage, ObjectAuditPage } from "@/features/audit/AuditPage";
-import { ProjectsPage } from "@/features/projects/ProjectsPage";
 import { ProjectDetailPage } from "@/features/projects/ProjectDetailPage";
 import { AllProjectsPage } from "@/features/projects/AllProjectsPage";
 import { LotsPage } from "@/features/lots/LotsPage";
@@ -84,7 +83,10 @@ export function App(): JSX.Element {
               <Route path="/projekte" element={<AllProjectsPage />} />
               <Route path="/lose-uebersicht" element={<AllLotsPage />} />
               <Route path="/lieferanten-uebersicht" element={<AllSuppliersPage />} />
-              <Route path="/objekte/:objectId/projekte" element={<ProjectsPage />} />
+              <Route
+                path="/objekte/:objectId/projekte"
+                element={<Navigate to=".." replace relative="path" />}
+              />
               <Route path="/projekte/:projectId" element={<ProjectDetailPage />} />
               <Route path="/objekte/:objectId/lose" element={<LotsPage />} />
               <Route path="/lose/:lotId" element={<LotDetailPage />} />

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -23,6 +24,9 @@ class _ProjectBase(BaseModel):
     description: str | None = None
     status: ProjectStatus = ProjectStatus.IDEA
     planned_year: int | None = Field(default=None, ge=1900, le=2200)
+    rough_estimate_chf: Decimal | None = Field(
+        default=None, ge=0, max_digits=12, decimal_places=2
+    )
 
 
 class ProjectCreate(_ProjectBase):
@@ -38,6 +42,9 @@ class ProjectUpdate(BaseModel):
     description: str | None = None
     status: ProjectStatus | None = None
     planned_year: int | None = Field(default=None, ge=1900, le=2200)
+    rough_estimate_chf: Decimal | None = Field(
+        default=None, ge=0, max_digits=12, decimal_places=2
+    )
 
 
 class ProjectRead(_ProjectBase):

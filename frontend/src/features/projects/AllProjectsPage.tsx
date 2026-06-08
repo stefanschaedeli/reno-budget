@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { PageContainer } from "@/components/PageContainer";
 import { PageHeader } from "@/components/PageHeader";
+import { formatChf } from "@/features/costs/types";
 import { useAllProjects } from "./api";
 import type { ProjectListItem } from "./types";
 
@@ -23,6 +24,13 @@ export function AllProjectsPage(): JSX.Element {
         subtitle={t("projects.allSubtitle")}
       />
 
+      <p className="mb-4 text-sm text-slate-500">
+        {t("projects.createHint")}{" "}
+        <Link to="/objekte" className="underline hover:text-slate-900">
+          {t("nav.objects")}
+        </Link>
+      </p>
+
       {q.isLoading && <p className="text-slate-500">{t("common.loading")}</p>}
       {q.isError && <p className="text-red-700">{t("common.error")}</p>}
       {q.isSuccess && q.data.length === 0 && (
@@ -35,6 +43,9 @@ export function AllProjectsPage(): JSX.Element {
               <th className="px-2 py-2">{t("projects.fields.name")}</th>
               <th className="px-2 py-2">{t("projects.fields.object")}</th>
               <th className="px-2 py-2">{t("projects.fields.status")}</th>
+              <th className="px-2 py-2 text-right">
+                {t("projects.fields.roughEstimate")}
+              </th>
               <th className="px-2 py-2">{t("projects.fields.plannedYear")}</th>
             </tr>
           </thead>
@@ -60,6 +71,11 @@ export function AllProjectsPage(): JSX.Element {
                 </td>
                 <td className="px-2 py-2">
                   {t(`projects.status.${p.status}`)}
+                </td>
+                <td className="px-2 py-2 text-right tabular-nums">
+                  {p.rough_estimate_chf != null
+                    ? formatChf(String(p.rough_estimate_chf))
+                    : "—"}
                 </td>
                 <td className="px-2 py-2">{p.planned_year ?? "—"}</td>
               </tr>

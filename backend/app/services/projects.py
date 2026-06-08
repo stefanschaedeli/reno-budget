@@ -41,6 +41,7 @@ async def create_project(
         description=payload.description,
         status=payload.status,
         planned_year=payload.planned_year,
+        rough_estimate_chf=payload.rough_estimate_chf,
         created_by=actor.id,
     )
     session.add(project)

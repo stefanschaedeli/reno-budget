@@ -23,6 +23,7 @@ interface FormState {
   description: string;
   status: ProjectStatus;
   planned_year: string;
+  rough_estimate_chf: string;
 }
 
 export function ProjectForm({
@@ -37,6 +38,10 @@ export function ProjectForm({
     description: initial?.description ?? "",
     status: initial?.status ?? "idea",
     planned_year: initial?.planned_year?.toString() ?? "",
+    rough_estimate_chf:
+      initial?.rough_estimate_chf != null
+        ? String(initial.rough_estimate_chf)
+        : "",
   }));
   const [errors, setErrors] = useState<Map<string, string>>(() => new Map());
 
@@ -50,6 +55,9 @@ export function ProjectForm({
       description: state.description || null,
       status: state.status,
       planned_year: state.planned_year ? Number(state.planned_year) : null,
+      rough_estimate_chf: state.rough_estimate_chf
+        ? state.rough_estimate_chf
+        : null,
     };
     const result = projectCreateSchema.safeParse(candidate);
     if (!result.success) {
@@ -127,6 +135,25 @@ export function ProjectForm({
           />
         </label>
       </div>
+
+      <label className="block text-sm">
+        <span className="mb-1 block font-medium">
+          {t("projects.fields.roughEstimate")}
+        </span>
+        <input
+          type="number"
+          min={0}
+          step="0.01"
+          inputMode="decimal"
+          value={state.rough_estimate_chf}
+          onChange={(e) => update("rough_estimate_chf", e.target.value)}
+          placeholder={t("projects.fields.roughEstimatePlaceholder")}
+          className="w-full rounded border border-slate-300 px-2 py-1 tabular-nums"
+        />
+        {err("rough_estimate_chf") && (
+          <p className="text-xs text-red-700">{err("rough_estimate_chf")}</p>
+        )}
+      </label>
 
       <div className="flex justify-end gap-2 pt-2">
         {onCancel && (

@@ -8,6 +8,7 @@ import { UnitEditor } from "./UnitEditor";
 import { AttachmentList } from "@/features/attachments/AttachmentList";
 import { PageContainer } from "@/components/PageContainer";
 import { PageHeader } from "@/components/PageHeader";
+import { ObjectProjectsSection } from "@/features/projects/ObjectProjectsSection";
 
 /**
  * Read-only object detail page. Phase 2 stops here for unit editing — the
@@ -76,6 +77,8 @@ export function ObjectDetailPage(): JSX.Element {
           readonly
         />
       </section>
+
+      <ObjectProjectsSection objectId={obj.id} />
 
       <section className="mb-8">
         <AttachmentList targetType="object" targetId={obj.id} canEdit />

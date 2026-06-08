@@ -23,6 +23,7 @@ export const projectSchema = z.object({
   description: z.string().nullable(),
   status: z.enum(PROJECT_STATUSES),
   planned_year: z.number().int().nullable(),
+  rough_estimate_chf: z.union([z.string(), z.number()]).nullable(),
   archived_at: z.string().nullable(),
   created_by: z.string().uuid().nullable(),
   created_at: z.string(),
@@ -35,6 +36,10 @@ export const projectCreateSchema = z.object({
   description: z.string().max(2000).nullable().optional(),
   status: z.enum(PROJECT_STATUSES).default("idea"),
   planned_year: z.number().int().min(1900).max(2200).nullable().optional(),
+  rough_estimate_chf: z
+    .union([z.string(), z.number()])
+    .nullable()
+    .optional(),
 });
 export type ProjectCreate = z.infer<typeof projectCreateSchema>;
 

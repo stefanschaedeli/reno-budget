@@ -148,11 +148,17 @@ class TestProjectCrud:
             f"/api/v1/objects/{obj.id}/projects",
             headers=_auth(token, integration_client),
             cookies=_cookies(integration_client),
-            json={"name": "Badsanierung", "status": "planned", "planned_year": 2027},
+            json={
+                "name": "Badsanierung",
+                "status": "planned",
+                "planned_year": 2027,
+                "rough_estimate_chf": "75000.00",
+            },
         )
         assert r.status_code == 201, r.text
         project_id = r.json()["id"]
         assert r.json()["name"] == "Badsanierung"
+        assert r.json()["rough_estimate_chf"] == "75000.00"
 
         # List (no archived)
         r = await integration_client.get(
@@ -175,11 +181,16 @@ class TestProjectCrud:
             f"/api/v1/projects/{project_id}",
             headers=_auth(token, integration_client),
             cookies=_cookies(integration_client),
-            json={"status": "in_progress", "description": "Notiz"},
+            json={
+                "status": "in_progress",
+                "description": "Notiz",
+                "rough_estimate_chf": "82500.50",
+            },
         )
         assert r.status_code == 200
         assert r.json()["status"] == "in_progress"
         assert r.json()["description"] == "Notiz"
+        assert r.json()["rough_estimate_chf"] == "82500.50"
 
         # Archive
         r = await integration_client.post(

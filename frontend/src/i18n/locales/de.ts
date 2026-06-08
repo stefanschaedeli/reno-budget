@@ -54,6 +54,7 @@ export const de = {
     lotsListe: "Lose",
     suppliersListe: "Lieferanten",
     finances: "Finanzen",
+    overviews: "Übersichten",
     adminAudit: "Admin · Audit",
     back: "Zurück",
     openMenu: "Menü öffnen",
@@ -419,7 +420,13 @@ export const de = {
     create: "Neues Projekt",
     edit: "Projekt bearbeiten",
     empty: "Noch keine Projekte erfasst.",
+    emptyInObject:
+      "Noch keine Projekte. Lege ein Projekt an, um mit der Planung zu starten.",
+    createHint: "Projekte werden im jeweiligen Objekt angelegt:",
     includeArchived: "Archivierte anzeigen",
+    filter: {
+      all: "Alle",
+    },
     archived: "Archiviert",
     archive: "Archivieren",
     archiveConfirm: "Projekt wirklich archivieren?",
@@ -434,6 +441,9 @@ export const de = {
       itemCount: "Positionen",
       archivedAt: "Archiviert",
       object: "Objekt",
+      roughEstimate: "Grobschätzung (CHF)",
+      roughEstimatePlaceholder: "z.B. 50000",
+      updatedAt: "Aktualisiert",
     },
     status: {
       idea: "Idee",

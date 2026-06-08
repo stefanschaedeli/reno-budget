@@ -108,7 +108,6 @@ function useBreadcrumbs(inputs: BreadcrumbInputs): Crumb[] {
         else if (tail === "budget") crumbs.push({ label: t("nav.crumb.budget") });
         else if (tail === "renofond") crumbs.push({ label: t("nav.crumb.renofond") });
         else if (tail === "audit") crumbs.push({ label: t("nav.crumb.audit") });
-        else if (tail === "projekte") crumbs.push({ label: t("nav.crumb.projects") });
         else if (tail === "lose") crumbs.push({ label: t("nav.crumb.lots") });
         else if (tail === "lieferanten") crumbs.push({ label: t("nav.crumb.suppliers") });
       }
@@ -116,10 +115,6 @@ function useBreadcrumbs(inputs: BreadcrumbInputs): Crumb[] {
       if (projectParentObjectId) {
         crumbs.push({ label: t("nav.crumb.objects"), to: "/objekte" });
         crumbs.push({ label: "…", to: `/objekte/${projectParentObjectId}` });
-        crumbs.push({
-          label: t("nav.crumb.projects"),
-          to: `/objekte/${projectParentObjectId}/projekte`,
-        });
       } else {
         crumbs.push({ label: t("nav.crumb.projects") });
       }
@@ -253,13 +248,6 @@ function ObjectContextSection({
           {t("nav.crumb.budget")}
         </SidebarLink>
         <SidebarLink
-          to={`/objekte/${objectId}/projekte`}
-          icon="🗂️"
-          onNavigate={onNavigate}
-        >
-          {t("nav.crumb.projects")}
-        </SidebarLink>
-        <SidebarLink
           to={`/objekte/${objectId}/lose`}
           icon="📦"
           onNavigate={onNavigate}
@@ -288,6 +276,52 @@ function ObjectContextSection({
           {t("nav.crumb.audit")}
         </SidebarLink>
       </div>
+    </div>
+  );
+}
+
+function OverviewsSection({
+  onNavigate,
+}: {
+  onNavigate?: (() => void) | undefined;
+}): JSX.Element {
+  const { t } = useTranslation();
+  const { pathname } = useLocation();
+  const containsOverview =
+    pathname === "/projekte" ||
+    pathname.startsWith("/lose-uebersicht") ||
+    pathname.startsWith("/lieferanten-uebersicht");
+  const [open, setOpen] = useState(containsOverview);
+  return (
+    <div className="mt-6 border-t border-slate-200 pt-4">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-3 text-xs font-semibold uppercase tracking-wider text-slate-400 hover:text-slate-600"
+        aria-expanded={open}
+      >
+        <span>{t("nav.overviews")}</span>
+        <span aria-hidden className="text-slate-400">
+          {open ? "▾" : "▸"}
+        </span>
+      </button>
+      {open && (
+        <div className="mt-2 space-y-1">
+          <SidebarLink to="/projekte" icon="🗂️" onNavigate={onNavigate}>
+            {t("nav.projektsListe")}
+          </SidebarLink>
+          <SidebarLink to="/lose-uebersicht" icon="📦" onNavigate={onNavigate}>
+            {t("nav.lotsListe")}
+          </SidebarLink>
+          <SidebarLink
+            to="/lieferanten-uebersicht"
+            icon="🤝"
+            onNavigate={onNavigate}
+          >
+            {t("nav.suppliersListe")}
+          </SidebarLink>
+        </div>
+      )}
     </div>
   );
 }
@@ -512,27 +546,6 @@ export function AppLayout(): JSX.Element {
             {t("nav.objects")}
           </SidebarLink>
           <SidebarLink
-            to="/projekte"
-            icon="🗂️"
-            onNavigate={() => setDrawerOpen(false)}
-          >
-            {t("nav.projektsListe")}
-          </SidebarLink>
-          <SidebarLink
-            to="/lose-uebersicht"
-            icon="📦"
-            onNavigate={() => setDrawerOpen(false)}
-          >
-            {t("nav.lotsListe")}
-          </SidebarLink>
-          <SidebarLink
-            to="/lieferanten-uebersicht"
-            icon="🤝"
-            onNavigate={() => setDrawerOpen(false)}
-          >
-            {t("nav.suppliersListe")}
-          </SidebarLink>
-          <SidebarLink
             to="/finanzen"
             icon="💰"
             onNavigate={() => setDrawerOpen(false)}
@@ -556,6 +569,8 @@ export function AppLayout(): JSX.Element {
               onNavigate={() => setDrawerOpen(false)}
             />
           )}
+
+          <OverviewsSection onNavigate={() => setDrawerOpen(false)} />
         </nav>
         <div className="border-t border-slate-200 px-4 py-3 text-xs text-slate-400">
           {t("app.title")}
