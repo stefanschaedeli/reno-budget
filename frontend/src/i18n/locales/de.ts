@@ -444,6 +444,8 @@ export const de = {
   lots: {
     title: "Lose",
     subtitle: "Ausschreibungspakete pro Objekt — projektübergreifend",
+    allTitle: "Alle Lose",
+    allSubtitle: "Alle Lose über alle Objekte",
     create: "Neues Los",
     edit: "Los bearbeiten",
     empty: "Noch keine Lose erfasst.",
@@ -463,6 +465,7 @@ export const de = {
       tenderDeadline: "Eingabetermin",
       itemCount: "Positionen",
       archivedAt: "Archiviert",
+      object: "Objekt",
     },
     status: {
       draft: "Entwurf",
