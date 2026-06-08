@@ -454,7 +454,37 @@ export const de = {
     },
     costItems: {
       title: "Kostenpositionen in diesem Projekt",
-      empty: "Diesem Projekt sind noch keine Kostenpositionen zugeordnet.",
+      empty:
+        "Noch keine Positionen. Beginnen Sie mit \"Neue Position\" oder verknüpfen Sie bestehende.",
+      add: "Neue Position",
+      link: "Bestehende Position verknüpfen",
+      remove: "Von Projekt entfernen",
+      removeConfirm: "Position aus diesem Projekt entfernen?",
+      linkDialog: {
+        title: "Bestehende Positionen verknüpfen",
+        empty: "Keine unverknüpften Positionen auf diesem Objekt.",
+        search: "Titel suchen…",
+        confirm: "Verknüpfen",
+        cancel: "Abbrechen",
+        selected: "{{count}} ausgewählt",
+      },
+    },
+    budget: {
+      heading: "Budget",
+      estimate: "Grobschätzung",
+      planned: "Geplant aus Positionen",
+      diff: "Differenz",
+      addEstimate: "Grobschätzung hinzufügen",
+      edit: "Bearbeiten",
+      save: "Speichern",
+      cancel: "Abbrechen",
+      noEstimate: "Keine Grobschätzung erfasst",
+      percentOfEstimate: "{{percent}} % der Grobschätzung",
+    },
+    details: {
+      heading: "Details",
+      show: "Details anzeigen",
+      hide: "Details ausblenden",
     },
   },
   lots: {
