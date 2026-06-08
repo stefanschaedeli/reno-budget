@@ -21,6 +21,7 @@ import { LotsPage } from "@/features/lots/LotsPage";
 import { LotDetailPage } from "@/features/lots/LotDetailPage";
 import { SuppliersPage } from "@/features/suppliers/SuppliersPage";
 import { SupplierDetailPage } from "@/features/suppliers/SupplierDetailPage";
+import { AppLayout } from "@/components/AppLayout";
 
 /**
  * Single QueryClient for the whole app. Defaults are conservative:
@@ -55,140 +56,40 @@ export function App(): JSX.Element {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-          <Route path="/anmelden" element={<LoginPage />} />
-          <Route path="/invite/:token" element={<AcceptInvitePage />} />
-          <Route path="/passwort-zuruecksetzen" element={<PasswordResetRequestPage />} />
-          <Route path="/passwort-zuruecksetzen/:token" element={<PasswordResetConfirmPage />} />
-          <Route
-            path="/"
-            element={
-              <RequireAuth>
-                <HomePage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/objekte"
-            element={
-              <RequireAuth>
-                <ObjectsListPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/objekte/neu"
-            element={
-              <RequireAuth>
-                <ObjectCreatePage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/objekte/:id"
-            element={
-              <RequireAuth>
-                <ObjectDetailPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/objekte/:objectId/kosten"
-            element={
-              <RequireAuth>
-                <CostsPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/objekte/:id/budget"
-            element={
-              <RequireAuth>
-                <BudgetPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/objekte/:id/renofond"
-            element={
-              <RequireAuth>
-                <RenofondPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/finanzen"
-            element={
-              <RequireAuth>
-                <FinancesPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/objekte/:objectId/projekte"
-            element={
-              <RequireAuth>
-                <ProjectsPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/projects/:projectId"
-            element={
-              <RequireAuth>
-                <ProjectDetailPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/objekte/:objectId/lose"
-            element={
-              <RequireAuth>
-                <LotsPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/lose/:lotId"
-            element={
-              <RequireAuth>
-                <LotDetailPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/objekte/:objectId/lieferanten"
-            element={
-              <RequireAuth>
-                <SuppliersPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/lieferanten/:supplierId"
-            element={
-              <RequireAuth>
-                <SupplierDetailPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/objekte/:id/audit"
-            element={
-              <RequireAuth>
-                <ObjectAuditPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/admin/audit"
-            element={
-              <RequireAuth>
-                <GlobalAuditPage />
-              </RequireAuth>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* Public routes */}
+            <Route path="/anmelden" element={<LoginPage />} />
+            <Route path="/invite/:token" element={<AcceptInvitePage />} />
+            <Route path="/passwort-zuruecksetzen" element={<PasswordResetRequestPage />} />
+            <Route path="/passwort-zuruecksetzen/:token" element={<PasswordResetConfirmPage />} />
+
+            {/* Authenticated routes — all share AppLayout chrome */}
+            <Route
+              element={
+                <RequireAuth>
+                  <AppLayout />
+                </RequireAuth>
+              }
+            >
+              <Route path="/" element={<HomePage />} />
+              <Route path="/objekte" element={<ObjectsListPage />} />
+              <Route path="/objekte/neu" element={<ObjectCreatePage />} />
+              <Route path="/objekte/:id" element={<ObjectDetailPage />} />
+              <Route path="/objekte/:objectId/kosten" element={<CostsPage />} />
+              <Route path="/objekte/:id/budget" element={<BudgetPage />} />
+              <Route path="/objekte/:id/renofond" element={<RenofondPage />} />
+              <Route path="/finanzen" element={<FinancesPage />} />
+              <Route path="/objekte/:objectId/projekte" element={<ProjectsPage />} />
+              <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+              <Route path="/objekte/:objectId/lose" element={<LotsPage />} />
+              <Route path="/lose/:lotId" element={<LotDetailPage />} />
+              <Route path="/objekte/:objectId/lieferanten" element={<SuppliersPage />} />
+              <Route path="/lieferanten/:supplierId" element={<SupplierDetailPage />} />
+              <Route path="/objekte/:id/audit" element={<ObjectAuditPage />} />
+              <Route path="/admin/audit" element={<GlobalAuditPage />} />
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
       </BrowserRouter>
     </AuthProvider>
     </QueryClientProvider>
