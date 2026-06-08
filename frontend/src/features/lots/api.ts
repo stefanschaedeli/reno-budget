@@ -12,13 +12,16 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from "@tanstack/react-query";
+import { z } from "zod";
 import { apiRequest } from "@/api/client";
 import { costItemSchema, type CostItem } from "@/features/costs/types";
 import {
+  lotListItemSchema,
   lotSchema,
   type Lot,
   type LotCostItemRef,
   type LotCreate,
+  type LotListItem,
   type LotUpdate,
 } from "./types";
 
@@ -29,6 +32,18 @@ export async function fetchLots(
   const qs = opts.includeArchived ? "?include_archived=true" : "";
   const raw = await apiRequest<unknown[]>(`/objects/${objectId}/lots${qs}`);
   return raw.map((l) => lotSchema.parse(l));
+}
+
+export async function fetchAllLots(): Promise<LotListItem[]> {
+  const raw = await apiRequest<unknown>(`/lots`);
+  return z.array(lotListItemSchema).parse(raw);
+}
+
+export function useAllLots(): UseQueryResult<LotListItem[]> {
+  return useQuery({
+    queryKey: ["lots-all"],
+    queryFn: fetchAllLots,
+  });
 }
 
 export async function fetchLot(lotId: string): Promise<Lot> {
