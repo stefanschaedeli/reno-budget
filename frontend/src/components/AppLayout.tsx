@@ -148,6 +148,12 @@ function useBreadcrumbs(inputs: BreadcrumbInputs): Crumb[] {
         crumbs.push({ label: t("nav.crumb.suppliers") });
       }
       crumbs.push({ label: supplierName ?? "…" });
+    } else if (parts[0] === "projekte" && !parts[1]) {
+      crumbs.push({ label: t("nav.crumb.projektsListe") });
+    } else if (parts[0] === "lose-uebersicht") {
+      crumbs.push({ label: t("nav.crumb.lotsListe") });
+    } else if (parts[0] === "lieferanten-uebersicht") {
+      crumbs.push({ label: t("nav.crumb.suppliersListe") });
     } else if (parts[0] === "finanzen") {
       crumbs.push({ label: t("nav.crumb.finances") });
     } else if (parts[0] === "admin") {
@@ -504,6 +510,27 @@ export function AppLayout(): JSX.Element {
             onNavigate={() => setDrawerOpen(false)}
           >
             {t("nav.objects")}
+          </SidebarLink>
+          <SidebarLink
+            to="/projekte"
+            icon="🗂️"
+            onNavigate={() => setDrawerOpen(false)}
+          >
+            {t("nav.projektsListe")}
+          </SidebarLink>
+          <SidebarLink
+            to="/lose-uebersicht"
+            icon="📦"
+            onNavigate={() => setDrawerOpen(false)}
+          >
+            {t("nav.lotsListe")}
+          </SidebarLink>
+          <SidebarLink
+            to="/lieferanten-uebersicht"
+            icon="🤝"
+            onNavigate={() => setDrawerOpen(false)}
+          >
+            {t("nav.suppliersListe")}
           </SidebarLink>
           <SidebarLink
             to="/finanzen"

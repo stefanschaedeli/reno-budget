@@ -50,6 +50,9 @@ export const de = {
   nav: {
     home: "Start",
     objects: "Objekte",
+    projektsListe: "Projekte",
+    lotsListe: "Lose",
+    suppliersListe: "Lieferanten",
     finances: "Finanzen",
     adminAudit: "Admin · Audit",
     back: "Zurück",
@@ -72,6 +75,9 @@ export const de = {
       projects: "Projekte",
       lots: "Lose",
       suppliers: "Lieferanten",
+      projektsListe: "Projekte (alle)",
+      lotsListe: "Lose (alle)",
+      suppliersListe: "Lieferanten (alle)",
     },
   },
   objects: {
