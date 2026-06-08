@@ -80,12 +80,12 @@ export async function createCostItem(
 export async function updateCostItem(
   objectId: string,
   costItemId: string,
-  payload: CostItemInput,
+  payload: Partial<CostItemInput>,
 ): Promise<CostItem> {
   const raw = await apiRequest<unknown>(
     `/objects/${objectId}/cost-items/${costItemId}`,
     {
-      method: "PUT",
+      method: "PATCH",
       json: payload,
       withCsrf: true,
     },

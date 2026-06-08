@@ -3,7 +3,6 @@ import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCostItems, updateCostItem } from "@/api/costs";
-import type { CostItemInput } from "@/features/costs/types";
 
 export interface LinkExistingItemsDialogProps {
   objectId: string;
@@ -24,6 +23,7 @@ export function LinkExistingItemsDialog({
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const items = itemsQuery.data ?? [];
   const filtered = useMemo(() => {
@@ -43,18 +43,16 @@ export function LinkExistingItemsDialog({
   const handleConfirm = async () => {
     if (selected.size === 0) return;
     setSubmitting(true);
+    setError(null);
     try {
       const ids = Array.from(selected);
       for (const id of ids) {
-        const target = items.find((i) => i.id === id);
-        if (!target) continue;
-        await updateCostItem(objectId, id, {
-          ...(target as unknown as CostItemInput),
-          project_id: projectId,
-        });
+        await updateCostItem(objectId, id, { project_id: projectId });
       }
       void qc.invalidateQueries({ queryKey: ["cost-items", objectId] });
       onLinked();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setSubmitting(false);
     }
@@ -101,6 +99,9 @@ export function LinkExistingItemsDialog({
             </label>
           ))}
         </div>
+        {error && (
+          <p className="mt-2 text-xs text-red-700">{error}</p>
+        )}
         <div className="mt-3 flex items-center justify-between">
           <span className="text-xs text-slate-500">
             {t("projects.costItems.linkDialog.selected", { count: selected.size })}

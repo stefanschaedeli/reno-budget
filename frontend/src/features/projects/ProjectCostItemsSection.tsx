@@ -57,10 +57,7 @@ export function ProjectCostItemsSection({
 
   const handleUnlink = async (item: CostItem): Promise<void> => {
     if (!window.confirm(t("projects.costItems.removeConfirm"))) return;
-    await updateCostItem(objectId, item.id, {
-      ...(item as unknown as CostItemInput),
-      project_id: null,
-    });
+    await updateCostItem(objectId, item.id, { project_id: null });
     void qc.invalidateQueries({ queryKey: ["cost-items", objectId] });
     onItemsChanged?.();
   };
