@@ -7,8 +7,10 @@
  */
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useCostItems } from "@/api/costs";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 import { TagChip } from "@/components/TagChip";
 import { formatChf } from "@/features/costs/types";
 import { QuotesPanel } from "@/features/quotes/QuotesPanel";
@@ -60,16 +62,16 @@ export function LotDetailPage(): JSX.Element {
 
   if (lotQuery.isLoading || !lotId) {
     return (
-      <p className="mx-auto mt-12 max-w-3xl p-6 text-slate-500">
-        {t("common.loading")}
-      </p>
+      <PageContainer width="narrow">
+        <p className="text-slate-500">{t("common.loading")}</p>
+      </PageContainer>
     );
   }
   if (lotQuery.isError || !lotQuery.data) {
     return (
-      <p className="mx-auto mt-12 max-w-3xl p-6 text-red-700">
-        {t("common.error")}
-      </p>
+      <PageContainer width="narrow">
+        <p className="text-red-700">{t("common.error")}</p>
+      </PageContainer>
     );
   }
 
@@ -102,24 +104,18 @@ export function LotDetailPage(): JSX.Element {
   };
 
   return (
-    <section className="mx-auto mt-8 max-w-3xl p-6">
-      <header className="mb-6">
-        <h2 className="text-2xl font-semibold">{lot.name}</h2>
-        <p className="text-slate-500">
-          {t(`lots.status.${lot.status}`)}
-          {lot.tender_deadline &&
-            ` · ${new Date(lot.tender_deadline).toLocaleDateString("de-CH")}`}
-          {lot.archived_at && ` · ${t("lots.archived")}`}
-        </p>
-        <nav className="mt-3 text-sm">
-          <Link
-            to={`/objekte/${lot.object_id}/lose`}
-            className="text-slate-500 hover:underline"
-          >
-            ← {t("lots.backToList")}
-          </Link>
-        </nav>
-      </header>
+    <PageContainer width="narrow">
+      <PageHeader
+        title={lot.name}
+        subtitle={
+          <>
+            {t(`lots.status.${lot.status}`)}
+            {lot.tender_deadline &&
+              ` · ${new Date(lot.tender_deadline).toLocaleDateString("de-CH")}`}
+            {lot.archived_at && ` · ${t("lots.archived")}`}
+          </>
+        }
+      />
 
       {tags.length > 0 && (
         <div className="mb-6 flex flex-wrap gap-1">
@@ -267,6 +263,6 @@ export function LotDetailPage(): JSX.Element {
           </button>
         </div>
       </section>
-    </section>
+    </PageContainer>
   );
 }
