@@ -12,11 +12,14 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from "@tanstack/react-query";
+import { z } from "zod";
 import { apiRequest } from "@/api/client";
 import {
+  supplierListItemSchema,
   supplierSchema,
   type Supplier,
   type SupplierCreate,
+  type SupplierListItem,
   type SupplierUpdate,
 } from "./types";
 
@@ -29,6 +32,18 @@ export async function fetchSuppliers(
     `/objects/${objectId}/suppliers${qs}`,
   );
   return raw.map((s) => supplierSchema.parse(s));
+}
+
+export async function fetchAllSuppliers(): Promise<SupplierListItem[]> {
+  const raw = await apiRequest<unknown>(`/suppliers`);
+  return z.array(supplierListItemSchema).parse(raw);
+}
+
+export function useAllSuppliers(): UseQueryResult<SupplierListItem[]> {
+  return useQuery({
+    queryKey: ["suppliers-all"],
+    queryFn: fetchAllSuppliers,
+  });
 }
 
 export async function fetchSupplier(supplierId: string): Promise<Supplier> {
