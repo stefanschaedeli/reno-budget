@@ -12,11 +12,14 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from "@tanstack/react-query";
+import { z } from "zod";
 import { apiRequest } from "@/api/client";
 import {
+  projectListItemSchema,
   projectSchema,
   type Project,
   type ProjectCreate,
+  type ProjectListItem,
   type ProjectUpdate,
 } from "./types";
 
@@ -29,6 +32,18 @@ export async function fetchProjects(
     `/objects/${objectId}/projects${qs}`,
   );
   return raw.map((p) => projectSchema.parse(p));
+}
+
+export async function fetchAllProjects(): Promise<ProjectListItem[]> {
+  const raw = await apiRequest<unknown>(`/projects`);
+  return z.array(projectListItemSchema).parse(raw);
+}
+
+export function useAllProjects(): UseQueryResult<ProjectListItem[]> {
+  return useQuery({
+    queryKey: ["projects-all"],
+    queryFn: fetchAllProjects,
+  });
 }
 
 export async function fetchProject(projectId: string): Promise<Project> {
