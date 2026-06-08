@@ -31,9 +31,16 @@ function useCurrentObjectId(): string | null {
   return id;
 }
 
-function useCurrentDetailId(prefix: "projects" | "lose" | "lieferanten"): string | null {
+const DETAIL_ID_PATTERNS = {
+  projects: /^\/projects\/([^/]+)(?:\/|$)/,
+  lose: /^\/lose\/([^/]+)(?:\/|$)/,
+  lieferanten: /^\/lieferanten\/([^/]+)(?:\/|$)/,
+} as const;
+
+function useCurrentDetailId(prefix: keyof typeof DETAIL_ID_PATTERNS): string | null {
   const { pathname } = useLocation();
-  const m = pathname.match(new RegExp(`^/${prefix}/([^/]+)(?:/|$)`));
+  // eslint-disable-next-line security/detect-object-injection -- prefix is a string-literal union
+  const m = pathname.match(DETAIL_ID_PATTERNS[prefix]);
   return m ? m[1]! : null;
 }
 

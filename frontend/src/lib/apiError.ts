@@ -10,7 +10,7 @@ export function apiErrorMessage(err: unknown, fallback: string): string {
     const d = err.detail;
     if (typeof d === "string" && d.length > 0) return d;
     if (d && typeof d === "object" && "detail" in d) {
-      const inner = (d as { detail: unknown }).detail;
+      const inner = d.detail;
       if (typeof inner === "string" && inner.length > 0) return inner;
     }
   }
