@@ -11,8 +11,10 @@
  */
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { ApiError } from "@/api/client";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 import { listGlobalAudit, listObjectAudit } from "./api";
 import type { AuditEvent } from "./types";
 
@@ -26,7 +28,12 @@ interface InnerProps {
 export function ObjectAuditPage(): JSX.Element {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  if (!id) return <p className="p-6 text-red-700">{t("common.error")}</p>;
+  if (!id)
+    return (
+      <PageContainer width="default">
+        <p className="text-red-700">{t("common.error")}</p>
+      </PageContainer>
+    );
   return <AuditViewer mode="object" objectId={id} />;
 }
 
@@ -76,30 +83,26 @@ function AuditViewer({ mode, objectId }: InnerProps): JSX.Element {
   const title = mode === "global" ? t("audit.globalTitle") : t("audit.title");
 
   if (loading) {
-    return <p className="p-6 text-slate-600">{t("common.loading")}</p>;
+    return (
+      <PageContainer width="default">
+        <p className="text-slate-600">{t("common.loading")}</p>
+      </PageContainer>
+    );
   }
   if (error) {
     return (
-      <section className="mx-auto mt-12 max-w-3xl p-6">
-        <h2 className="mb-4 text-2xl font-semibold">{title}</h2>
-        <p className="rounded border border-red-300 bg-red-50 p-3 text-red-800">{error}</p>
-        {mode === "object" && objectId ? (
-          <p className="mt-4">
-            <Link to={`/objekte/${objectId}`} className="text-blue-700 underline">
-              ← {t("objects.detail.tabUnits")}
-            </Link>
-          </p>
-        ) : null}
-      </section>
+      <PageContainer width="default">
+        <PageHeader title={title} />
+        <p className="rounded border border-red-300 bg-red-50 p-3 text-red-800">
+          {error}
+        </p>
+      </PageContainer>
     );
   }
 
   return (
-    <section className="mx-auto mt-8 max-w-5xl p-6">
-      <header className="mb-4">
-        <h2 className="text-2xl font-semibold">{title}</h2>
-        <p className="text-sm text-slate-500">{t("audit.subtitle")}</p>
-      </header>
+    <PageContainer width="default">
+      <PageHeader title={title} subtitle={t("audit.subtitle")} />
 
       {events.length === 0 ? (
         <p className="text-slate-500">{t("audit.empty")}</p>
@@ -133,7 +136,7 @@ function AuditViewer({ mode, objectId }: InnerProps): JSX.Element {
           </button>
         </div>
       ) : null}
-    </section>
+    </PageContainer>
   );
 }
 
