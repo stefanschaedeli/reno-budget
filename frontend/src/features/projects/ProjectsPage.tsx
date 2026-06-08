@@ -9,6 +9,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { useCostItems } from "@/api/costs";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
+import { Drawer } from "@/components/Drawer";
 import { ProjectForm } from "./ProjectForm";
 import { useCreateProject, useProjects } from "./api";
 import type { Project, ProjectCreate } from "./types";
@@ -25,9 +28,9 @@ export function ProjectsPage(): JSX.Element {
 
   if (!objectId) {
     return (
-      <p className="mx-auto mt-12 max-w-5xl p-6 text-red-700">
-        {t("common.error")}
-      </p>
+      <PageContainer width="default">
+        <p className="text-red-700">{t("common.error")}</p>
+      </PageContainer>
     );
   }
 
@@ -46,20 +49,20 @@ export function ProjectsPage(): JSX.Element {
   };
 
   return (
-    <section className="mx-auto mt-8 max-w-5xl p-6">
-      <header className="mb-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold">{t("projects.title")}</h2>
-          <p className="text-slate-500">{t("projects.subtitle")}</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setCreating(true)}
-          className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
-        >
-          {t("projects.create")}
-        </button>
-      </header>
+    <PageContainer width="default">
+      <PageHeader
+        title={t("projects.title")}
+        subtitle={t("projects.subtitle")}
+        actions={
+          <button
+            type="button"
+            onClick={() => setCreating(true)}
+            className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
+          >
+            {t("projects.create")}
+          </button>
+        }
+      />
 
       <label className="mb-3 inline-flex items-center gap-2 text-sm">
         <input
@@ -129,38 +132,6 @@ export function ProjectsPage(): JSX.Element {
           />
         </Drawer>
       )}
-    </section>
-  );
-}
-
-interface DrawerProps {
-  title: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}
-
-function Drawer({ title, onClose, children }: DrawerProps): JSX.Element {
-  return (
-    <div className="fixed inset-0 z-40 flex">
-      <div
-        className="flex-1 bg-slate-900/40"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <aside className="z-50 w-full max-w-xl overflow-y-auto bg-white p-6 shadow-xl">
-        <header className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Schliessen"
-            className="text-slate-500 hover:text-slate-900"
-          >
-            ×
-          </button>
-        </header>
-        {children}
-      </aside>
-    </div>
+    </PageContainer>
   );
 }
