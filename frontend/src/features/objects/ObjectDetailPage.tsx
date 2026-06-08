@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import { getObject } from "./api";
 import type { ObjectDetail } from "./types";
 import { UnitEditor } from "./UnitEditor";
 import { AttachmentList } from "@/features/attachments/AttachmentList";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 
 /**
  * Read-only object detail page. Phase 2 stops here for unit editing — the
@@ -35,56 +37,30 @@ export function ObjectDetailPage(): JSX.Element {
     };
   }, [id, t]);
 
-  if (error) return <p className="mx-auto mt-12 max-w-3xl p-6 text-red-700">{error}</p>;
-  if (!obj) return <p className="mx-auto mt-12 max-w-3xl p-6 text-slate-500">{t("common.loading")}</p>;
+  if (error)
+    return (
+      <PageContainer width="narrow">
+        <p className="text-red-700">{error}</p>
+      </PageContainer>
+    );
+  if (!obj)
+    return (
+      <PageContainer width="narrow">
+        <p className="text-slate-500">{t("common.loading")}</p>
+      </PageContainer>
+    );
 
   return (
-    <section className="mx-auto mt-12 max-w-3xl p-6">
-      <header className="mb-6">
-        <h2 className="text-2xl font-semibold">{obj.name}</h2>
-        <p className="text-slate-500">
-          {t(`objects.type.${obj.type}`)}
-          {obj.address && ` — ${obj.address}`}
-        </p>
-        <nav className="mt-3 flex gap-3 text-sm">
-          <Link
-            to={`/objekte/${obj.id}/kosten`}
-            className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
-          >
-            {t("costs.title")}
-          </Link>
-          <Link
-            to={`/objekte/${obj.id}/budget`}
-            className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
-          >
-            {t("budget.tab")}
-          </Link>
-          <Link
-            to={`/objekte/${obj.id}/projekte`}
-            className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
-          >
-            {t("projects.title")}
-          </Link>
-          <Link
-            to={`/objekte/${obj.id}/lose`}
-            className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
-          >
-            {t("lots.title")}
-          </Link>
-          <Link
-            to={`/objekte/${obj.id}/lieferanten`}
-            className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
-          >
-            {t("suppliers.title")}
-          </Link>
-          <Link
-            to={`/objekte/${obj.id}/audit`}
-            className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-100"
-          >
-            {t("audit.tab")}
-          </Link>
-        </nav>
-      </header>
+    <PageContainer width="narrow">
+      <PageHeader
+        title={obj.name}
+        subtitle={
+          <>
+            {t(`objects.type.${obj.type}`)}
+            {obj.address && ` — ${obj.address}`}
+          </>
+        }
+      />
 
       <section className="mb-8">
         <h3 className="mb-2 text-lg font-medium">{t("objects.units.title")}</h3>
@@ -104,6 +80,6 @@ export function ObjectDetailPage(): JSX.Element {
       <section className="mb-8">
         <AttachmentList targetType="object" targetId={obj.id} canEdit />
       </section>
-    </section>
+    </PageContainer>
   );
 }
