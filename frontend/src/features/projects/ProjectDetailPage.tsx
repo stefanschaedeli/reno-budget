@@ -1,15 +1,21 @@
 /**
- * Project detail / edit page.
- *
- * Shows project metadata, an edit form, archive + delete buttons and
- * the list of cost items belonging to the project. Cost items are
- * fetched from the existing cost-items endpoint filtered by project_id.
+ * Project detail page composed from a budget card, a cost-items
+ * section, and a collapsible details panel (existing ProjectForm).
  */
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCostItems } from "@/api/costs";
-import { formatChf } from "@/features/costs/types";
+import { getObject } from "@/features/objects/api";
+import type { ObjectDetail } from "@/features/objects/types";
+import { apiErrorMessage } from "@/lib/apiError";
+import { useTagsForTarget } from "@/features/tags/api";
+import { TagChip } from "@/components/TagChip";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 import { ProjectForm } from "./ProjectForm";
+import { BudgetCard } from "./BudgetCard";
+import { ProjectCostItemsSection } from "./ProjectCostItemsSection";
 import {
   useArchiveProject,
   useDeleteProject,
@@ -17,15 +23,24 @@ import {
   useUpdateProject,
 } from "./api";
 import type { ProjectCreate } from "./types";
-import { useTagsForTarget } from "@/features/tags/api";
-import { TagChip } from "@/components/TagChip";
-import { PageContainer } from "@/components/PageContainer";
-import { PageHeader } from "@/components/PageHeader";
+
+function sumPlanned(items: Array<{ planned_amount_chf: string | null }>): number {
+  let total = 0;
+  for (const i of items) {
+    if (i.planned_amount_chf == null) continue;
+    const n = Number(i.planned_amount_chf);
+    if (Number.isFinite(n)) total += n;
+  }
+  return total;
+}
 
 export function ProjectDetailPage(): JSX.Element {
   const { t } = useTranslation();
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const [object, setObject] = useState<ObjectDetail | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const projectQuery = useProject(projectId ?? "");
   const updateMut = useUpdateProject(projectId ?? "");
@@ -34,6 +49,22 @@ export function ProjectDetailPage(): JSX.Element {
   const deleteMut = useDeleteProject(projectId ?? "", objectId);
   const costItemsQuery = useCostItems(objectId, { project_id: projectId });
   const tagsQuery = useTagsForTarget("project", projectId ?? "");
+
+  useEffect(() => {
+    if (!objectId) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const data = await getObject(objectId);
+        if (!cancelled) setObject(data);
+      } catch (e) {
+        if (!cancelled) setLoadError(apiErrorMessage(e, t("common.error")));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [objectId, t]);
 
   if (projectQuery.isLoading || !projectId) {
     return (
@@ -49,10 +80,18 @@ export function ProjectDetailPage(): JSX.Element {
       </PageContainer>
     );
   }
+  if (loadError) {
+    return (
+      <PageContainer width="narrow">
+        <p className="text-red-700">{loadError}</p>
+      </PageContainer>
+    );
+  }
 
   const project = projectQuery.data;
   const items = costItemsQuery.data ?? [];
   const tags = tagsQuery.data ?? [];
+  const plannedTotal = sumPlanned(items);
 
   const handleSubmit = async (payload: ProjectCreate) => {
     await updateMut.mutateAsync(payload);
@@ -90,56 +129,38 @@ export function ProjectDetailPage(): JSX.Element {
         </div>
       )}
 
-      <section className="mb-8">
-        <h3 className="mb-3 text-lg font-medium">{t("projects.edit")}</h3>
-        <ProjectForm
-          initial={{
-            name: project.name,
-            description: project.description,
-            status: project.status,
-            planned_year: project.planned_year,
-            rough_estimate_chf: project.rough_estimate_chf,
-          }}
-          onSubmit={handleSubmit}
-          submitting={updateMut.isPending}
-        />
-      </section>
+      <BudgetCard project={project} plannedTotal={plannedTotal} />
 
-      <section className="mb-8">
-        <h3 className="mb-3 text-lg font-medium">
-          {t("projects.costItems.title")}
-        </h3>
-        {costItemsQuery.isLoading && (
-          <p className="text-slate-500">{t("common.loading")}</p>
-        )}
-        {items.length === 0 && !costItemsQuery.isLoading && (
-          <p className="text-slate-500">{t("projects.costItems.empty")}</p>
-        )}
-        {items.length > 0 && (
-          <table className="w-full text-sm">
-            <thead className="text-left text-slate-600">
-              <tr className="border-b border-slate-300">
-                <th className="px-2 py-2">{t("costs.fields.title")}</th>
-                <th className="px-2 py-2">{t("costs.fields.bkp")}</th>
-                <th className="px-2 py-2 text-right">
-                  {t("costs.fields.plannedAmount")}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id} className="border-b border-slate-200">
-                  <td className="px-2 py-2 font-medium">{item.title}</td>
-                  <td className="px-2 py-2 font-mono text-xs">
-                    {item.bkp_code ?? t("costs.uncategorised")}
-                  </td>
-                  <td className="px-2 py-2 text-right tabular-nums">
-                    {formatChf(item.planned_amount_chf)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {object && (
+        <ProjectCostItemsSection
+          objectId={objectId}
+          projectId={projectId}
+          object={object}
+        />
+      )}
+
+      <section className="mb-8 border-t border-slate-200 pt-4">
+        <button
+          type="button"
+          onClick={() => setDetailsOpen((v) => !v)}
+          className="mb-3 text-sm font-medium text-slate-600 hover:text-slate-900"
+        >
+          {detailsOpen
+            ? t("projects.details.hide")
+            : t("projects.details.show")}
+        </button>
+        {detailsOpen && (
+          <ProjectForm
+            initial={{
+              name: project.name,
+              description: project.description,
+              status: project.status,
+              planned_year: project.planned_year,
+              rough_estimate_chf: project.rough_estimate_chf,
+            }}
+            onSubmit={handleSubmit}
+            submitting={updateMut.isPending}
+          />
         )}
       </section>
 
