@@ -6,7 +6,7 @@
  * fetched from the existing cost-items endpoint filtered by project_id.
  */
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useCostItems } from "@/api/costs";
 import { formatChf } from "@/features/costs/types";
 import { ProjectForm } from "./ProjectForm";
@@ -19,6 +19,8 @@ import {
 import type { ProjectCreate } from "./types";
 import { useTagsForTarget } from "@/features/tags/api";
 import { TagChip } from "@/components/TagChip";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 
 export function ProjectDetailPage(): JSX.Element {
   const { t } = useTranslation();
@@ -35,16 +37,16 @@ export function ProjectDetailPage(): JSX.Element {
 
   if (projectQuery.isLoading || !projectId) {
     return (
-      <p className="mx-auto mt-12 max-w-3xl p-6 text-slate-500">
-        {t("common.loading")}
-      </p>
+      <PageContainer width="narrow">
+        <p className="text-slate-500">{t("common.loading")}</p>
+      </PageContainer>
     );
   }
   if (projectQuery.isError || !projectQuery.data) {
     return (
-      <p className="mx-auto mt-12 max-w-3xl p-6 text-red-700">
-        {t("common.error")}
-      </p>
+      <PageContainer width="narrow">
+        <p className="text-red-700">{t("common.error")}</p>
+      </PageContainer>
     );
   }
 
@@ -68,23 +70,17 @@ export function ProjectDetailPage(): JSX.Element {
   };
 
   return (
-    <section className="mx-auto mt-8 max-w-3xl p-6">
-      <header className="mb-6">
-        <h2 className="text-2xl font-semibold">{project.name}</h2>
-        <p className="text-slate-500">
-          {t(`projects.status.${project.status}`)}
-          {project.planned_year && ` · ${project.planned_year}`}
-          {project.archived_at && ` · ${t("projects.archived")}`}
-        </p>
-        <nav className="mt-3 text-sm">
-          <Link
-            to={`/objekte/${project.object_id}/projekte`}
-            className="text-slate-500 hover:underline"
-          >
-            ← {t("projects.backToList")}
-          </Link>
-        </nav>
-      </header>
+    <PageContainer width="narrow">
+      <PageHeader
+        title={project.name}
+        subtitle={
+          <>
+            {t(`projects.status.${project.status}`)}
+            {project.planned_year && ` · ${project.planned_year}`}
+            {project.archived_at && ` · ${t("projects.archived")}`}
+          </>
+        }
+      />
 
       {tags.length > 0 && (
         <div className="mb-6 flex flex-wrap gap-1">
@@ -166,6 +162,6 @@ export function ProjectDetailPage(): JSX.Element {
           </button>
         </div>
       </section>
-    </section>
+    </PageContainer>
   );
 }
