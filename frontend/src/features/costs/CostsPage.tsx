@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { ApiError } from "@/api/client";
+import { Drawer } from "@/components/Drawer";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 import {
   useCostItems,
   useCreateCostItem,
@@ -68,13 +71,15 @@ export function CostsPage(): JSX.Element {
 
   if (loadError)
     return (
-      <p className="mx-auto mt-12 max-w-5xl p-6 text-red-700">{loadError}</p>
+      <PageContainer width="wide">
+        <p className="text-red-700">{loadError}</p>
+      </PageContainer>
     );
   if (!obj || !objectId)
     return (
-      <p className="mx-auto mt-12 max-w-5xl p-6 text-slate-500">
-        {t("common.loading")}
-      </p>
+      <PageContainer width="wide">
+        <p className="text-slate-500">{t("common.loading")}</p>
+      </PageContainer>
     );
 
   const handleSubmit = async (payload: CostItemInput, pendingTags: Tag[]) => {
@@ -113,20 +118,20 @@ export function CostsPage(): JSX.Element {
   const items = costItemsQuery.data ?? [];
 
   return (
-    <section className="mx-auto mt-8 max-w-6xl p-6">
-      <header className="mb-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold">{t("costs.title")}</h2>
-          <p className="text-slate-500">{obj.name}</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setEditing("new")}
-          className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
-        >
-          {t("costs.create")}
-        </button>
-      </header>
+    <PageContainer width="wide">
+      <PageHeader
+        title={t("costs.title")}
+        subtitle={obj.name}
+        actions={
+          <button
+            type="button"
+            onClick={() => setEditing("new")}
+            className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
+          >
+            {t("costs.create")}
+          </button>
+        }
+      />
 
       <CostItemFilters
         units={obj.units}
@@ -253,38 +258,6 @@ export function CostsPage(): JSX.Element {
           )}
         </Drawer>
       )}
-    </section>
-  );
-}
-
-interface DrawerProps {
-  title: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}
-
-function Drawer({ title, onClose, children }: DrawerProps): JSX.Element {
-  return (
-    <div className="fixed inset-0 z-40 flex">
-      <div
-        className="flex-1 bg-slate-900/40"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <aside className="z-50 w-full max-w-xl overflow-y-auto bg-white p-6 shadow-xl">
-        <header className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Schliessen"
-            className="text-slate-500 hover:text-slate-900"
-          >
-            ×
-          </button>
-        </header>
-        {children}
-      </aside>
-    </div>
+    </PageContainer>
   );
 }
