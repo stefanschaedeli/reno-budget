@@ -240,6 +240,27 @@ function ObjectContextSection({
           {t("nav.crumb.budget")}
         </SidebarLink>
         <SidebarLink
+          to={`/objekte/${objectId}/projekte`}
+          icon="🗂️"
+          onNavigate={onNavigate}
+        >
+          {t("nav.crumb.projects")}
+        </SidebarLink>
+        <SidebarLink
+          to={`/objekte/${objectId}/lose`}
+          icon="📦"
+          onNavigate={onNavigate}
+        >
+          {t("nav.crumb.lots")}
+        </SidebarLink>
+        <SidebarLink
+          to={`/objekte/${objectId}/lieferanten`}
+          icon="🤝"
+          onNavigate={onNavigate}
+        >
+          {t("nav.crumb.suppliers")}
+        </SidebarLink>
+        <SidebarLink
           to={`/objekte/${objectId}/renofond`}
           icon="📈"
           onNavigate={onNavigate}
@@ -431,10 +452,7 @@ export function AppLayout(): JSX.Element {
   };
 
   // Suppress unused-var warning; `params` kept for future per-route extensions.
-  // `effectiveObjectId` / `effectiveObjectName` are wired up in the next task.
   void params;
-  void effectiveObjectId;
-  void effectiveObjectName;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -497,10 +515,10 @@ export function AppLayout(): JSX.Element {
             </SidebarLink>
           )}
 
-          {objectId && (
+          {effectiveObjectId && (
             <ObjectContextSection
-              objectId={objectId}
-              objectName={objectName}
+              objectId={effectiveObjectId}
+              objectName={effectiveObjectName}
               onNavigate={() => setDrawerOpen(false)}
             />
           )}
