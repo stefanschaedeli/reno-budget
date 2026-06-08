@@ -20,8 +20,9 @@ from app.core.db import SessionDep
 from app.core.deps import CurrentUser, require_csrf, require_object_access_dep
 from app.models.lot import Lot
 from app.models.object import ObjectRole
+from app.repositories.object import list_objects_for_user
 from app.schemas.cost import CostItemRead
-from app.schemas.lot import LotCreate, LotRead, LotUpdate
+from app.schemas.lot import LotCreate, LotListItem, LotRead, LotUpdate
 from app.services import audit as audit_svc
 from app.services.lots import (
     LotMembershipScopeError,
@@ -126,6 +127,28 @@ async def create_object_lot(
     )
     await session.commit()
     return _to_read(lot, cost_item_count=0)
+
+
+# ---- Cross-object list ------------------------------------------------------
+
+
+@router_lots.get("", response_model=list[LotListItem])
+async def list_all_lots(
+    user: CurrentUser,
+    session: SessionDep,
+) -> list[LotListItem]:
+    """All non-archived lots across every object the user can access."""
+    objects = await list_objects_for_user(session, user.id)
+    items: list[LotListItem] = []
+    for obj in objects:
+        rows = await list_lots(session, object_id=obj.id, include_archived=False)
+        for l in rows:
+            items.append(
+                LotListItem.model_validate(
+                    {**LotRead.model_validate(l).model_dump(), "object_name": obj.name}
+                )
+            )
+    return items
 
 
 # ---- Per-lot get / patch / archive / delete --------------------------------
