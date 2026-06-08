@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatChf } from "@/features/costs/types";
 import { useUpdateProject } from "./api";
 import type { Project } from "./types";
+
+const MAX_BAR_PERCENT = 150;
 
 export interface BudgetCardProps {
   project: Project;
@@ -28,6 +30,7 @@ export function BudgetCard({
   const [draft, setDraft] = useState<string>(
     estimate != null ? String(estimate) : "",
   );
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const updateMut = useUpdateProject(project.id);
 
   const diff = estimate != null ? plannedTotal - estimate : null;
@@ -37,12 +40,27 @@ export function BudgetCard({
       : null;
   const over = diff != null && diff > 0;
 
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+    }
+  }, [editing]);
+
+  const openEditor = () => {
+    setDraft(estimate != null ? String(estimate) : "");
+    setEditing(true);
+  };
+
   const save = async () => {
-    await updateMut.mutateAsync({
-      rough_estimate_chf: draft.trim() === "" ? null : draft.trim(),
-    });
-    setEditing(false);
-    onEstimateSaved?.();
+    try {
+      await updateMut.mutateAsync({
+        rough_estimate_chf: draft.trim() === "" ? null : draft.trim(),
+      });
+      setEditing(false);
+      onEstimateSaved?.();
+    } catch {
+      // Keep editor open; error surfaced below via updateMut.isError.
+    }
   };
 
   return (
@@ -56,7 +74,7 @@ export function BudgetCard({
           <p className="text-slate-500">{t("projects.budget.noEstimate")}</p>
           <button
             type="button"
-            onClick={() => setEditing(true)}
+            onClick={openEditor}
             className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
           >
             {t("projects.budget.addEstimate")}
@@ -68,12 +86,23 @@ export function BudgetCard({
         <>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <p className="text-xs text-slate-500">
-                {t("projects.budget.estimate")}
-              </p>
+              {editing ? (
+                <label
+                  htmlFor="budget-estimate-input"
+                  className="text-xs text-slate-500"
+                >
+                  {t("projects.budget.estimate")}
+                </label>
+              ) : (
+                <p className="text-xs text-slate-500">
+                  {t("projects.budget.estimate")}
+                </p>
+              )}
               {editing ? (
                 <div className="flex items-center gap-2">
                   <input
+                    id="budget-estimate-input"
+                    ref={inputRef}
                     type="number"
                     min={0}
                     step="0.01"
@@ -108,12 +137,17 @@ export function BudgetCard({
                   </p>
                   <button
                     type="button"
-                    onClick={() => setEditing(true)}
+                    onClick={openEditor}
                     className="text-xs text-slate-500 hover:text-slate-900"
                   >
                     {t("projects.budget.edit")}
                   </button>
                 </div>
+              )}
+              {editing && updateMut.isError && (
+                <p className="mt-1 text-xs text-red-700">
+                  {(updateMut.error as Error).message}
+                </p>
               )}
             </div>
 
@@ -159,7 +193,7 @@ export function BudgetCard({
                       : "bg-emerald-500")
                   }
                   style={{
-                    width: `${Math.min(percent ?? 0, 150)}%`,
+                    width: `${Math.min(percent ?? 0, MAX_BAR_PERCENT)}%`,
                   }}
                 />
               </div>
