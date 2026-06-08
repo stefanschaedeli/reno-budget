@@ -570,6 +570,8 @@ def _apply_filter(item: CostItem, filters: CostItemFilter) -> CostItem | None:
             return None
     if filters.project_id is not None and item.project_id != filters.project_id:
         return None
+    if filters.project_id_is_null and item.project_id is not None:
+        return None
     if filters.q is not None:
         needle = filters.q.strip().lower()
         if needle and needle not in item.title.lower():

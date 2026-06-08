@@ -255,6 +255,9 @@ class CostItemFilter(BaseModel):
     bkp_code: str | None = Field(default=None, min_length=1, max_length=16)
     unit_id: uuid.UUID | None = None
     project_id: uuid.UUID | None = None
+    # Phase 12: surface items that haven't been assigned to any project yet.
+    # Mutually exclusive with ``project_id``.
+    project_id_is_null: bool = False
     # Multi-value: pass ``?tag_id=<a>&tag_id=<b>`` for OR semantics.
     tag_id: list[uuid.UUID] | None = Field(default=None)
     # Phase 11B: scope to a single lot (any-of would be over-engineering for
@@ -268,6 +271,14 @@ class CostItemFilter(BaseModel):
     include_tag_ids: bool = False
     # Phase 11B: same pattern for lot membership ids.
     include_lot_ids: bool = False
+
+    @model_validator(mode="after")
+    def _project_filters_mutually_exclusive(self) -> "CostItemFilter":
+        if self.project_id is not None and self.project_id_is_null:
+            raise ValueError(
+                "project_id and project_id_is_null are mutually exclusive",
+            )
+        return self
 
 
 # ---- Internal helpers -------------------------------------------------------
