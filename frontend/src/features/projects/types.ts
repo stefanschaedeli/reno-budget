@@ -40,3 +40,9 @@ export type ProjectCreate = z.infer<typeof projectCreateSchema>;
 
 export const projectUpdateSchema = projectCreateSchema.partial();
 export type ProjectUpdate = z.infer<typeof projectUpdateSchema>;
+
+export const projectListItemSchema = projectSchema.extend({
+  object_name: z.string(),
+});
+
+export type ProjectListItem = z.infer<typeof projectListItemSchema>;
