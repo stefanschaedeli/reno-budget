@@ -408,6 +408,8 @@ export const de = {
   projects: {
     title: "Projekte",
     subtitle: "Gruppen von Kostenpositionen pro Objekt",
+    allTitle: "Alle Projekte",
+    allSubtitle: "Alle Projekte über alle Objekte",
     create: "Neues Projekt",
     edit: "Projekt bearbeiten",
     empty: "Noch keine Projekte erfasst.",
@@ -425,6 +427,7 @@ export const de = {
       plannedYear: "Geplantes Jahr",
       itemCount: "Positionen",
       archivedAt: "Archiviert",
+      object: "Objekt",
     },
     status: {
       idea: "Idee",
