@@ -8,6 +8,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
+import { Drawer } from "@/components/Drawer";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 import { SupplierForm } from "./SupplierForm";
 import { useCreateSupplier, useSuppliers } from "./api";
 import type { Supplier, SupplierCreate } from "./types";
@@ -23,9 +26,9 @@ export function SuppliersPage(): JSX.Element {
 
   if (!objectId) {
     return (
-      <p className="mx-auto mt-12 max-w-5xl p-6 text-red-700">
-        {t("common.error")}
-      </p>
+      <PageContainer width="default">
+        <p className="text-red-700">{t("common.error")}</p>
+      </PageContainer>
     );
   }
 
@@ -37,20 +40,20 @@ export function SuppliersPage(): JSX.Element {
   };
 
   return (
-    <section className="mx-auto mt-8 max-w-5xl p-6">
-      <header className="mb-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold">{t("suppliers.title")}</h2>
-          <p className="text-slate-500">{t("suppliers.subtitle")}</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setCreating(true)}
-          className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
-        >
-          {t("suppliers.create")}
-        </button>
-      </header>
+    <PageContainer width="default">
+      <PageHeader
+        title={t("suppliers.title")}
+        subtitle={t("suppliers.subtitle")}
+        actions={
+          <button
+            type="button"
+            onClick={() => setCreating(true)}
+            className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
+          >
+            {t("suppliers.create")}
+          </button>
+        }
+      />
 
       <label className="mb-3 inline-flex items-center gap-2 text-sm">
         <input
@@ -120,38 +123,6 @@ export function SuppliersPage(): JSX.Element {
           />
         </Drawer>
       )}
-    </section>
-  );
-}
-
-interface DrawerProps {
-  title: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}
-
-function Drawer({ title, onClose, children }: DrawerProps): JSX.Element {
-  return (
-    <div className="fixed inset-0 z-40 flex">
-      <div
-        className="flex-1 bg-slate-900/40"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <aside className="z-50 w-full max-w-xl overflow-y-auto bg-white p-6 shadow-xl">
-        <header className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Schliessen"
-            className="text-slate-500 hover:text-slate-900"
-          >
-            ×
-          </button>
-        </header>
-        {children}
-      </aside>
-    </div>
+    </PageContainer>
   );
 }
