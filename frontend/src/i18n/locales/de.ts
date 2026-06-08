@@ -487,6 +487,8 @@ export const de = {
   suppliers: {
     title: "Lieferanten",
     subtitle: "Adressbuch pro Objekt — Lieferanten und Handwerker",
+    allTitle: "Alle Lieferanten",
+    allSubtitle: "Alle Lieferanten über alle Objekte",
     create: "Neuer Lieferant",
     edit: "Lieferant bearbeiten",
     empty: "Noch keine Lieferanten erfasst.",
@@ -505,6 +507,7 @@ export const de = {
       address: "Adresse",
       notes: "Notizen",
       archivedAt: "Archiviert",
+      object: "Objekt",
     },
   },
   quotes: {
