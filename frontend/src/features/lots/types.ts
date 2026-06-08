@@ -49,3 +49,9 @@ export interface LotCostItemRef {
   lot_id: string;
   cost_item_id: string;
 }
+
+export const lotListItemSchema = lotSchema.extend({
+  object_name: z.string(),
+});
+
+export type LotListItem = z.infer<typeof lotListItemSchema>;
