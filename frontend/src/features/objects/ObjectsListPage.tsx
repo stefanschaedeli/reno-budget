@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import { listObjects } from "./api";
 import type { ObjectPublic } from "./types";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
 
 /**
  * Lists every object the current user has any membership on. Empty state
@@ -31,16 +33,18 @@ export function ObjectsListPage(): JSX.Element {
   }, [t]);
 
   return (
-    <section className="mx-auto mt-12 max-w-3xl p-6">
-      <header className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">{t("objects.list.title")}</h2>
-        <Link
-          to="/objekte/neu"
-          className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
-        >
-          {t("objects.list.create")}
-        </Link>
-      </header>
+    <PageContainer width="narrow">
+      <PageHeader
+        title={t("objects.list.title")}
+        actions={
+          <Link
+            to="/objekte/neu"
+            className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
+          >
+            {t("objects.list.create")}
+          </Link>
+        }
+      />
 
       {error && <p className="text-red-700">{error}</p>}
       {objects === null && !error && <p className="text-slate-500">{t("common.loading")}</p>}
@@ -62,6 +66,6 @@ export function ObjectsListPage(): JSX.Element {
           ))}
         </ul>
       )}
-    </section>
+    </PageContainer>
   );
 }
