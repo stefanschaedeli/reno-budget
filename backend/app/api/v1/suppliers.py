@@ -19,7 +19,8 @@ from app.core.db import SessionDep
 from app.core.deps import CurrentUser, require_csrf, require_object_access_dep
 from app.models.object import ObjectRole
 from app.models.supplier import Supplier
-from app.schemas.supplier import SupplierCreate, SupplierRead, SupplierUpdate
+from app.repositories.object import list_objects_for_user
+from app.schemas.supplier import SupplierCreate, SupplierListItem, SupplierRead, SupplierUpdate
 from app.services import audit as audit_svc
 from app.services.rbac import ObjectAccess
 from app.services.rbac import require_object_access as _require_access
@@ -118,6 +119,28 @@ async def create_object_supplier(
     )
     await session.commit()
     return _to_read(supplier)
+
+
+# ---- Cross-object list ------------------------------------------------------
+
+
+@router_suppliers.get("", response_model=list[SupplierListItem])
+async def list_all_suppliers(
+    user: CurrentUser,
+    session: SessionDep,
+) -> list[SupplierListItem]:
+    """All non-archived suppliers across every object the user can access."""
+    objects = await list_objects_for_user(session, user.id)
+    items: list[SupplierListItem] = []
+    for obj in objects:
+        rows = await list_suppliers(session, object_id=obj.id, include_archived=False)
+        for s in rows:
+            items.append(
+                SupplierListItem.model_validate(
+                    {**SupplierRead.model_validate(s).model_dump(), "object_name": obj.name}
+                )
+            )
+    return items
 
 
 # ---- Per-supplier get / patch / archive / delete ---------------------------
