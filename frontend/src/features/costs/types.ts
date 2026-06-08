@@ -180,6 +180,8 @@ export interface CostItemFilters {
   unit_id?: string | null | undefined;
   bkp_prefix?: string | null | undefined;
   project_id?: string | null | undefined;
+  /** When true, list endpoint returns only cost items with no project_id. */
+  project_id_is_null?: boolean | undefined;
   /** Tag-id OR filter — multiple tag ids are OR-ed by the backend. */
   tag_ids?: string[] | undefined;
   /** Phase 11B: filter to cost items that are a member of this lot. */
