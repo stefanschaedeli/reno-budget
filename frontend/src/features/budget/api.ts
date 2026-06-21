@@ -80,7 +80,7 @@ export async function fetchStatusPriorityBreakdown(
 }
 
 export async function fetchReservePlan(objectId: string): Promise<ReservePlan> {
-  const raw = await apiRequest<unknown>(`/objects/${objectId}/reserve`);
+  const raw = await apiRequest<unknown>(`/objects/${objectId}/budget/reserve`);
   return reservePlanSchema.parse(raw);
 }
 

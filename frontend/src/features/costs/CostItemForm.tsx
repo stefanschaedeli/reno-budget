@@ -232,11 +232,11 @@ export function CostItemForm({
             type="text"
             value={state.title}
             onChange={(e) => update("title", e.target.value)}
-            className="w-full rounded border border-slate-300 px-2 py-1"
+            className="w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1.5 text-ink focus:border-accent focus:outline-none"
             required
           />
         </label>
-        {err("title") && <p className="text-xs text-red-700">{err("title")}</p>}
+        {err("title") && <p className="text-xs text-negative">{err("title")}</p>}
       </div>
 
       <div>
@@ -248,7 +248,7 @@ export function CostItemForm({
           />
           {t("costs.bkpAllocations.toggle")}
         </label>
-        <p className="mb-2 text-xs text-slate-500">
+        <p className="mb-2 text-xs text-ink-muted">
           {t("costs.bkpAllocations.toggleHint")}
         </p>
         {!state.detailedBkp ? (
@@ -259,7 +259,7 @@ export function CostItemForm({
               onChange={(code) => update("bkp_code", code ?? "")}
             />
             {err("bkp_code") && (
-              <p className="text-xs text-red-700">{err("bkp_code")}</p>
+              <p className="text-xs text-negative">{err("bkp_code")}</p>
             )}
           </>
         ) : (
@@ -270,7 +270,7 @@ export function CostItemForm({
           />
         )}
         {err("bkp_allocations") && (
-          <p className="text-xs text-red-700">{err("bkp_allocations")}</p>
+          <p className="text-xs text-negative">{err("bkp_allocations")}</p>
         )}
       </div>
 
@@ -279,7 +279,7 @@ export function CostItemForm({
         <select
           value={state.project_id}
           onChange={(e) => update("project_id", e.target.value)}
-          className="w-full rounded border border-slate-300 px-2 py-1"
+          className="w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1.5 text-ink focus:border-accent focus:outline-none"
         >
           <option value="">{t("costs.projectNone")}</option>
           {(projectsQuery.data ?? []).map((p) => (
@@ -307,7 +307,7 @@ export function CostItemForm({
           <select
             value={state.status}
             onChange={(e) => update("status", e.target.value as CostStatus)}
-            className="w-full rounded border border-slate-300 px-2 py-1"
+            className="w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1.5 text-ink focus:border-accent focus:outline-none"
           >
             {COST_STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -324,7 +324,7 @@ export function CostItemForm({
           <select
             value={state.priority}
             onChange={(e) => update("priority", e.target.value as CostPriority)}
-            className="w-full rounded border border-slate-300 px-2 py-1"
+            className="w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1.5 text-ink focus:border-accent focus:outline-none"
           >
             {COST_PRIORITIES.map((p) => (
               <option key={p} value={p}>
@@ -346,7 +346,7 @@ export function CostItemForm({
             max={2200}
             value={state.planned_year}
             onChange={(e) => update("planned_year", e.target.value)}
-            className="w-full rounded border border-slate-300 px-2 py-1"
+            className="w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1.5 text-ink focus:border-accent focus:outline-none"
           />
         </label>
 
@@ -359,7 +359,7 @@ export function CostItemForm({
             min={0}
             value={state.lifespan_years}
             onChange={(e) => update("lifespan_years", e.target.value)}
-            className="w-full rounded border border-slate-300 px-2 py-1"
+            className="w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1.5 text-ink focus:border-accent focus:outline-none"
           />
         </label>
       </div>
@@ -375,7 +375,7 @@ export function CostItemForm({
             value={state.planned_amount_chf}
             onChange={(e) => update("planned_amount_chf", e.target.value)}
             placeholder="0.00"
-            className="w-full rounded border border-slate-300 px-2 py-1"
+            className="w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1.5 text-ink focus:border-accent focus:outline-none"
           />
         </label>
 
@@ -389,12 +389,12 @@ export function CostItemForm({
             value={state.actual_amount_chf}
             onChange={(e) => update("actual_amount_chf", e.target.value)}
             placeholder="0.00"
-            className="w-full rounded border border-slate-300 px-2 py-1"
+            className="w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1.5 text-ink focus:border-accent focus:outline-none"
           />
         </label>
       </div>
       {(err("planned_amount_chf") || err("actual_amount_chf")) && (
-        <p className="text-xs text-red-700">
+        <p className="text-xs text-negative">
           {err("planned_amount_chf") ?? err("actual_amount_chf")}
         </p>
       )}
@@ -408,7 +408,7 @@ export function CostItemForm({
             type="date"
             value={state.actual_date}
             onChange={(e) => update("actual_date", e.target.value)}
-            className="w-full rounded border border-slate-300 px-2 py-1"
+            className="w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1.5 text-ink focus:border-accent focus:outline-none"
           />
         </label>
 
@@ -420,7 +420,7 @@ export function CostItemForm({
             type="date"
             value={state.warranty_until}
             onChange={(e) => update("warranty_until", e.target.value)}
-            className="w-full rounded border border-slate-300 px-2 py-1"
+            className="w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1.5 text-ink focus:border-accent focus:outline-none"
           />
         </label>
       </div>
@@ -433,7 +433,7 @@ export function CostItemForm({
           value={state.description}
           onChange={(e) => update("description", e.target.value)}
           rows={3}
-          className="w-full rounded border border-slate-300 px-2 py-1"
+          className="w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1.5 text-ink focus:border-accent focus:outline-none"
         />
       </label>
 
@@ -472,7 +472,7 @@ export function CostItemForm({
         onChange={(next) => update("allocations", next)}
       />
       {err("allocations") && (
-        <p className="text-xs text-red-700">{err("allocations")}</p>
+        <p className="text-xs text-negative">{err("allocations")}</p>
       )}
 
       <div className="flex justify-end gap-2 pt-2">
@@ -480,7 +480,7 @@ export function CostItemForm({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+            className="rounded-sheet border border-rule px-3 py-1.5 text-sm text-ink-muted hover:border-ink/30 hover:text-ink"
           >
             {t("costs.cancel")}
           </button>
@@ -488,7 +488,7 @@ export function CostItemForm({
         <button
           type="submit"
           disabled={submitting}
-          className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700 disabled:opacity-50"
+          className="rounded-sheet bg-ink px-3 py-1.5 text-sm text-paper hover:bg-ink/85 disabled:opacity-50"
         >
           {submitting ? t("common.submitting") : t("costs.save")}
         </button>

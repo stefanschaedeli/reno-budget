@@ -47,7 +47,7 @@ describe("BkpAllocationEditor", () => {
     );
     const status = screen.getByRole("status");
     expect(status).toHaveTextContent(/900‰/);
-    expect(status.className).toMatch(/text-red-700/);
+    expect(status.className).toMatch(/text-negative/);
   });
 
   it("renders a balanced sum in green", () => {
@@ -64,7 +64,7 @@ describe("BkpAllocationEditor", () => {
     );
     const status = screen.getByRole("status");
     expect(status).toHaveTextContent(/1000‰/);
-    expect(status.className).toMatch(/text-green-700/);
+    expect(status.className).toMatch(/text-positive/);
   });
 
   it("calls onChange when adding a code from the dropdown", () => {

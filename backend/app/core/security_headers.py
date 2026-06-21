@@ -43,6 +43,7 @@ _BASELINE: dict[str, str] = {
 _HTML_CSP = (
     "default-src 'self'; "
     "img-src 'self' data:; "
+    "font-src 'self' data:; "
     "style-src 'self' 'unsafe-inline'; "
     "script-src 'self'; "
     "connect-src 'self'; "

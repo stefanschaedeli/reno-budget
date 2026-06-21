@@ -41,7 +41,7 @@ export function AcceptInvitePage(): JSX.Element {
   }
 
   return (
-    <div className="mx-auto mt-16 max-w-md rounded-lg bg-white p-8 shadow">
+    <div className="mx-auto mt-16 max-w-md rounded-lg bg-paper-raised p-8 shadow">
       <h1 className="mb-6 text-2xl font-semibold">{t("auth.invite.title")}</h1>
       <form
         onSubmit={(e) => {
@@ -56,7 +56,7 @@ export function AcceptInvitePage(): JSX.Element {
             required
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="block w-full rounded border border-slate-300 px-3 py-2"
+            className="block w-full rounded border border-rule px-3 py-2"
           />
         </label>
         <label className="block">
@@ -68,13 +68,13 @@ export function AcceptInvitePage(): JSX.Element {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="block w-full rounded border border-slate-300 px-3 py-2"
+            className="block w-full rounded border border-rule px-3 py-2"
           />
-          <span className="mt-1 block text-xs text-slate-500">{t("auth.invite.passwordHint")}</span>
+          <span className="mt-1 block text-xs text-ink-muted">{t("auth.invite.passwordHint")}</span>
         </label>
 
         {error && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-sm text-negative">
             {error}
           </p>
         )}
@@ -82,7 +82,7 @@ export function AcceptInvitePage(): JSX.Element {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
+          className="w-full rounded bg-ink px-4 py-2 text-paper disabled:opacity-50"
         >
           {submitting ? t("common.submitting") : t("auth.invite.submit")}
         </button>

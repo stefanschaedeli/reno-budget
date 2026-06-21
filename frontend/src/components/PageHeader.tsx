@@ -14,7 +14,7 @@ export function PageHeader({
       <div className="min-w-0">
         <h2 className="text-2xl font-semibold">{title}</h2>
         {subtitle && (
-          <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+          <p className="mt-1 text-sm text-ink-muted">{subtitle}</p>
         )}
       </div>
       {actions && (

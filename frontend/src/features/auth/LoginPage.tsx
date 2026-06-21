@@ -35,8 +35,8 @@ export function LoginPage(): JSX.Element {
   }
 
   return (
-    <div className="mx-auto mt-16 max-w-md rounded-lg bg-white p-8 shadow">
-      <h1 className="mb-6 text-2xl font-semibold">{t("auth.login.title")}</h1>
+    <div className="mx-auto mt-16 max-w-md border border-rule bg-paper-raised p-8 shadow-panel">
+      <h1 className="mb-6 font-display text-3xl text-ink">{t("auth.login.title")}</h1>
       <form
         onSubmit={(e) => {
           void onSubmit(e);
@@ -51,7 +51,7 @@ export function LoginPage(): JSX.Element {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="block w-full rounded border border-slate-300 px-3 py-2"
+            className="block w-full rounded border border-rule px-3 py-2"
           />
         </label>
         <label className="block">
@@ -62,12 +62,12 @@ export function LoginPage(): JSX.Element {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="block w-full rounded border border-slate-300 px-3 py-2"
+            className="block w-full rounded border border-rule px-3 py-2"
           />
         </label>
 
         {error && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-sm text-negative">
             {error}
           </p>
         )}
@@ -75,14 +75,14 @@ export function LoginPage(): JSX.Element {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
+          className="w-full rounded bg-ink px-4 py-2 text-paper disabled:opacity-50"
         >
           {submitting ? t("common.submitting") : t("auth.login.submit")}
         </button>
       </form>
 
       <p className="mt-4 text-sm">
-        <Link to="/passwort-zuruecksetzen" className="text-slate-600 underline">
+        <Link to="/passwort-zuruecksetzen" className="text-ink-muted underline">
           {t("auth.login.forgot")}
         </Link>
       </p>

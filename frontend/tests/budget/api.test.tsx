@@ -70,8 +70,7 @@ describe("budget API hooks", () => {
         respond: () => ({
           body: {
             object_id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-            my_role: "owner",
-            is_scoped: false,
+            scope_pro_rated: false,
             rows: [],
           },
         }),

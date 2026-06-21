@@ -52,6 +52,10 @@ class Settings(BaseSettings):
     uploads_dir: str = "/data/uploads"
     upload_max_bytes: int = 25 * 1024 * 1024  # 25 MiB
 
+    # AI assistant (Anthropic). Server-side only — never exposed to the browser.
+    # When unset, the AI feature is disabled and its endpoints return 503.
+    anthropic_api_key: SecretStr | None = None
+
     # SMTP (used by invitations / password reset / reminders)
     smtp_host: str | None = None
     smtp_port: int = 587

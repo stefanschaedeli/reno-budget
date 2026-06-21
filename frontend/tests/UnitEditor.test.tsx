@@ -17,7 +17,7 @@ describe("UnitEditor", () => {
     );
     const status = screen.getByRole("status");
     expect(status).toHaveTextContent(/1000‰/);
-    expect(status.className).toMatch(/text-green-700/);
+    expect(status.className).toMatch(/text-positive/);
   });
 
   it("shows hint when sum is off", () => {
@@ -33,7 +33,7 @@ describe("UnitEditor", () => {
     const status = screen.getByRole("status");
     expect(status).toHaveTextContent(/800‰/);
     expect(status).toHaveTextContent(/1000/);
-    expect(status.className).toMatch(/text-red-700/);
+    expect(status.className).toMatch(/text-negative/);
   });
 
   it("emits updates when a Wertquote input changes", () => {

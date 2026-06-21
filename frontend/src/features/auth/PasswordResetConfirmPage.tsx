@@ -37,15 +37,15 @@ export function PasswordResetConfirmPage(): JSX.Element {
 
   if (success) {
     return (
-      <div className="mx-auto mt-16 max-w-md rounded-lg bg-white p-8 shadow">
+      <div className="mx-auto mt-16 max-w-md rounded-lg bg-paper-raised p-8 shadow">
         <h1 className="mb-2 text-2xl font-semibold">{t("auth.reset.confirmTitle")}</h1>
-        <p className="text-emerald-700">{t("auth.reset.confirmSuccess")}</p>
+        <p className="text-positive">{t("auth.reset.confirmSuccess")}</p>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto mt-16 max-w-md rounded-lg bg-white p-8 shadow">
+    <div className="mx-auto mt-16 max-w-md rounded-lg bg-paper-raised p-8 shadow">
       <h1 className="mb-6 text-2xl font-semibold">{t("auth.reset.confirmTitle")}</h1>
       <form
         onSubmit={(e) => {
@@ -62,13 +62,13 @@ export function PasswordResetConfirmPage(): JSX.Element {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="block w-full rounded border border-slate-300 px-3 py-2"
+            className="block w-full rounded border border-rule px-3 py-2"
           />
-          <span className="mt-1 block text-xs text-slate-500">{t("auth.invite.passwordHint")}</span>
+          <span className="mt-1 block text-xs text-ink-muted">{t("auth.invite.passwordHint")}</span>
         </label>
 
         {error && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-sm text-negative">
             {error}
           </p>
         )}
@@ -76,7 +76,7 @@ export function PasswordResetConfirmPage(): JSX.Element {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
+          className="w-full rounded bg-ink px-4 py-2 text-paper disabled:opacity-50"
         >
           {submitting ? t("common.submitting") : t("auth.reset.confirmSubmit")}
         </button>

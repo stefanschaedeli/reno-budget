@@ -20,6 +20,14 @@ export interface CostItemBoardProps {
   onCardClick: (item: CostItem) => void;
 }
 
+const STATUS_DOT: Record<CostStatus, string> = {
+  idea: "bg-ink-subtle",
+  planned: "bg-warning",
+  in_progress: "bg-accent",
+  completed: "bg-positive",
+  cancelled: "bg-rule",
+};
+
 export function CostItemBoard({
   objectId,
   items,
@@ -56,23 +64,30 @@ export function CostItemBoard({
   };
 
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-3 lg:grid-cols-5">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5">
       {groups.map(({ status, items: group }) => (
         <div
           key={status}
           onDragOver={(e) => onDragOver(e, status)}
           onDragLeave={() => setDragOverCol(null)}
           onDrop={(e) => onDrop(e, status)}
-          className={`flex min-h-32 flex-col rounded border p-2 ${
+          className={`flex min-h-32 flex-col rounded-sheet border bg-paper-sunk/40 p-3 transition ${
             dragOverCol === status
-              ? "border-slate-900 bg-slate-100"
-              : "border-slate-200 bg-slate-50"
+              ? "border-accent bg-accent-soft/30"
+              : "border-rule"
           }`}
         >
-          <h3 className="mb-2 text-sm font-semibold text-slate-700">
-            {t(`costs.status.${status}`)}{" "}
-            <span className="text-xs font-normal text-slate-500">
-              ({group.length})
+          <h3 className="mb-3 flex items-center gap-2 font-display text-sm uppercase tracking-[0.12em] text-ink">
+            <span
+              aria-hidden
+              className={`inline-block h-1.5 w-1.5 rounded-full ${
+                // eslint-disable-next-line security/detect-object-injection -- status is CostStatus literal union
+                STATUS_DOT[status]
+              }`}
+            />
+            <span>{t(`costs.status.${status}`)}</span>
+            <span className="ml-auto font-mono text-xs font-normal text-ink-subtle">
+              {group.length}
             </span>
           </h3>
           <div className="flex flex-col gap-2">
@@ -82,16 +97,18 @@ export function CostItemBoard({
                 draggable
                 onDragStart={(e) => onDragStart(e, item.id)}
                 onClick={() => onCardClick(item)}
-                className="cursor-grab rounded border border-slate-300 bg-white p-2 text-sm shadow-sm hover:shadow active:cursor-grabbing"
+                className="cursor-grab rounded-sheet border border-rule bg-paper-raised p-3 text-sm text-ink transition hover:border-ink/30 active:cursor-grabbing"
               >
-                <div className="font-medium">{item.title}</div>
-                <div className="mt-1 flex items-center justify-between text-xs text-slate-600">
-                  <span className="rounded bg-slate-200 px-1 font-mono">
+                <div className="font-medium leading-snug">{item.title}</div>
+                <div className="mt-2 flex items-center justify-between text-xs text-ink-muted">
+                  <span className="rounded-sheet border border-rule px-1.5 py-0.5 font-mono text-[0.65rem]">
                     {item.bkp_code ?? t("costs.uncategorised")}
                   </span>
-                  <span>{item.planned_year ?? "—"}</span>
+                  <span className="font-mono tabular-nums">
+                    {item.planned_year ?? "—"}
+                  </span>
                 </div>
-                <div className="mt-1 text-right text-xs tabular-nums">
+                <div className="mt-2 text-right font-mono text-sm font-medium tabular-nums text-ink">
                   {formatChf(item.planned_amount_chf)}
                 </div>
               </div>

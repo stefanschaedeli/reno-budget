@@ -66,6 +66,12 @@ export function parseFiltersFromParams(params: URLSearchParams): Filters {
   };
 }
 
+const fieldLabelClass =
+  "mb-1 block text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-ink-muted";
+const inputClass =
+  "mt-1 block w-full rounded-sheet border border-rule bg-paper-raised px-2 py-1 text-sm text-ink focus:border-accent focus:outline-none";
+const selectClass = inputClass;
+
 export function CostItemFilters({
   units,
   objectId,
@@ -84,7 +90,6 @@ export function CostItemFilters({
     return (tagsQuery.data ?? []).filter((tag) => ids.has(tag.id));
   }, [filters.tag_ids, tagsQuery.data]);
 
-  // Latest onChange in a ref so we don't re-fire when the parent rebinds it.
   const onChangeRef = useRef(onChange);
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -122,13 +127,11 @@ export function CostItemFilters({
   return (
     <section
       aria-label={t("costs.filters.title")}
-      className="mb-4 rounded border border-slate-200 bg-slate-50 p-3"
+      className="mb-6 border-y border-rule bg-paper-sunk/60 p-4"
     >
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div>
-          <p className="mb-1 text-xs font-medium text-slate-600">
-            {t("costs.filters.status")}
-          </p>
+          <p className={fieldLabelClass}>{t("costs.filters.status")}</p>
           <div className="flex flex-wrap gap-1">
             {COST_STATUSES.map((s) => {
               const active = filters.status?.includes(s) ?? false;
@@ -140,10 +143,10 @@ export function CostItemFilters({
                   onClick={() =>
                     setMulti(STATUS_PARAM, toggleInArray(filters.status, s))
                   }
-                  className={`rounded border px-2 py-0.5 text-xs ${
+                  className={`rounded-sheet border px-2 py-0.5 text-xs transition ${
                     active
-                      ? "border-slate-900 bg-slate-900 text-white"
-                      : "border-slate-300 bg-white"
+                      ? "border-ink bg-ink text-paper"
+                      : "border-rule bg-paper-raised text-ink-muted hover:border-ink/30 hover:text-ink"
                   }`}
                 >
                   {t(`costs.status.${s}`)}
@@ -154,9 +157,7 @@ export function CostItemFilters({
         </div>
 
         <div>
-          <p className="mb-1 text-xs font-medium text-slate-600">
-            {t("costs.filters.priority")}
-          </p>
+          <p className={fieldLabelClass}>{t("costs.filters.priority")}</p>
           <div className="flex flex-wrap gap-1">
             {COST_PRIORITIES.map((p) => {
               const active = filters.priority?.includes(p) ?? false;
@@ -168,10 +169,10 @@ export function CostItemFilters({
                   onClick={() =>
                     setMulti(PRIORITY_PARAM, toggleInArray(filters.priority, p))
                   }
-                  className={`rounded border px-2 py-0.5 text-xs ${
+                  className={`rounded-sheet border px-2 py-0.5 text-xs transition ${
                     active
-                      ? "border-slate-900 bg-slate-900 text-white"
-                      : "border-slate-300 bg-white"
+                      ? "border-ink bg-ink text-paper"
+                      : "border-rule bg-paper-raised text-ink-muted hover:border-ink/30 hover:text-ink"
                   }`}
                 >
                   {t(`costs.priority.${p}`)}
@@ -182,7 +183,7 @@ export function CostItemFilters({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
+          <label className={fieldLabelClass}>
             {t("costs.filters.plannedYear")}
             <input
               type="number"
@@ -190,18 +191,18 @@ export function CostItemFilters({
               max={2200}
               value={filters.planned_year ?? ""}
               onChange={(e) => setScalar(YEAR_PARAM, e.target.value || null)}
-              className="mt-1 w-32 rounded border border-slate-300 px-2 py-1 text-sm"
+              className={`${inputClass} w-32 font-mono tabular-nums`}
             />
           </label>
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
+          <label className={fieldLabelClass}>
             {t("costs.filters.unit")}
             <select
               value={filters.unit_id ?? ""}
               onChange={(e) => setScalar(UNIT_PARAM, e.target.value || null)}
-              className="mt-1 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+              className={selectClass}
             >
               <option value="">{t("costs.filters.anyUnit")}</option>
               {units.map((u) => (
@@ -214,25 +215,25 @@ export function CostItemFilters({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
+          <label className={fieldLabelClass}>
             {t("costs.filters.bkpPrefix")}
             <input
               type="text"
               value={filters.bkp_prefix ?? ""}
               onChange={(e) => setScalar(BKP_PARAM, e.target.value || null)}
               placeholder="z. B. C"
-              className="mt-1 w-32 rounded border border-slate-300 px-2 py-1 text-sm"
+              className={`${inputClass} w-32 font-mono`}
             />
           </label>
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
+          <label className={fieldLabelClass}>
             {t("costs.filters.project")}
             <select
               value={filters.project_id ?? ""}
               onChange={(e) => setScalar(PROJECT_PARAM, e.target.value || null)}
-              className="mt-1 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+              className={selectClass}
             >
               <option value="">{t("costs.filters.anyProject")}</option>
               {(projectsQuery.data ?? []).map((p) => (
@@ -245,12 +246,12 @@ export function CostItemFilters({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
+          <label className={fieldLabelClass}>
             {t("costs.filters.lot")}
             <select
               value={filters.lot_id ?? ""}
               onChange={(e) => setScalar(LOT_PARAM, e.target.value || null)}
-              className="mt-1 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+              className={selectClass}
             >
               <option value="">{t("costs.filters.anyLot")}</option>
               {(lotsQuery.data ?? []).map((l) => (
@@ -263,21 +264,19 @@ export function CostItemFilters({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
+          <label className={fieldLabelClass}>
             {t("costs.filters.search")}
             <input
               type="search"
               value={filters.q ?? ""}
               onChange={(e) => setScalar(Q_PARAM, e.target.value || null)}
-              className="mt-1 block w-full rounded border border-slate-300 px-2 py-1 text-sm"
+              className={inputClass}
             />
           </label>
         </div>
 
         <div className="md:col-span-3">
-          <p className="mb-1 text-xs font-medium text-slate-600">
-            {t("costs.filters.tags")}
-          </p>
+          <p className={fieldLabelClass}>{t("costs.filters.tags")}</p>
           <TagPicker
             objectId={objectId}
             value={selectedTags}
@@ -287,11 +286,11 @@ export function CostItemFilters({
         </div>
       </div>
 
-      <div className="mt-3 text-right">
+      <div className="mt-4 text-right">
         <button
           type="button"
           onClick={reset}
-          className="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-100"
+          className="rounded-sheet border border-rule px-3 py-1 text-xs text-ink-muted hover:border-ink/30 hover:text-ink"
         >
           {t("costs.filters.reset")}
         </button>

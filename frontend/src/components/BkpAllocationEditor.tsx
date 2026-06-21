@@ -57,13 +57,13 @@ export function BkpAllocationEditor({
         {t("costs.bkpAllocations.title")}
       </h4>
       {value.length === 0 && (
-        <p className="mb-2 text-sm text-slate-500">
+        <p className="mb-2 text-sm text-ink-muted">
           {t("costs.bkpAllocations.empty")}
         </p>
       )}
       {value.length > 0 && (
         <table className="w-full text-sm">
-          <thead className="text-left text-slate-500">
+          <thead className="text-left text-ink-muted">
             <tr>
               <th className="py-1">{t("costs.bkpAllocations.codeColumn")}</th>
               <th className="py-1">{t("costs.bkpAllocations.shareColumn")}</th>
@@ -74,11 +74,11 @@ export function BkpAllocationEditor({
             {value.map((a) => {
               const code = codesByCode.get(a.bkp_code);
               return (
-                <tr key={a.bkp_code} className="border-t border-slate-200">
+                <tr key={a.bkp_code} className="border-t border-rule">
                   <td className="py-1 font-mono text-xs">
                     {a.bkp_code}
                     {code && (
-                      <span className="ml-2 font-sans text-slate-500">
+                      <span className="ml-2 font-sans text-ink-muted">
                         {code.label_de}
                       </span>
                     )}
@@ -93,17 +93,17 @@ export function BkpAllocationEditor({
                       onChange={(e) =>
                         updateShare(a.bkp_code, Number(e.target.value))
                       }
-                      className="w-24 rounded border border-slate-300 px-2 py-1"
+                      className="w-24 rounded border border-rule px-2 py-1"
                       aria-label={`${t("costs.bkpAllocations.shareColumn")} ${a.bkp_code}`}
                     />
-                    <span className="ml-1 text-slate-500">‰</span>
+                    <span className="ml-1 text-ink-muted">‰</span>
                   </td>
                   {!readonly && (
                     <td className="py-1 text-right">
                       <button
                         type="button"
                         onClick={() => removeCode(a.bkp_code)}
-                        className="text-xs text-red-700 hover:underline"
+                        className="text-xs text-negative hover:underline"
                       >
                         {t("costs.bkpAllocations.remove")}
                       </button>
@@ -125,7 +125,7 @@ export function BkpAllocationEditor({
               e.target.value = "";
             }}
             aria-label={t("costs.bkpAllocations.add")}
-            className="rounded border border-slate-300 px-2 py-1 text-sm"
+            className="rounded border border-rule px-2 py-1 text-sm"
           >
             <option value="">{t("costs.bkpAllocations.chooseCode")}</option>
             {availableCodes.map((c) => (
@@ -141,7 +141,7 @@ export function BkpAllocationEditor({
         role="status"
         aria-live="polite"
         className={`mt-3 text-sm font-medium ${
-          balanced ? "text-green-700" : "text-red-700"
+          balanced ? "text-positive" : "text-negative"
         }`}
       >
         {t("costs.bkpAllocations.sum", { sum })}

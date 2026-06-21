@@ -19,7 +19,7 @@ from app.services.rbac import get_object_access
 router = APIRouter(prefix="/finances", tags=["finances"])
 
 
-@router.get("/overview", response_model=FinanceOverviewResponse)
+@router.get("", response_model=FinanceOverviewResponse)
 async def get_overview(user: CurrentUser, session: SessionDep) -> FinanceOverviewResponse:
     """Per-object totals for every object the current user belongs to.
 
@@ -48,7 +48,7 @@ async def get_overview(user: CurrentUser, session: SessionDep) -> FinanceOvervie
                 total_planned_inflated_chf=planned_infl,
                 total_actual_chf=actual,
                 required_per_year_chf=per_year,
-                scope_pro_rated=access.allowed_unit_ids is not None,
+                is_scoped=access.allowed_unit_ids is not None,
             )
         )
-    return FinanceOverviewResponse(items=items)
+    return FinanceOverviewResponse(rows=items)

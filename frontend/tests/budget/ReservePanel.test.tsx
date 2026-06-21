@@ -12,24 +12,22 @@ const OBJECT_ID = "00000000-0000-0000-0000-000000000001";
 
 const ownerPlan = {
   object_id: OBJECT_ID,
-  inflation_rate_percent: 1.5,
+  inflation_rate_percent: "1.5",
   initial_reserve_chf: "20000",
   contribution_mode: "yearly",
   horizon_years: 30,
   total_planned_inflated_chf: "300000",
   required_total_chf: "280000",
-  required_contribution_chf: "9333.33",
-  lump_sum_schedule: [],
-  my_role: "owner",
+  required_per_year_chf: "9333.33",
+  required_per_month_chf: "777.78",
+  required_lump_sums: [],
+  scope_pro_rated: false,
 };
-
-const editorPlan = { ...ownerPlan, my_role: "editor" };
 
 const lumpSumPlan = {
   ...ownerPlan,
   contribution_mode: "lump_sum",
-  required_contribution_chf: null,
-  lump_sum_schedule: [
+  required_lump_sums: [
     { year: 2027, amount_chf: "10000" },
     { year: 2030, amount_chf: "25000" },
   ],
@@ -38,11 +36,11 @@ const lumpSumPlan = {
 describe("ReservePanel", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  describe("as OWNER", () => {
+  describe("editable form", () => {
     beforeEach(() => {
       mockFetchByRoute([
         {
-          match: get(`/objects/${OBJECT_ID}/reserve`),
+          match: get(`/objects/${OBJECT_ID}/budget/reserve`),
           respond: () => ({ body: ownerPlan }),
         },
         {
@@ -79,34 +77,11 @@ describe("ReservePanel", () => {
     });
   });
 
-  describe("as EDITOR", () => {
-    beforeEach(() => {
-      mockFetchByRoute([
-        {
-          match: get(`/objects/${OBJECT_ID}/reserve`),
-          respond: () => ({ body: editorPlan }),
-        },
-      ]);
-    });
-
-    it("shows read-only hint and no save button", async () => {
-      renderWithProviders(<ReservePanel objectId={OBJECT_ID} />);
-      await waitFor(() => {
-        expect(
-          screen.getByText(/Nur Eigentümer können diese Werte bearbeiten/),
-        ).toBeInTheDocument();
-      });
-      expect(
-        screen.queryByRole("button", { name: /Speichern/ }),
-      ).not.toBeInTheDocument();
-    });
-  });
-
   describe("formula label per mode", () => {
     it("uses 'CHF pro Jahr' for yearly mode", async () => {
       mockFetchByRoute([
         {
-          match: get(`/objects/${OBJECT_ID}/reserve`),
+          match: get(`/objects/${OBJECT_ID}/budget/reserve`),
           respond: () => ({ body: ownerPlan }),
         },
       ]);
@@ -119,7 +94,7 @@ describe("ReservePanel", () => {
     it("renders the lump-sum schedule table when mode is lump_sum", async () => {
       mockFetchByRoute([
         {
-          match: get(`/objects/${OBJECT_ID}/reserve`),
+          match: get(`/objects/${OBJECT_ID}/budget/reserve`),
           respond: () => ({ body: lumpSumPlan }),
         },
       ]);

@@ -94,10 +94,10 @@ class FinanceOverviewItem(BaseModel):
     total_planned_inflated_chf: Decimal
     total_actual_chf: Decimal
     required_per_year_chf: Decimal
-    scope_pro_rated: bool
+    is_scoped: bool
 
 
 class FinanceOverviewResponse(BaseModel):
     """Wrapper around the list of objects the user belongs to."""
 
-    items: list[FinanceOverviewItem]
+    rows: list[FinanceOverviewItem]

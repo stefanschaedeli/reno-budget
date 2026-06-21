@@ -120,13 +120,13 @@ export function TagPicker({
             window.setTimeout(() => setOpen(false), 120);
           }}
           placeholder={placeholder ?? t("tags.picker.placeholder")}
-          className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+          className="w-full rounded border border-rule px-2 py-1 text-sm"
           aria-label={t("tags.picker.label")}
         />
         {open && (matches.length > 0 || (allowCreate && parsedNew && !exactMatch)) && (
           <ul
             role="listbox"
-            className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded border border-slate-300 bg-white shadow-lg"
+            className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded border border-rule bg-paper-raised shadow-lg"
           >
             {matches.map((tag) => (
               <li key={tag.id}>
@@ -134,20 +134,20 @@ export function TagPicker({
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => handleSelect(tag)}
-                  className="flex w-full items-center gap-2 px-2 py-1 text-left text-sm hover:bg-slate-100"
+                  className="flex w-full items-center gap-2 px-2 py-1 text-left text-sm hover:bg-paper-sunk"
                 >
                   <TagChip tag={tag} />
                 </button>
               </li>
             ))}
             {allowCreate && parsedNew && !exactMatch && (
-              <li className="border-t border-slate-200">
+              <li className="border-t border-rule">
                 <button
                   type="button"
                   disabled={createMut.isPending}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => void handleCreate()}
-                  className="w-full px-2 py-1 text-left text-sm text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                  className="w-full px-2 py-1 text-left text-sm text-ink-muted hover:bg-paper-sunk disabled:opacity-50"
                 >
                   {t("tags.picker.create", {
                     key: parsedNew.key,
@@ -160,7 +160,7 @@ export function TagPicker({
         )}
       </div>
       {allowCreate && (
-        <p className="text-xs text-slate-500">{t("tags.picker.hint")}</p>
+        <p className="text-xs text-ink-muted">{t("tags.picker.hint")}</p>
       )}
     </div>
   );

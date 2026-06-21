@@ -31,7 +31,7 @@ export function ObjectAuditPage(): JSX.Element {
   if (!id)
     return (
       <PageContainer width="default">
-        <p className="text-red-700">{t("common.error")}</p>
+        <p className="text-negative">{t("common.error")}</p>
       </PageContainer>
     );
   return <AuditViewer mode="object" objectId={id} />;
@@ -85,7 +85,7 @@ function AuditViewer({ mode, objectId }: InnerProps): JSX.Element {
   if (loading) {
     return (
       <PageContainer width="default">
-        <p className="text-slate-600">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       </PageContainer>
     );
   }
@@ -93,7 +93,7 @@ function AuditViewer({ mode, objectId }: InnerProps): JSX.Element {
     return (
       <PageContainer width="default">
         <PageHeader title={title} />
-        <p className="rounded border border-red-300 bg-red-50 p-3 text-red-800">
+        <p className="rounded border border-negative bg-negative-soft p-3 text-negative">
           {error}
         </p>
       </PageContainer>
@@ -105,11 +105,11 @@ function AuditViewer({ mode, objectId }: InnerProps): JSX.Element {
       <PageHeader title={title} subtitle={t("audit.subtitle")} />
 
       {events.length === 0 ? (
-        <p className="text-slate-500">{t("audit.empty")}</p>
+        <p className="text-ink-muted">{t("audit.empty")}</p>
       ) : (
         <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="border-b border-slate-300 text-left">
+            <tr className="border-b border-rule text-left">
               <th className="py-2 pr-3">{t("audit.columns.time")}</th>
               <th className="py-2 pr-3">{t("audit.columns.actor")}</th>
               <th className="py-2 pr-3">{t("audit.columns.action")}</th>
@@ -128,7 +128,7 @@ function AuditViewer({ mode, objectId }: InnerProps): JSX.Element {
         <div className="mt-4">
           <button
             type="button"
-            className="rounded border border-slate-300 px-3 py-1.5 hover:bg-slate-50 disabled:opacity-50"
+            className="rounded border border-rule px-3 py-1.5 hover:bg-paper-sunk disabled:opacity-50"
             onClick={() => void handleMore()}
             disabled={loadingMore}
           >
@@ -151,8 +151,8 @@ function AuditRow({ event }: { event: AuditEvent }): JSX.Element {
     defaultValue: event.action,
   });
   return (
-    <tr className="border-b border-slate-100 align-top">
-      <td className="py-2 pr-3 font-mono text-xs text-slate-600">{time}</td>
+    <tr className="border-b border-rule align-top">
+      <td className="py-2 pr-3 font-mono text-xs text-ink-muted">{time}</td>
       <td className="py-2 pr-3">{event.actor_email}</td>
       <td className="py-2 pr-3">{actionLabel}</td>
       <td className="py-2 pr-3">{event.summary}</td>

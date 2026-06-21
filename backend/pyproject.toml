@@ -1,6 +1,6 @@
 [project]
 name = "reno-budget-api"
-version = "1.0.0"
+version = "2.0.0"
 description = "Reno-Budget backend (FastAPI + SQLAlchemy + Postgres)"
 requires-python = ">=3.12"
 readme = "../README.md"
@@ -22,6 +22,7 @@ dependencies = [
   "slowapi>=0.1.9",
   "apscheduler>=3.10",
   "httpx>=0.28",
+  "anthropic>=0.40",
   "structlog>=24.4",
   "openpyxl>=3.1",
   "reportlab>=4.2",

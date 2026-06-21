@@ -68,7 +68,7 @@ export function QuotesPanel({ lotId, objectId, lotStatus }: Props): JSX.Element 
         <button
           type="button"
           onClick={() => setCreating((v) => !v)}
-          className="rounded border border-slate-300 px-2 py-1 text-sm hover:bg-slate-100"
+          className="rounded border border-rule px-2 py-1 text-sm hover:bg-paper-sunk"
         >
           {t("quotes.add")}
         </button>
@@ -76,7 +76,7 @@ export function QuotesPanel({ lotId, objectId, lotStatus }: Props): JSX.Element 
 
       {awardedQuote && (
         <div
-          className="mb-3 rounded border border-green-300 bg-green-50 p-3 text-sm"
+          className="mb-3 rounded border border-positive bg-positive-soft p-3 text-sm"
           data-testid="awarded-banner"
         >
           <strong>{t("quotes.awardedLabel")}:</strong>{" "}
@@ -88,7 +88,7 @@ export function QuotesPanel({ lotId, objectId, lotStatus }: Props): JSX.Element 
       )}
 
       {creating && (
-        <div className="mb-3 rounded border border-slate-200 bg-slate-50 p-3">
+        <div className="mb-3 rounded border border-rule bg-paper-sunk p-3">
           <QuoteForm
             suppliers={suppliers}
             onSubmit={handleCreate}
@@ -99,15 +99,15 @@ export function QuotesPanel({ lotId, objectId, lotStatus }: Props): JSX.Element 
       )}
 
       {quotesQuery.isLoading && (
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       )}
       {quotes.length === 0 && !quotesQuery.isLoading && (
-        <p className="text-slate-500">{t("quotes.empty")}</p>
+        <p className="text-ink-muted">{t("quotes.empty")}</p>
       )}
       {quotes.length > 0 && (
         <table className="w-full text-sm">
-          <thead className="text-left text-slate-600">
-            <tr className="border-b border-slate-300">
+          <thead className="text-left text-ink-muted">
+            <tr className="border-b border-rule">
               <th className="px-2 py-2">{t("quotes.fields.supplier")}</th>
               <th className="px-2 py-2 text-right">
                 {t("quotes.fields.amount")}
@@ -123,7 +123,7 @@ export function QuotesPanel({ lotId, objectId, lotStatus }: Props): JSX.Element 
               <tr
                 key={q.id}
                 data-testid={`quote-row-${q.id}`}
-                className="border-b border-slate-200"
+                className="border-b border-rule"
               >
                 <td className="px-2 py-2 font-medium">
                   {supplierById.get(q.supplier_id)?.name ?? "?"}
@@ -148,7 +148,7 @@ export function QuotesPanel({ lotId, objectId, lotStatus }: Props): JSX.Element 
                       type="button"
                       onClick={() => void handleAward(q.id)}
                       disabled={awardMut.isPending}
-                      className="rounded border border-green-300 px-2 py-0.5 text-xs text-green-700 hover:bg-green-50 disabled:opacity-60"
+                      className="rounded-sheet border border-positive px-2 py-0.5 text-xs text-positive hover:bg-positive-soft disabled:opacity-60"
                     >
                       {t("quotes.award")}
                     </button>
@@ -203,14 +203,14 @@ function QuoteForm({
     <form onSubmit={submit} className="space-y-2 text-sm">
       <div className="grid grid-cols-2 gap-2">
         <label className="block">
-          <span className="block text-slate-700">
+          <span className="block text-ink-muted">
             {t("quotes.fields.supplier")}
           </span>
           <select
             value={supplierId}
             onChange={(e) => setSupplierId(e.target.value)}
             required
-            className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 w-full rounded border border-rule px-2 py-1"
           >
             {suppliers.length === 0 && <option value="">—</option>}
             {suppliers.map((s) => (
@@ -221,7 +221,7 @@ function QuoteForm({
           </select>
         </label>
         <label className="block">
-          <span className="block text-slate-700">
+          <span className="block text-ink-muted">
             {t("quotes.fields.amount")}
           </span>
           <input
@@ -231,11 +231,11 @@ function QuoteForm({
             onChange={(e) => setAmount(e.target.value)}
             required
             placeholder="12345.00"
-            className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 w-full rounded border border-rule px-2 py-1"
           />
         </label>
         <label className="block">
-          <span className="block text-slate-700">
+          <span className="block text-ink-muted">
             {t("quotes.fields.receivedAt")}
           </span>
           <input
@@ -243,28 +243,28 @@ function QuoteForm({
             value={receivedAt}
             onChange={(e) => setReceivedAt(e.target.value)}
             required
-            className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 w-full rounded border border-rule px-2 py-1"
           />
         </label>
         <label className="block">
-          <span className="block text-slate-700">
+          <span className="block text-ink-muted">
             {t("quotes.fields.validUntil")}
           </span>
           <input
             type="date"
             value={validUntil}
             onChange={(e) => setValidUntil(e.target.value)}
-            className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 w-full rounded border border-rule px-2 py-1"
           />
         </label>
         <label className="block">
-          <span className="block text-slate-700">
+          <span className="block text-ink-muted">
             {t("quotes.fields.status")}
           </span>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as QuoteStatus)}
-            className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 w-full rounded border border-rule px-2 py-1"
           >
             <option value="received">{t("quotes.status.received")}</option>
             <option value="shortlisted">
@@ -274,14 +274,14 @@ function QuoteForm({
           </select>
         </label>
         <label className="block">
-          <span className="block text-slate-700">
+          <span className="block text-ink-muted">
             {t("quotes.fields.notes")}
           </span>
           <input
             type="text"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 w-full rounded border border-rule px-2 py-1"
           />
         </label>
       </div>
@@ -289,14 +289,14 @@ function QuoteForm({
         <button
           type="submit"
           disabled={submitting || suppliers.length === 0}
-          className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700 disabled:opacity-60"
+          className="rounded bg-ink px-3 py-1 text-sm text-paper hover:bg-ink disabled:opacity-60"
         >
           {submitting ? t("common.submitting") : t("costs.save")}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+          className="rounded border border-rule px-3 py-1 text-sm hover:bg-paper-sunk"
         >
           {t("costs.cancel")}
         </button>

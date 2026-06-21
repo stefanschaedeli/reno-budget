@@ -9,6 +9,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from app import __version__
+from app.api.v1 import ai as ai_router
 from app.api.v1 import attachments as attachments_router
 from app.api.v1 import audit as audit_router
 from app.api.v1 import auth as auth_router
@@ -66,6 +67,7 @@ def create_app() -> FastAPI:
     app.include_router(exports_router.router, prefix=settings.api_prefix)
     app.include_router(projects_router.router_objects, prefix=settings.api_prefix)
     app.include_router(projects_router.router_projects, prefix=settings.api_prefix)
+    app.include_router(ai_router.router, prefix=settings.api_prefix)
     app.include_router(lots_router.router_objects, prefix=settings.api_prefix)
     app.include_router(lots_router.router_lots, prefix=settings.api_prefix)
     app.include_router(tags_router.router_objects, prefix=settings.api_prefix)

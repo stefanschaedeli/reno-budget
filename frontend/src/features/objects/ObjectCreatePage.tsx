@@ -76,7 +76,7 @@ export function ObjectCreatePage(): JSX.Element {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 w-full rounded border border-rule px-2 py-1"
           />
         </label>
 
@@ -85,7 +85,7 @@ export function ObjectCreatePage(): JSX.Element {
           <input
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 w-full rounded border border-rule px-2 py-1"
           />
         </label>
 
@@ -95,7 +95,7 @@ export function ObjectCreatePage(): JSX.Element {
             type="number"
             value={yearBuilt}
             onChange={(e) => setYearBuilt(e.target.value)}
-            className="mt-1 w-32 rounded border border-slate-300 px-2 py-1"
+            className="mt-1 w-32 rounded border border-rule px-2 py-1"
           />
         </label>
 
@@ -126,12 +126,12 @@ export function ObjectCreatePage(): JSX.Element {
           <UnitEditor units={units} onChange={setUnits} readonly={type === "sfh"} />
         </section>
 
-        {error && <p className="text-red-700">{error}</p>}
+        {error && <p className="text-negative">{error}</p>}
 
         <button
           type="submit"
           disabled={busy}
-          className="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700 disabled:opacity-50"
+          className="rounded bg-ink px-4 py-2 text-paper hover:bg-ink disabled:opacity-50"
         >
           {busy ? t("common.submitting") : t("objects.create.submit")}
         </button>

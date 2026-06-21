@@ -19,6 +19,14 @@ function toNumberOrNull(v: string | number | null): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+function FieldLabel({ children }: { children: React.ReactNode }): JSX.Element {
+  return (
+    <p className="mb-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
+      {children}
+    </p>
+  );
+}
+
 export function BudgetCard({
   project,
   plannedTotal,
@@ -64,18 +72,29 @@ export function BudgetCard({
   };
 
   return (
-    <section className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
-      <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-slate-500">
-        {t("projects.budget.heading")}
-      </h3>
+    <section className="mb-6 border-y border-rule bg-paper py-4">
+      <div className="mb-4 flex items-baseline justify-between">
+        <h3 className="font-display text-lg font-medium text-ink">
+          {t("projects.budget.heading")}
+        </h3>
+        {percent != null && (
+          <span
+            className={`font-mono text-xs tabular-nums ${
+              percent > 100 ? "text-negative" : "text-ink-muted"
+            }`}
+          >
+            {t("projects.budget.percentOfEstimate", { percent })}
+          </span>
+        )}
+      </div>
 
       {estimate == null && !editing && (
         <div className="flex items-center justify-between">
-          <p className="text-slate-500">{t("projects.budget.noEstimate")}</p>
+          <p className="text-ink-muted">{t("projects.budget.noEstimate")}</p>
           <button
             type="button"
             onClick={openEditor}
-            className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
+            className="rounded-sheet bg-ink px-3 py-1.5 text-sm text-paper transition hover:bg-ink/85"
           >
             {t("projects.budget.addEstimate")}
           </button>
@@ -86,20 +105,9 @@ export function BudgetCard({
         <>
           <div className="grid grid-cols-3 gap-4">
             <div>
+              <FieldLabel>{t("projects.budget.estimate")}</FieldLabel>
               {editing ? (
-                <label
-                  htmlFor="budget-estimate-input"
-                  className="text-xs text-slate-500"
-                >
-                  {t("projects.budget.estimate")}
-                </label>
-              ) : (
-                <p className="text-xs text-slate-500">
-                  {t("projects.budget.estimate")}
-                </p>
-              )}
-              {editing ? (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2">
                   <input
                     id="budget-estimate-input"
                     ref={inputRef}
@@ -109,70 +117,68 @@ export function BudgetCard({
                     inputMode="decimal"
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
-                    className="w-32 rounded border border-slate-300 px-2 py-1 tabular-nums"
+                    className="w-40 rounded-sheet border border-rule bg-paper-raised px-2 py-1 font-mono tabular-nums text-ink focus:border-accent focus:outline-none"
                   />
-                  <button
-                    type="button"
-                    onClick={() => void save()}
-                    disabled={updateMut.isPending}
-                    className="rounded bg-slate-900 px-2 py-1 text-xs text-white hover:bg-slate-700 disabled:opacity-50"
-                  >
-                    {t("projects.budget.save")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditing(false);
-                      setDraft(estimate != null ? String(estimate) : "");
-                    }}
-                    className="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-100"
-                  >
-                    {t("projects.budget.cancel")}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void save()}
+                      disabled={updateMut.isPending}
+                      className="rounded-sheet bg-ink px-3 py-1 text-xs text-paper hover:bg-ink/85 disabled:opacity-50"
+                    >
+                      {t("projects.budget.save")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditing(false);
+                        setDraft(estimate != null ? String(estimate) : "");
+                      }}
+                      className="rounded-sheet border border-rule px-3 py-1 text-xs text-ink-muted hover:border-ink/30 hover:text-ink"
+                    >
+                      {t("projects.budget.cancel")}
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-baseline gap-2">
-                  <p className="text-2xl font-semibold tabular-nums">
+                  <p className="font-mono text-xl font-medium tabular-nums text-ink">
                     {formatChf(String(estimate ?? 0))}
                   </p>
                   <button
                     type="button"
                     onClick={openEditor}
-                    className="text-xs text-slate-500 hover:text-slate-900"
+                    className="text-xs text-ink-muted underline-offset-2 hover:text-accent hover:underline"
                   >
                     {t("projects.budget.edit")}
                   </button>
                 </div>
               )}
               {editing && updateMut.isError && (
-                <p className="mt-1 text-xs text-red-700">
+                <p className="mt-1 text-xs text-negative">
                   {(updateMut.error as Error).message}
                 </p>
               )}
             </div>
 
             <div>
-              <p className="text-xs text-slate-500">
-                {t("projects.budget.planned")}
-              </p>
-              <p className="text-2xl font-semibold tabular-nums">
+              <FieldLabel>{t("projects.budget.planned")}</FieldLabel>
+              <p className="font-mono text-xl font-medium tabular-nums text-ink">
                 {formatChf(String(plannedTotal))}
               </p>
             </div>
 
             <div>
-              <p className="text-xs text-slate-500">
-                {t("projects.budget.diff")}
-              </p>
+              <FieldLabel>{t("projects.budget.diff")}</FieldLabel>
               <p
                 data-testid="budget-diff"
                 className={
-                  "text-2xl font-semibold tabular-nums " +
+                  "font-mono text-xl font-medium tabular-nums " +
                   (diff == null
-                    ? "text-slate-400"
+                    ? "text-ink-subtle"
                     : over
-                      ? "text-red-700"
-                      : "text-emerald-700")
+                      ? "text-negative"
+                      : "text-positive")
                 }
               >
                 {diff == null
@@ -184,22 +190,19 @@ export function BudgetCard({
 
           {estimate != null && estimate > 0 && (
             <div className="mt-4">
-              <div className="h-2 w-full overflow-hidden rounded bg-slate-100">
+              <div className="h-[3px] w-full overflow-hidden bg-paper-sunk">
                 <div
                   className={
-                    "h-full " +
+                    "h-full transition-all " +
                     (percent != null && percent > 100
-                      ? "bg-red-500"
-                      : "bg-emerald-500")
+                      ? "bg-negative"
+                      : "bg-positive")
                   }
                   style={{
                     width: `${Math.min(percent ?? 0, MAX_BAR_PERCENT)}%`,
                   }}
                 />
               </div>
-              <p className="mt-1 text-xs text-slate-500">
-                {t("projects.budget.percentOfEstimate", { percent })}
-              </p>
             </div>
           )}
         </>

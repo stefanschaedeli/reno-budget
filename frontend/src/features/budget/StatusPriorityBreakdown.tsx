@@ -24,12 +24,12 @@ export function StatusPriorityBreakdown({ objectId }: Props): JSX.Element {
   const { t } = useTranslation();
   const q = useStatusPriorityBreakdown(objectId);
 
-  if (q.isLoading) return <p className="text-slate-500">{t("common.loading")}</p>;
+  if (q.isLoading) return <p className="text-ink-muted">{t("common.loading")}</p>;
   if (q.isError)
-    return <p className="text-red-700">{t("budget.errors.generic")}</p>;
+    return <p className="text-negative">{t("budget.errors.generic")}</p>;
   const rows = q.data?.rows ?? [];
   if (rows.length === 0)
-    return <p className="text-slate-500">{t("budget.statusPriority.empty")}</p>;
+    return <p className="text-ink-muted">{t("budget.statusPriority.empty")}</p>;
 
   const max = rows.reduce((m, r) => Math.max(m, toNumber(r.planned_chf)), 0);
   const safeMax = max === 0 ? 1 : max;
@@ -48,7 +48,7 @@ export function StatusPriorityBreakdown({ objectId }: Props): JSX.Element {
         {t("budget.statusPriority.title")}
       </h3>
       <table className="w-full text-sm">
-        <thead className="text-left text-xs uppercase text-slate-500">
+        <thead className="text-left text-xs uppercase text-ink-muted">
           <tr>
             <th className="py-1"> </th>
             {PRIORITY_ORDER.map((p) => (
@@ -72,9 +72,9 @@ export function StatusPriorityBreakdown({ objectId }: Props): JSX.Element {
                     data-testid={`sp-${s}-${p}`}
                   >
                     <div className="flex items-center gap-1">
-                      <div className="h-2 flex-1 rounded bg-slate-100">
+                      <div className="h-2 flex-1 rounded bg-paper-sunk">
                         <div
-                          className="h-2 rounded bg-slate-700"
+                          className="h-2 rounded bg-ink"
                           style={{ width: `${pct}%` }}
                           aria-hidden
                         />

@@ -42,7 +42,7 @@ export function SupplierForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <label className="block text-sm">
-        <span className="block text-slate-700">
+        <span className="block text-ink-muted">
           {t("suppliers.fields.name")}
         </span>
         <input
@@ -51,11 +51,11 @@ export function SupplierForm({
           onChange={(e) => setName(e.target.value)}
           required
           maxLength={160}
-          className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          className="mt-1 w-full rounded border border-rule px-2 py-1"
         />
       </label>
       <label className="block text-sm">
-        <span className="block text-slate-700">
+        <span className="block text-ink-muted">
           {t("suppliers.fields.email")}
         </span>
         <input
@@ -63,11 +63,11 @@ export function SupplierForm({
           value={email ?? ""}
           onChange={(e) => setEmail(e.target.value)}
           maxLength={254}
-          className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          className="mt-1 w-full rounded border border-rule px-2 py-1"
         />
       </label>
       <label className="block text-sm">
-        <span className="block text-slate-700">
+        <span className="block text-ink-muted">
           {t("suppliers.fields.phone")}
         </span>
         <input
@@ -75,11 +75,11 @@ export function SupplierForm({
           value={phone ?? ""}
           onChange={(e) => setPhone(e.target.value)}
           maxLength={40}
-          className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          className="mt-1 w-full rounded border border-rule px-2 py-1"
         />
       </label>
       <label className="block text-sm">
-        <span className="block text-slate-700">
+        <span className="block text-ink-muted">
           {t("suppliers.fields.address")}
         </span>
         <input
@@ -87,25 +87,25 @@ export function SupplierForm({
           value={address ?? ""}
           onChange={(e) => setAddress(e.target.value)}
           maxLength={255}
-          className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          className="mt-1 w-full rounded border border-rule px-2 py-1"
         />
       </label>
       <label className="block text-sm">
-        <span className="block text-slate-700">
+        <span className="block text-ink-muted">
           {t("suppliers.fields.notes")}
         </span>
         <textarea
           value={notes ?? ""}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
-          className="mt-1 w-full rounded border border-slate-300 px-2 py-1"
+          className="mt-1 w-full rounded border border-rule px-2 py-1"
         />
       </label>
       <div className="flex gap-2">
         <button
           type="submit"
           disabled={submitting}
-          className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700 disabled:opacity-60"
+          className="rounded bg-ink px-3 py-1 text-sm text-paper hover:bg-ink disabled:opacity-60"
         >
           {submitting ? t("common.submitting") : t("costs.save")}
         </button>
@@ -113,7 +113,7 @@ export function SupplierForm({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+            className="rounded border border-rule px-3 py-1 text-sm hover:bg-paper-sunk"
           >
             {t("costs.cancel")}
           </button>

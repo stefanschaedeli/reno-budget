@@ -27,7 +27,7 @@ export function LotsPage(): JSX.Element {
   if (!objectId) {
     return (
       <PageContainer width="default">
-        <p className="text-red-700">{t("common.error")}</p>
+        <p className="text-negative">{t("common.error")}</p>
       </PageContainer>
     );
   }
@@ -48,7 +48,7 @@ export function LotsPage(): JSX.Element {
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
+            className="rounded bg-ink px-3 py-1 text-sm text-paper hover:bg-ink"
           >
             {t("lots.create")}
           </button>
@@ -65,18 +65,18 @@ export function LotsPage(): JSX.Element {
       </label>
 
       {lotsQuery.isLoading && (
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       )}
       {lotsQuery.isError && (
-        <p className="text-red-700">{t("common.error")}</p>
+        <p className="text-negative">{t("common.error")}</p>
       )}
       {lotsQuery.isSuccess && lots.length === 0 && (
-        <p className="text-slate-500">{t("lots.empty")}</p>
+        <p className="text-ink-muted">{t("lots.empty")}</p>
       )}
       {lots.length > 0 && (
         <table className="w-full text-sm">
-          <thead className="text-left text-slate-600">
-            <tr className="border-b border-slate-300">
+          <thead className="text-left text-ink-muted">
+            <tr className="border-b border-rule">
               <th className="px-2 py-2">{t("lots.fields.name")}</th>
               <th className="px-2 py-2">{t("lots.fields.status")}</th>
               <th className="px-2 py-2">{t("lots.fields.tenderDeadline")}</th>
@@ -91,7 +91,7 @@ export function LotsPage(): JSX.Element {
               <tr
                 key={l.id}
                 data-testid={`lot-row-${l.id}`}
-                className="border-b border-slate-200 hover:bg-slate-50"
+                className="border-b border-rule hover:bg-paper-sunk"
               >
                 <td className="px-2 py-2 font-medium">
                   <Link to={`/lose/${l.id}`} className="hover:underline">
@@ -107,7 +107,7 @@ export function LotsPage(): JSX.Element {
                 <td className="px-2 py-2 text-right tabular-nums">
                   {l.cost_item_count}
                 </td>
-                <td className="px-2 py-2 text-slate-500">
+                <td className="px-2 py-2 text-ink-muted">
                   {l.archived_at
                     ? new Date(l.archived_at).toLocaleDateString("de-CH")
                     : "—"}

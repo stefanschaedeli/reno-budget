@@ -41,13 +41,13 @@ export function ObjectDetailPage(): JSX.Element {
   if (error)
     return (
       <PageContainer width="narrow">
-        <p className="text-red-700">{error}</p>
+        <p className="text-negative">{error}</p>
       </PageContainer>
     );
   if (!obj)
     return (
       <PageContainer width="narrow">
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       </PageContainer>
     );
 

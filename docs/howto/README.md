@@ -16,6 +16,7 @@ Empfehlung, sondern Voraussetzung dafür, dass ein Phasen-Tag gesetzt wird.
 | Rollen & Berechtigungen (RBAC)      | [rbac.md](./rbac.md)       | 0.3.0                 |
 | eBKP-H-Katalog                      | [ebkp.md](./ebkp.md)       | 0.4.0                 |
 | Kostenpositionen erfassen           | [kosten.md](./kosten.md)   | 0.4.0                 |
+| KI-Assistent für Projekte           | [ai-assistent.md](./ai-assistent.md) | 2.0.0       |
 
 ## Vorlage für eine neue How-To
 

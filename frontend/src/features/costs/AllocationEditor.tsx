@@ -83,7 +83,7 @@ export function AllocationEditor({
             type="button"
             onClick={resetToWertquote}
             title={t("costs.allocations.resetHint")}
-            className="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-100"
+            className="rounded border border-rule px-2 py-1 text-xs hover:bg-paper-sunk"
           >
             {t("costs.allocations.reset")}
           </button>
@@ -91,19 +91,19 @@ export function AllocationEditor({
       </div>
 
       {showEmptyShared && units.length === 0 && (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-ink-muted">
           {t("costs.allocations.emptyShared")}
         </p>
       )}
       {showEmptyUnit && (
-        <p className="mb-2 text-sm text-slate-500">
+        <p className="mb-2 text-sm text-ink-muted">
           {t("costs.allocations.emptyUnit")}
         </p>
       )}
 
       {value.length > 0 && (
         <table className="w-full text-sm">
-          <thead className="text-left text-slate-500">
+          <thead className="text-left text-ink-muted">
             <tr>
               <th className="py-1">{t("costs.allocations.unitColumn")}</th>
               <th className="py-1">{t("costs.allocations.shareColumn")}</th>
@@ -114,7 +114,7 @@ export function AllocationEditor({
             {value.map((a) => {
               const unit = unitsById.get(a.unit_id);
               return (
-                <tr key={a.unit_id} className="border-t border-slate-200">
+                <tr key={a.unit_id} className="border-t border-rule">
                   <td className="py-1">{unit?.label ?? a.unit_id}</td>
                   <td className="py-1">
                     <input
@@ -126,17 +126,17 @@ export function AllocationEditor({
                       onChange={(e) =>
                         updateShare(a.unit_id, Number(e.target.value))
                       }
-                      className="w-24 rounded border border-slate-300 px-2 py-1"
+                      className="w-24 rounded border border-rule px-2 py-1"
                       aria-label={`${t("costs.allocations.shareColumn")} ${unit?.label ?? ""}`}
                     />
-                    <span className="ml-1 text-slate-500">‰</span>
+                    <span className="ml-1 text-ink-muted">‰</span>
                   </td>
                   {!readonly && (
                     <td className="py-1 text-right">
                       <button
                         type="button"
                         onClick={() => removeUnit(a.unit_id)}
-                        className="text-xs text-red-700 hover:underline"
+                        className="text-xs text-negative hover:underline"
                       >
                         {t("costs.allocations.remove")}
                       </button>
@@ -158,7 +158,7 @@ export function AllocationEditor({
               e.target.value = "";
             }}
             aria-label={t("costs.allocations.add")}
-            className="rounded border border-slate-300 px-2 py-1 text-sm"
+            className="rounded border border-rule px-2 py-1 text-sm"
           >
             <option value="">{t("costs.allocations.chooseUnit")}</option>
             {availableUnits.map((u) => (
@@ -174,7 +174,7 @@ export function AllocationEditor({
         role="status"
         aria-live="polite"
         className={`mt-3 text-sm font-medium ${
-          balanced ? "text-green-700" : "text-red-700"
+          balanced ? "text-positive" : "text-negative"
         }`}
       >
         {t("costs.allocations.sum", { sum })}

@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { ProjectForm } from "./ProjectForm";
 import { BudgetCard } from "./BudgetCard";
 import { ProjectCostItemsSection } from "./ProjectCostItemsSection";
+import { AiAssistantDrawer } from "@/features/ai/AiAssistantDrawer";
 import {
   useArchiveProject,
   useDeleteProject,
@@ -41,6 +42,7 @@ export function ProjectDetailPage(): JSX.Element {
   const [object, setObject] = useState<ObjectDetail | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
 
   const projectQuery = useProject(projectId ?? "");
   const updateMut = useUpdateProject(projectId ?? "");
@@ -69,21 +71,21 @@ export function ProjectDetailPage(): JSX.Element {
   if (projectQuery.isLoading || !projectId) {
     return (
       <PageContainer width="narrow">
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       </PageContainer>
     );
   }
   if (projectQuery.isError || !projectQuery.data) {
     return (
       <PageContainer width="narrow">
-        <p className="text-red-700">{t("common.error")}</p>
+        <p className="text-negative">{t("common.error")}</p>
       </PageContainer>
     );
   }
   if (loadError) {
     return (
       <PageContainer width="narrow">
-        <p className="text-red-700">{loadError}</p>
+        <p className="text-negative">{loadError}</p>
       </PageContainer>
     );
   }
@@ -131,6 +133,26 @@ export function ProjectDetailPage(): JSX.Element {
 
       <BudgetCard project={project} plannedTotal={plannedTotal} />
 
+      {!project.archived_at && (
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={() => setAiOpen(true)}
+            className="rounded-sheet border border-rule px-3 py-1.5 text-sm text-ink-muted transition hover:border-ink/30 hover:text-ink"
+          >
+            {t("ai.open")}
+          </button>
+        </div>
+      )}
+
+      {aiOpen && (
+        <AiAssistantDrawer
+          objectId={objectId}
+          projectId={projectId}
+          onClose={() => setAiOpen(false)}
+        />
+      )}
+
       {object && (
         <ProjectCostItemsSection
           objectId={objectId}
@@ -139,11 +161,11 @@ export function ProjectDetailPage(): JSX.Element {
         />
       )}
 
-      <section className="mb-8 border-t border-slate-200 pt-4">
+      <section className="mb-8 border-t border-rule pt-4">
         <button
           type="button"
           onClick={() => setDetailsOpen((v) => !v)}
-          className="mb-3 text-sm font-medium text-slate-600 hover:text-slate-900"
+          className="mb-3 text-sm font-medium text-ink-muted hover:text-ink"
         >
           {detailsOpen
             ? t("projects.details.hide")
@@ -164,13 +186,13 @@ export function ProjectDetailPage(): JSX.Element {
         )}
       </section>
 
-      <section className="border-t border-slate-200 pt-4">
+      <section className="border-t border-rule pt-4">
         <div className="flex gap-2">
           {!project.archived_at && (
             <button
               type="button"
               onClick={() => void handleArchive()}
-              className="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+              className="rounded border border-rule px-3 py-1 text-sm hover:bg-paper-sunk"
             >
               {t("projects.archive")}
             </button>
@@ -178,7 +200,7 @@ export function ProjectDetailPage(): JSX.Element {
           <button
             type="button"
             onClick={() => void handleDelete()}
-            className="rounded border border-red-300 px-3 py-1 text-sm text-red-700 hover:bg-red-50"
+            className="rounded border border-negative px-3 py-1 text-sm text-negative hover:bg-negative-soft"
           >
             {t("projects.delete")}
           </button>

@@ -191,17 +191,27 @@ function SidebarLink({
       end={end}
       onClick={onNavigate}
       className={({ isActive }) =>
-        `flex items-center gap-3 rounded-md px-3 py-2 text-sm transition ${
+        `group relative flex items-center gap-3 px-3 py-2 text-sm transition ${
           isActive
-            ? "bg-slate-900 text-white"
-            : "text-slate-700 hover:bg-slate-100"
+            ? "text-ink"
+            : "text-ink-muted hover:text-ink hover:bg-paper-sunk"
         }`
       }
     >
-      <span aria-hidden className="w-5 text-base leading-none">
-        {icon}
-      </span>
-      <span className="truncate">{children}</span>
+      {({ isActive }) => (
+        <>
+          <span
+            aria-hidden
+            className={`absolute left-0 top-1/2 h-5 -translate-y-1/2 transition-all ${
+              isActive ? "w-[3px] bg-accent" : "w-0 bg-transparent"
+            }`}
+          />
+          <span aria-hidden className="w-5 text-base leading-none">
+            {icon}
+          </span>
+          <span className="truncate">{children}</span>
+        </>
+      )}
     </NavLink>
   );
 }
@@ -217,11 +227,11 @@ function ObjectContextSection({
 }): JSX.Element {
   const { t } = useTranslation();
   return (
-    <div className="mt-6 border-t border-slate-200 pt-4">
-      <p className="px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+    <div className="mt-6 border-t border-rule pt-4">
+      <p className="px-3 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
         {t("nav.currentObject")}
       </p>
-      <p className="mb-2 truncate px-3 py-1 text-sm font-medium text-slate-900">
+      <p className="mb-2 truncate px-3 py-1 font-display text-base text-ink">
         {objectName ?? "…"}
       </p>
       <div className="space-y-1">
@@ -293,15 +303,15 @@ function OverviewsSection({
     pathname.startsWith("/lieferanten-uebersicht");
   const [open, setOpen] = useState(containsOverview);
   return (
-    <div className="mt-6 border-t border-slate-200 pt-4">
+    <div className="mt-6 border-t border-rule pt-4">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-3 text-xs font-semibold uppercase tracking-wider text-slate-400 hover:text-slate-600"
+        className="flex w-full items-center justify-between px-3 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-ink-subtle hover:text-ink"
         aria-expanded={open}
       >
         <span>{t("nav.overviews")}</span>
-        <span aria-hidden className="text-slate-400">
+        <span aria-hidden className="text-ink-subtle">
           {open ? "▾" : "▸"}
         </span>
       </button>
@@ -355,30 +365,30 @@ function UserMenu(): JSX.Element {
         aria-label={t("nav.userMenu")}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex items-center gap-2 rounded-full border border-slate-300 bg-white px-2 py-1 text-sm hover:bg-slate-50"
+        className="flex items-center gap-2 rounded-full border border-rule bg-paper-raised px-2 py-1 text-sm hover:bg-paper-sunk"
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink text-xs font-semibold text-paper">
           {initials || "👤"}
         </span>
         <span className="hidden max-w-[10rem] truncate sm:inline">
           {user?.display_name}
         </span>
-        <span aria-hidden className="text-slate-400">
+        <span aria-hidden className="text-ink-subtle">
           ▾
         </span>
       </button>
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-40 mt-2 w-56 rounded-md border border-slate-200 bg-white p-1 shadow-lg"
+          className="absolute right-0 z-40 mt-2 w-56 rounded-sheet border border-rule bg-paper-raised p-1 shadow-panel"
         >
           {user && (
-            <div className="border-b border-slate-100 px-3 py-2 text-xs text-slate-500">
+            <div className="border-b border-rule px-3 py-2 text-xs text-ink-muted">
               {user.email}
             </div>
           )}
           <div className="flex items-center justify-between px-3 py-2 text-sm">
-            <span className="text-slate-600">{t("nav.language")}</span>
+            <span className="text-ink-muted">{t("nav.language")}</span>
             <div className="flex gap-1">
               {(["de", "en"] as const).map((code) => (
                 <button
@@ -388,10 +398,10 @@ function UserMenu(): JSX.Element {
                     void i18n.changeLanguage(code);
                     setLang(code);
                   }}
-                  className={`rounded px-2 py-0.5 text-xs ${
+                  className={`rounded-sheet px-2 py-0.5 text-xs ${
                     lang === code
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-600 hover:bg-slate-100"
+                      ? "bg-ink text-paper"
+                      : "text-ink-muted hover:bg-paper-sunk hover:text-ink"
                   }`}
                 >
                   {code.toUpperCase()}
@@ -403,7 +413,7 @@ function UserMenu(): JSX.Element {
             type="button"
             role="menuitem"
             onClick={() => void logout()}
-            className="w-full rounded px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100"
+            className="w-full rounded-sheet px-3 py-2 text-left text-sm text-ink-muted hover:bg-paper-sunk hover:text-ink"
           >
             {t("auth.logout")}
           </button>
@@ -416,27 +426,27 @@ function UserMenu(): JSX.Element {
 function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }): JSX.Element {
   return (
     <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
-      <ol className="flex flex-wrap items-center gap-1 text-sm text-slate-500">
+      <ol className="flex flex-wrap items-center gap-1 text-sm text-ink-muted">
         {crumbs.map((c, i) => {
           const isLast = i === crumbs.length - 1;
           return (
             <li key={i} className="flex items-center gap-1">
               {i > 0 && (
-                <span aria-hidden className="text-slate-300">
+                <span aria-hidden className="text-ink-subtle">
                   ›
                 </span>
               )}
               {c.to && !isLast ? (
                 <Link
                   to={c.to}
-                  className="rounded px-1 hover:bg-slate-100 hover:text-slate-900"
+                  className="rounded-sheet px-1 hover:text-accent"
                 >
                   {c.label}
                 </Link>
               ) : (
                 <span
                   aria-current={isLast ? "page" : undefined}
-                  className={isLast ? "font-medium text-slate-900" : ""}
+                  className={isLast ? "font-medium text-ink" : ""}
                 >
                   {c.label}
                 </span>
@@ -502,11 +512,11 @@ export function AppLayout(): JSX.Element {
   void params;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-paper text-ink">
       {/* Mobile drawer backdrop */}
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-30 bg-slate-900/40 md:hidden"
+          className="fixed inset-0 z-30 bg-ink/40 md:hidden"
           onClick={() => setDrawerOpen(false)}
           aria-hidden
         />
@@ -514,21 +524,31 @@ export function AppLayout(): JSX.Element {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-slate-200 bg-white transition-transform md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-rule bg-paper transition-transform md:translate-x-0 ${
           drawerOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-900 text-sm font-bold text-white">
-              R
+        <div className="flex items-center justify-between border-b border-rule px-4 py-5">
+          <Link to="/" className="flex items-baseline gap-2">
+            <span
+              aria-hidden
+              className="font-display text-2xl font-semibold leading-none text-ink"
+              style={{ fontVariationSettings: '"SOFT" 30, "WONK" 1' }}
+            >
+              Reno
             </span>
-            <span className="text-base font-semibold">{t("app.title")}</span>
+            <span className="font-display text-2xl leading-none text-accent">
+              ·
+            </span>
+            <span className="font-display text-2xl font-light italic leading-none text-ink-muted">
+              budget
+            </span>
+            <span className="sr-only">{t("app.title")}</span>
           </Link>
           <button
             type="button"
             onClick={() => setDrawerOpen(false)}
-            className="rounded p-1 text-slate-400 hover:bg-slate-100 md:hidden"
+            className="rounded-sheet p-1 text-ink-subtle hover:bg-paper-sunk hover:text-ink md:hidden"
             aria-label={t("nav.closeMenu")}
           >
             ✕
@@ -572,18 +592,18 @@ export function AppLayout(): JSX.Element {
 
           <OverviewsSection onNavigate={() => setDrawerOpen(false)} />
         </nav>
-        <div className="border-t border-slate-200 px-4 py-3 text-xs text-slate-400">
+        <div className="border-t border-rule px-4 py-3 text-[0.65rem] uppercase tracking-[0.18em] text-ink-subtle">
           {t("app.title")}
         </div>
       </aside>
 
       {/* Main column */}
       <div className="md:pl-64">
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
+        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-rule bg-paper/95 px-4 py-3 backdrop-blur">
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
-            className="rounded p-2 text-slate-600 hover:bg-slate-100 md:hidden"
+            className="rounded-sheet p-2 text-ink-muted hover:bg-paper-sunk hover:text-ink md:hidden"
             aria-label={t("nav.openMenu")}
           >
             ☰
@@ -592,7 +612,7 @@ export function AppLayout(): JSX.Element {
             type="button"
             onClick={onBack}
             disabled={!canGoBack}
-            className="flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-sm text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-1 rounded-sheet border border-rule px-2 py-1 text-sm text-ink-muted hover:border-ink/30 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
             aria-label={t("nav.back")}
           >
             <span aria-hidden>‹</span>

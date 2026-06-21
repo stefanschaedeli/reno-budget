@@ -45,7 +45,7 @@ export function ObjectProjectsSection({
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
+          className="rounded bg-ink px-3 py-1 text-sm text-paper hover:bg-ink"
         >
           {t("projects.create")}
         </button>
@@ -70,20 +70,20 @@ export function ObjectProjectsSection({
       )}
 
       {projectsQuery.isLoading && (
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       )}
       {projectsQuery.isError && (
-        <p className="text-red-700">{t("common.error")}</p>
+        <p className="text-negative">{t("common.error")}</p>
       )}
       {projectsQuery.isSuccess && projects.length === 0 && (
-        <div className="rounded border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">
+        <div className="rounded border border-dashed border-rule px-4 py-8 text-center text-sm text-ink-muted">
           {t("projects.emptyInObject")}
         </div>
       )}
       {filtered.length > 0 && (
         <table className="w-full text-sm">
-          <thead className="text-left text-slate-600">
-            <tr className="border-b border-slate-300">
+          <thead className="text-left text-ink-muted">
+            <tr className="border-b border-rule">
               <th className="px-2 py-2">{t("projects.fields.name")}</th>
               <th className="px-2 py-2">{t("projects.fields.status")}</th>
               <th className="px-2 py-2 text-right">
@@ -98,7 +98,7 @@ export function ObjectProjectsSection({
               <tr
                 key={p.id}
                 data-testid={`project-row-${p.id}`}
-                className="border-b border-slate-200 hover:bg-slate-50"
+                className="border-b border-rule hover:bg-paper-sunk"
               >
                 <td className="px-2 py-2 font-medium">
                   <Link to={`/projekte/${p.id}`} className="hover:underline">
@@ -112,7 +112,7 @@ export function ObjectProjectsSection({
                     : "—"}
                 </td>
                 <td className="px-2 py-2">{p.planned_year ?? "—"}</td>
-                <td className="px-2 py-2 text-slate-500">
+                <td className="px-2 py-2 text-ink-muted">
                   {new Date(p.updated_at).toLocaleDateString("de-CH")}
                 </td>
               </tr>
@@ -149,8 +149,8 @@ function StatusChip({
       onClick={onClick}
       className={`rounded-full border px-3 py-0.5 text-xs ${
         active
-          ? "border-slate-900 bg-slate-900 text-white"
-          : "border-slate-300 text-slate-600 hover:bg-slate-100"
+          ? "border-ink bg-ink text-paper"
+          : "border-rule text-ink-muted hover:bg-paper-sunk"
       }`}
     >
       {label}

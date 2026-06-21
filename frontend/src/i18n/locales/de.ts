@@ -587,6 +587,68 @@ export const de = {
       hint: "Tipp: tippe „schlüssel:wert“, um einen neuen Tag anzulegen.",
     },
   },
+  ai: {
+    open: "KI-Assistent",
+    title: "KI-Assistent",
+    intro:
+      "Der Assistent hilft dir, dieses Projekt zu beschreiben, grob zu schätzen und in BKP-Positionen zu gliedern. Alle Vorschläge sind Entwürfe — nichts wird ohne deine Bestätigung übernommen.",
+    disabled: "Der KI-Assistent ist nicht konfiguriert.",
+    error: "Der KI-Assistent ist auf einen Fehler gestossen.",
+    running: "Wird verarbeitet…",
+    rerun: "Erneut ausführen",
+    needsType: "Bitte zuerst den Projekttyp bestimmen.",
+    steps: {
+      classify: "Projekttyp",
+      question: "Fragen",
+      describe: "Beschreibung",
+      estimate: "Grobschätzung",
+      bkp_scope: "BKP-Positionen",
+    },
+    stepAction: {
+      classify: "Projekttyp bestimmen",
+      question: "Fragen generieren",
+      describe: "Beschreibung erstellen",
+      estimate: "Schätzung erstellen",
+      bkp_scope: "BKP-Positionen erstellen",
+    },
+    question: {
+      choose: "Bitte wählen…",
+      yes: "Ja",
+      save: "Antworten speichern",
+      saved: "Antworten gespeichert.",
+    },
+    classify: {
+      result: "Erkannter Projekttyp: {{type}}",
+    },
+    describe: {
+      heading: "Vorgeschlagene Beschreibung",
+    },
+    estimate: {
+      heading: "Grobschätzung",
+      total: "Gesamt",
+      assumptions: "Annahmen",
+      disclaimer:
+        "Grobe Planungswerte für die Schweiz — keine Offerte. Vor Übernahme prüfen.",
+    },
+    bkp: {
+      heading: "Vorgeschlagene BKP-Positionen",
+      inScope: "Im Umfang",
+      outOfScope: "Nicht im Umfang",
+    },
+    confidence: {
+      low: "niedrige Konfidenz",
+      medium: "mittlere Konfidenz",
+      high: "hohe Konfidenz",
+    },
+    validation: {
+      ok: "Keine Beanstandungen.",
+      heading: "Hinweise zur Prüfung",
+      critic: "Zweitmeinung (KI)",
+    },
+    accept: "Übernehmen",
+    accepted: "Übernommen",
+    acceptBlocked: "Entwurf hat Fehler und kann nicht übernommen werden.",
+  },
   attachments: {
     title: "Anhänge",
     pick: "Datei wählen",

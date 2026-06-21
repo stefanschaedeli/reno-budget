@@ -24,22 +24,22 @@ export function AllProjectsPage(): JSX.Element {
         subtitle={t("projects.allSubtitle")}
       />
 
-      <p className="mb-4 text-sm text-slate-500">
+      <p className="mb-4 text-sm text-ink-muted">
         {t("projects.createHint")}{" "}
-        <Link to="/objekte" className="underline hover:text-slate-900">
+        <Link to="/objekte" className="underline hover:text-ink">
           {t("nav.objects")}
         </Link>
       </p>
 
-      {q.isLoading && <p className="text-slate-500">{t("common.loading")}</p>}
-      {q.isError && <p className="text-red-700">{t("common.error")}</p>}
+      {q.isLoading && <p className="text-ink-muted">{t("common.loading")}</p>}
+      {q.isError && <p className="text-negative">{t("common.error")}</p>}
       {q.isSuccess && q.data.length === 0 && (
-        <p className="text-slate-500">{t("projects.empty")}</p>
+        <p className="text-ink-muted">{t("projects.empty")}</p>
       )}
       {q.isSuccess && q.data.length > 0 && (
         <table className="w-full text-sm">
-          <thead className="text-left text-slate-600">
-            <tr className="border-b border-slate-300">
+          <thead className="text-left text-ink-muted">
+            <tr className="border-b border-rule">
               <th className="px-2 py-2">{t("projects.fields.name")}</th>
               <th className="px-2 py-2">{t("projects.fields.object")}</th>
               <th className="px-2 py-2">{t("projects.fields.status")}</th>
@@ -54,7 +54,7 @@ export function AllProjectsPage(): JSX.Element {
               <tr
                 key={p.id}
                 data-testid={`all-project-row-${p.id}`}
-                className="border-b border-slate-200 hover:bg-slate-50"
+                className="border-b border-rule hover:bg-paper-sunk"
               >
                 <td className="px-2 py-2 font-medium">
                   <Link to={`/projekte/${p.id}`} className="hover:underline">
@@ -64,7 +64,7 @@ export function AllProjectsPage(): JSX.Element {
                 <td className="px-2 py-2">
                   <Link
                     to={`/objekte/${p.object_id}`}
-                    className="text-slate-600 underline-offset-2 hover:underline"
+                    className="text-ink-muted underline-offset-2 hover:underline"
                   >
                     {p.object_name}
                   </Link>

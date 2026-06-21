@@ -33,7 +33,7 @@ export function UnitEditor({ units, onChange, readonly }: UnitEditorProps): JSX.
   return (
     <div>
       <table className="w-full text-sm">
-        <thead className="text-left text-slate-500">
+        <thead className="text-left text-ink-muted">
           <tr>
             <th className="py-1">{t("objects.units.label")}</th>
             <th className="py-1">{t("objects.units.wertquote")}</th>
@@ -43,7 +43,7 @@ export function UnitEditor({ units, onChange, readonly }: UnitEditorProps): JSX.
         </thead>
         <tbody>
           {units.map((u, idx) => (
-            <tr key={idx} className="border-t border-slate-200">
+            <tr key={idx} className="border-t border-rule">
               <td className="py-1">
                 <input
                   type="text"
@@ -52,7 +52,7 @@ export function UnitEditor({ units, onChange, readonly }: UnitEditorProps): JSX.
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     update(idx, { label: e.target.value })
                   }
-                  className="w-full rounded border border-slate-300 px-2 py-1"
+                  className="w-full rounded border border-rule px-2 py-1"
                   aria-label={t("objects.units.label")}
                 />
               </td>
@@ -71,10 +71,10 @@ export function UnitEditor({ units, onChange, readonly }: UnitEditorProps): JSX.
                       ),
                     })
                   }
-                  className="w-24 rounded border border-slate-300 px-2 py-1"
+                  className="w-24 rounded border border-rule px-2 py-1"
                   aria-label={t("objects.units.wertquote")}
                 />
-                <span className="ml-1 text-slate-500">‰</span>
+                <span className="ml-1 text-ink-muted">‰</span>
               </td>
               <td className="py-1">
                 <input
@@ -87,17 +87,17 @@ export function UnitEditor({ units, onChange, readonly }: UnitEditorProps): JSX.
                       area_m2: e.target.value === "" ? null : Number(e.target.value),
                     })
                   }
-                  className="w-24 rounded border border-slate-300 px-2 py-1"
+                  className="w-24 rounded border border-rule px-2 py-1"
                   aria-label={t("objects.units.area")}
                 />
-                <span className="ml-1 text-slate-500">m²</span>
+                <span className="ml-1 text-ink-muted">m²</span>
               </td>
               {!readonly && (
                 <td className="py-1 text-right">
                   <button
                     type="button"
                     onClick={() => remove(idx)}
-                    className="text-xs text-red-700 hover:underline"
+                    className="text-xs text-negative hover:underline"
                     disabled={units.length <= 1}
                   >
                     {t("objects.units.remove")}
@@ -114,7 +114,7 @@ export function UnitEditor({ units, onChange, readonly }: UnitEditorProps): JSX.
           <button
             type="button"
             onClick={add}
-            className="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-100"
+            className="rounded border border-rule px-2 py-1 text-xs hover:bg-paper-sunk"
           >
             {t("objects.units.add")}
           </button>
@@ -122,7 +122,7 @@ export function UnitEditor({ units, onChange, readonly }: UnitEditorProps): JSX.
         <p
           role="status"
           aria-live="polite"
-          className={`text-sm font-medium ${balanced ? "text-green-700" : "text-red-700"}`}
+          className={`text-sm font-medium ${balanced ? "text-positive" : "text-negative"}`}
         >
           {t("objects.units.sum", { sum })}
           {!balanced && " — " + t("objects.units.sumHint")}

@@ -12,20 +12,20 @@ export function HomePage(): JSX.Element {
     <PageContainer width="narrow">
       <PageHeader title={t("app.title")} subtitle={t("app.subtitle")} />
       {user && (
-        <p className="mb-4 text-sm text-slate-500">
+        <p className="mb-4 text-sm text-ink-muted">
           {t("auth.me.greeting", { name: user.display_name })}
         </p>
       )}
       <nav className="flex gap-2">
         <Link
           to="/objekte"
-          className="inline-block rounded bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-700"
+          className="inline-block rounded bg-ink px-3 py-2 text-sm text-paper hover:bg-ink"
         >
           {t("objects.list.title")}
         </Link>
         <Link
           to="/finanzen"
-          className="inline-block rounded border border-slate-300 px-3 py-2 text-sm hover:bg-slate-100"
+          className="inline-block rounded border border-rule px-3 py-2 text-sm hover:bg-paper-sunk"
         >
           {t("budget.nav")}
         </Link>

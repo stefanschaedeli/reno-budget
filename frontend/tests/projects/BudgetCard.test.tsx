@@ -53,7 +53,7 @@ describe("BudgetCard", () => {
     expect(screen.getByText(/83['’ ]?200/)).toBeInTheDocument();
     const diffNode = screen.getByTestId("budget-diff");
     expect(diffNode.textContent).toMatch(/3['’ ]?200/);
-    expect(diffNode.className).toMatch(/red/);
+    expect(diffNode.className).toMatch(/negative/);
   });
 
   it("opens inline editor on edit click", () => {

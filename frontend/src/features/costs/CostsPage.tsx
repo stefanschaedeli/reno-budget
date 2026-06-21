@@ -70,13 +70,13 @@ export function CostsPage(): JSX.Element {
   if (loadError)
     return (
       <PageContainer width="wide">
-        <p className="text-red-700">{loadError}</p>
+        <p className="text-negative">{loadError}</p>
       </PageContainer>
     );
   if (!obj || !objectId)
     return (
       <PageContainer width="wide">
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       </PageContainer>
     );
 
@@ -124,7 +124,7 @@ export function CostsPage(): JSX.Element {
           <button
             type="button"
             onClick={() => setEditing("new")}
-            className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
+            className="rounded bg-ink px-3 py-1 text-sm text-paper hover:bg-ink"
           >
             {t("costs.create")}
           </button>
@@ -137,15 +137,15 @@ export function CostsPage(): JSX.Element {
         onChange={setFilters}
       />
 
-      <div className="mb-3 flex gap-2 border-b border-slate-200">
+      <div className="mb-3 flex gap-2 border-b border-rule">
         <button
           type="button"
           onClick={() => setTab("list")}
           aria-pressed={tab === "list"}
           className={`px-3 py-1 text-sm ${
             tab === "list"
-              ? "border-b-2 border-slate-900 font-medium"
-              : "text-slate-500"
+              ? "border-b-2 border-ink font-medium"
+              : "text-ink-muted"
           }`}
         >
           {t("costs.tabs.list")}
@@ -156,8 +156,8 @@ export function CostsPage(): JSX.Element {
           aria-pressed={tab === "board"}
           className={`px-3 py-1 text-sm ${
             tab === "board"
-              ? "border-b-2 border-slate-900 font-medium"
-              : "text-slate-500"
+              ? "border-b-2 border-ink font-medium"
+              : "text-ink-muted"
           }`}
         >
           {t("costs.tabs.board")}
@@ -167,7 +167,7 @@ export function CostsPage(): JSX.Element {
       {tagAssignError && (
         <div
           role="alert"
-          className="mb-3 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900"
+          className="mb-3 rounded border border-warning bg-warning-soft px-3 py-2 text-sm text-ink"
         >
           <div className="flex items-center justify-between gap-2">
             <span>{tagAssignError}</span>
@@ -175,7 +175,7 @@ export function CostsPage(): JSX.Element {
               type="button"
               onClick={() => setTagAssignError(null)}
               aria-label={t("common.close")}
-              className="text-amber-900 hover:text-amber-700"
+              className="text-ink underline-offset-2 hover:text-accent hover:underline"
             >
               ×
             </button>
@@ -183,10 +183,10 @@ export function CostsPage(): JSX.Element {
         </div>
       )}
       {costItemsQuery.isLoading && (
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       )}
       {costItemsQuery.isError && (
-        <p className="text-red-700">{t("common.error")}</p>
+        <p className="text-negative">{t("common.error")}</p>
       )}
       {!costItemsQuery.isLoading && !costItemsQuery.isError && (
         <>
@@ -244,11 +244,11 @@ export function CostsPage(): JSX.Element {
             submitting={createMut.isPending || updateMut.isPending}
           />
           {editing !== "new" && (
-            <div className="mt-4 border-t border-slate-200 pt-3 text-right">
+            <div className="mt-4 border-t border-rule pt-3 text-right">
               <button
                 type="button"
                 onClick={() => void handleDelete(editing)}
-                className="rounded border border-red-300 px-3 py-1 text-sm text-red-700 hover:bg-red-50"
+                className="rounded border border-negative px-3 py-1 text-sm text-negative hover:bg-negative-soft"
               >
                 {t("costs.delete")}
               </button>

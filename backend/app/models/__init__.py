@@ -5,6 +5,13 @@ so that Alembic's ``--autogenerate`` (and the test fixtures) see the full
 metadata. Add new modules here when you create them.
 """
 
+from app.models.ai import (  # noqa: F401
+    AiArtifact,
+    AiArtifactStatus,
+    AiSession,
+    AiSessionStatus,
+    AiStep,
+)
 from app.models.attachment import (  # noqa: F401
     Attachment,
     AttachmentTargetType,

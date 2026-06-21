@@ -37,18 +37,25 @@ export function ReservePanel({ objectId }: Props): JSX.Element {
   }, [q.data]);
 
   if (q.isLoading)
-    return <p className="text-slate-500">{t("common.loading")}</p>;
+    return <p className="text-ink-muted">{t("common.loading")}</p>;
   if (q.isError) {
     const msg =
       q.error instanceof ApiError && q.error.status === 403
         ? t("budget.errors.forbidden")
         : t("budget.errors.generic");
-    return <p className="text-red-700">{msg}</p>;
+    return <p className="text-negative">{msg}</p>;
   }
   const data = q.data;
-  if (!data) return <p className="text-slate-500">{t("common.loading")}</p>;
+  if (!data) return <p className="text-ink-muted">{t("common.loading")}</p>;
 
-  const isOwner = data.my_role === "owner";
+  // TODO Phase 4 follow-up: gate editing on role. Backend reserve payload
+  // doesn't yet return my_role; assume editable and let a 403 from PATCH
+  // surface via the existing ApiError path.
+  const isOwner = true;
+  const requiredContributionScalar =
+    data.contribution_mode === "monthly"
+      ? data.required_per_month_chf
+      : data.required_per_year_chf;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,13 +73,13 @@ export function ReservePanel({ objectId }: Props): JSX.Element {
   return (
     <section
       aria-label={t("budget.reserve.title")}
-      className="rounded border border-slate-200 bg-white p-4"
+      className="rounded border border-rule bg-paper-raised p-4"
     >
       <h3 className="mb-3 text-lg font-medium">{t("budget.reserve.title")}</h3>
 
       <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
-          <dt className="text-xs uppercase text-slate-500">
+          <dt className="text-xs uppercase text-ink-muted">
             {t("budget.reserve.totalPlanned")}
           </dt>
           <dd className="text-base font-semibold tabular-nums">
@@ -80,7 +87,7 @@ export function ReservePanel({ objectId }: Props): JSX.Element {
           </dd>
         </div>
         <div>
-          <dt className="text-xs uppercase text-slate-500">
+          <dt className="text-xs uppercase text-ink-muted">
             {t("budget.reserve.initialReserve")}
           </dt>
           <dd className="text-base font-semibold tabular-nums">
@@ -88,7 +95,7 @@ export function ReservePanel({ objectId }: Props): JSX.Element {
           </dd>
         </div>
         <div>
-          <dt className="text-xs uppercase text-slate-500">
+          <dt className="text-xs uppercase text-ink-muted">
             {t("budget.reserve.requiredTotal")}
           </dt>
           <dd className="text-base font-semibold tabular-nums">
@@ -97,20 +104,20 @@ export function ReservePanel({ objectId }: Props): JSX.Element {
         </div>
       </dl>
 
-      <div className="mt-4 rounded bg-slate-50 p-3">
-        <p className="text-xs uppercase text-slate-500">
+      <div className="mt-4 rounded bg-paper-sunk p-3">
+        <p className="text-xs uppercase text-ink-muted">
           {t("budget.reserve.requiredContribution")} —{" "}
           {t(`budget.reserve.formula.${data.contribution_mode}`)}
         </p>
         {data.contribution_mode === "lump_sum" ? (
-          data.lump_sum_schedule.length === 0 ? (
-            <p className="text-sm text-slate-500">—</p>
+          data.required_lump_sums.length === 0 ? (
+            <p className="text-sm text-ink-muted">—</p>
           ) : (
             <table
               data-testid="lump-sum-schedule"
               className="mt-2 w-full max-w-md text-sm"
             >
-              <thead className="text-left text-xs uppercase text-slate-500">
+              <thead className="text-left text-xs uppercase text-ink-muted">
                 <tr>
                   <th className="py-1">{t("budget.reserve.lumpSumYear")}</th>
                   <th className="py-1 text-right">
@@ -119,7 +126,7 @@ export function ReservePanel({ objectId }: Props): JSX.Element {
                 </tr>
               </thead>
               <tbody>
-                {data.lump_sum_schedule.map((r) => (
+                {data.required_lump_sums.map((r) => (
                   <tr key={r.year}>
                     <td className="py-1">{r.year}</td>
                     <td className="py-1 text-right tabular-nums">
@@ -135,7 +142,7 @@ export function ReservePanel({ objectId }: Props): JSX.Element {
             data-testid="required-contribution-scalar"
             className="text-xl font-semibold tabular-nums"
           >
-            {formatChfPrecise(data.required_contribution_chf)}
+            {formatChfPrecise(requiredContributionScalar)}
           </p>
         )}
       </div>
@@ -153,7 +160,7 @@ export function ReservePanel({ objectId }: Props): JSX.Element {
             <select
               value={mode}
               onChange={(e) => setMode(e.target.value as ContributionMode)}
-              className="rounded border border-slate-300 px-2 py-1"
+              className="rounded border border-rule px-2 py-1"
             >
               {CONTRIBUTION_MODES.map((m) => (
                 <option key={m} value={m}>
@@ -172,7 +179,7 @@ export function ReservePanel({ objectId }: Props): JSX.Element {
               min="0"
               value={inflationPct}
               onChange={(e) => setInflationPct(e.target.value)}
-              className="rounded border border-slate-300 px-2 py-1"
+              className="rounded border border-rule px-2 py-1"
             />
           </label>
           <label className="flex flex-col text-sm">
@@ -184,28 +191,28 @@ export function ReservePanel({ objectId }: Props): JSX.Element {
               inputMode="decimal"
               value={initialReserve}
               onChange={(e) => setInitialReserve(e.target.value)}
-              className="rounded border border-slate-300 px-2 py-1"
+              className="rounded border border-rule px-2 py-1"
             />
           </label>
           <div className="sm:col-span-3">
             <button
               type="submit"
               disabled={updateMut.isPending}
-              className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700 disabled:opacity-60"
+              className="rounded bg-ink px-3 py-1 text-sm text-paper hover:bg-ink disabled:opacity-60"
             >
               {updateMut.isPending
                 ? t("budget.reserve.saving")
                 : t("budget.reserve.save")}
             </button>
             {savedFlash && (
-              <span className="ml-3 text-sm text-green-700" role="status">
+              <span className="ml-3 text-sm text-positive" role="status">
                 {t("budget.reserve.saved")}
               </span>
             )}
           </div>
         </form>
       ) : (
-        <p className="mt-4 text-sm text-slate-500">
+        <p className="mt-4 text-sm text-ink-muted">
           {t("budget.reserve.readOnlyHint")}
         </p>
       )}

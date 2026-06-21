@@ -63,14 +63,14 @@ export function LotDetailPage(): JSX.Element {
   if (lotQuery.isLoading || !lotId) {
     return (
       <PageContainer width="narrow">
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       </PageContainer>
     );
   }
   if (lotQuery.isError || !lotQuery.data) {
     return (
       <PageContainer width="narrow">
-        <p className="text-red-700">{t("common.error")}</p>
+        <p className="text-negative">{t("common.error")}</p>
       </PageContainer>
     );
   }
@@ -143,13 +143,13 @@ export function LotDetailPage(): JSX.Element {
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-lg font-medium">{t("lots.members.title")}</h3>
           <div className="flex items-center gap-3">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-ink-muted">
               {t("lots.members.total")}: <span className="tabular-nums font-medium">{formatChf(total.toFixed(2))}</span>
             </p>
             <button
               type="button"
               onClick={() => setPickerOpen((v) => !v)}
-              className="rounded border border-slate-300 px-2 py-1 text-sm hover:bg-slate-100"
+              className="rounded border border-rule px-2 py-1 text-sm hover:bg-paper-sunk"
             >
               {t("lots.members.add")}
             </button>
@@ -157,9 +157,9 @@ export function LotDetailPage(): JSX.Element {
         </div>
 
         {pickerOpen && (
-          <div className="mb-3 rounded border border-slate-200 bg-slate-50 p-3">
+          <div className="mb-3 rounded border border-rule bg-paper-sunk p-3">
             {candidates.length === 0 ? (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-ink-muted">
                 {t("lots.members.noCandidates")}
               </p>
             ) : (
@@ -167,18 +167,18 @@ export function LotDetailPage(): JSX.Element {
                 {candidates.map((c) => (
                   <li
                     key={c.id}
-                    className="flex items-center justify-between rounded px-2 py-1 hover:bg-white"
+                    className="flex items-center justify-between rounded px-2 py-1 hover:bg-paper-raised"
                   >
                     <span>
                       {c.title}{" "}
-                      <span className="font-mono text-xs text-slate-500">
+                      <span className="font-mono text-xs text-ink-muted">
                         {c.bkp_code ?? "—"}
                       </span>
                     </span>
                     <button
                       type="button"
                       onClick={() => void handleAdd(c.id)}
-                      className="rounded border border-slate-300 px-2 py-0.5 text-xs hover:bg-slate-100"
+                      className="rounded border border-rule px-2 py-0.5 text-xs hover:bg-paper-sunk"
                     >
                       {t("lots.members.addThis")}
                     </button>
@@ -190,15 +190,15 @@ export function LotDetailPage(): JSX.Element {
         )}
 
         {memberQuery.isLoading && (
-          <p className="text-slate-500">{t("common.loading")}</p>
+          <p className="text-ink-muted">{t("common.loading")}</p>
         )}
         {members.length === 0 && !memberQuery.isLoading && (
-          <p className="text-slate-500">{t("lots.members.empty")}</p>
+          <p className="text-ink-muted">{t("lots.members.empty")}</p>
         )}
         {members.length > 0 && (
           <table className="w-full text-sm">
-            <thead className="text-left text-slate-600">
-              <tr className="border-b border-slate-300">
+            <thead className="text-left text-ink-muted">
+              <tr className="border-b border-rule">
                 <th className="px-2 py-2">{t("costs.fields.title")}</th>
                 <th className="px-2 py-2">{t("costs.fields.bkp")}</th>
                 <th className="px-2 py-2 text-right">
@@ -212,7 +212,7 @@ export function LotDetailPage(): JSX.Element {
                 <tr
                   key={item.id}
                   data-testid={`member-row-${item.id}`}
-                  className="border-b border-slate-200"
+                  className="border-b border-rule"
                 >
                   <td className="px-2 py-2 font-medium">{item.title}</td>
                   <td className="px-2 py-2 font-mono text-xs">
@@ -225,7 +225,7 @@ export function LotDetailPage(): JSX.Element {
                     <button
                       type="button"
                       onClick={() => void handleRemove(item.id)}
-                      className="rounded border border-red-300 px-2 py-0.5 text-xs text-red-700 hover:bg-red-50"
+                      className="rounded border border-negative px-2 py-0.5 text-xs text-negative hover:bg-negative-soft"
                     >
                       {t("lots.members.remove")}
                     </button>
@@ -243,13 +243,13 @@ export function LotDetailPage(): JSX.Element {
         lotStatus={lot.status}
       />
 
-      <section className="border-t border-slate-200 pt-4">
+      <section className="border-t border-rule pt-4">
         <div className="flex gap-2">
           {!lot.archived_at && (
             <button
               type="button"
               onClick={() => void handleArchive()}
-              className="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+              className="rounded border border-rule px-3 py-1 text-sm hover:bg-paper-sunk"
             >
               {t("lots.archive")}
             </button>
@@ -257,7 +257,7 @@ export function LotDetailPage(): JSX.Element {
           <button
             type="button"
             onClick={() => void handleDelete()}
-            className="rounded border border-red-300 px-3 py-1 text-sm text-red-700 hover:bg-red-50"
+            className="rounded border border-negative px-3 py-1 text-sm text-negative hover:bg-negative-soft"
           >
             {t("lots.delete")}
           </button>

@@ -143,7 +143,7 @@ export function AttachmentList({
         {canEdit && (
           <button
             type="button"
-            className="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+            className="rounded border border-rule px-3 py-1 text-sm hover:bg-paper-sunk"
             onClick={() => fileInputRef.current?.click()}
           >
             {t("attachments.pick")}
@@ -165,7 +165,7 @@ export function AttachmentList({
           role="region"
           aria-label={t("attachments.dropzone")}
           className={`rounded border-2 border-dashed p-6 text-center text-sm ${
-            dragOver ? "border-blue-500 bg-blue-50" : "border-slate-300 bg-slate-50"
+            dragOver ? "border-accent bg-accent-soft" : "border-rule bg-paper-sunk"
           }`}
           onDragOver={(e) => {
             e.preventDefault();
@@ -180,7 +180,7 @@ export function AttachmentList({
       )}
 
       {uploading && (
-        <div className="rounded border border-slate-200 bg-white p-3 text-sm">
+        <div className="rounded border border-rule bg-paper-raised p-3 text-sm">
           <div className="flex justify-between">
             <span>{uploading.filename}</span>
             <span>
@@ -199,19 +199,19 @@ export function AttachmentList({
       )}
 
       {error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-negative">
           {error}
         </p>
       )}
 
-      {items === null && <p className="text-sm text-slate-500">{t("common.loading")}</p>}
+      {items === null && <p className="text-sm text-ink-muted">{t("common.loading")}</p>}
 
       {items !== null && items.length === 0 && (
-        <p className="text-sm text-slate-500">{t("attachments.empty")}</p>
+        <p className="text-sm text-ink-muted">{t("attachments.empty")}</p>
       )}
 
       {items !== null && items.length > 0 && (
-        <ul className="divide-y rounded border border-slate-200 bg-white">
+        <ul className="divide-y rounded border border-rule bg-paper-raised">
           {items.map((a) => {
             const canDeleteThis = canEdit || a.uploaded_by === user?.id;
             return (
@@ -219,12 +219,12 @@ export function AttachmentList({
                 <div className="min-w-0 flex-1">
                   <a
                     href={downloadUrl(a.id)}
-                    className="block truncate text-blue-700 hover:underline"
+                    className="block truncate text-accent hover:underline"
                     download={a.filename}
                   >
                     {a.filename}
                   </a>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-ink-muted">
                     {formatBytes(a.size_bytes)}
                     {" — "}
                     {new Date(a.created_at).toLocaleDateString("de-CH")}
@@ -234,12 +234,12 @@ export function AttachmentList({
                   <>
                     {confirmId === a.id ? (
                       <span className="ml-3 flex items-center gap-2">
-                        <span className="text-xs text-slate-700">
+                        <span className="text-xs text-ink-muted">
                           {t("attachments.confirmDelete")}
                         </span>
                         <button
                           type="button"
-                          className="rounded bg-red-600 px-2 py-0.5 text-xs text-white"
+                          className="rounded bg-negative px-2 py-0.5 text-xs text-paper"
                           onClick={() => void onDelete(a.id)}
                           data-testid={`attachment-delete-confirm-${a.id}`}
                         >
@@ -247,7 +247,7 @@ export function AttachmentList({
                         </button>
                         <button
                           type="button"
-                          className="rounded border border-slate-300 px-2 py-0.5 text-xs"
+                          className="rounded border border-rule px-2 py-0.5 text-xs"
                           onClick={() => setConfirmId(null)}
                         >
                           {t("attachments.cancel")}
@@ -256,7 +256,7 @@ export function AttachmentList({
                     ) : (
                       <button
                         type="button"
-                        className="ml-3 rounded border border-slate-300 px-2 py-0.5 text-xs hover:bg-slate-100"
+                        className="ml-3 rounded border border-rule px-2 py-0.5 text-xs hover:bg-paper-sunk"
                         onClick={() => setConfirmId(a.id)}
                         aria-label={t("attachments.delete")}
                         data-testid={`attachment-delete-${a.id}`}

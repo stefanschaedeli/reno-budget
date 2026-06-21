@@ -70,14 +70,14 @@ export function ProjectCostItemsSection({
           <button
             type="button"
             onClick={() => setLinking(true)}
-            className="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+            className="rounded border border-rule px-3 py-1 text-sm hover:bg-paper-sunk"
           >
             {t("projects.costItems.link")}
           </button>
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
+            className="rounded bg-ink px-3 py-1 text-sm text-paper hover:bg-ink"
           >
             {t("projects.costItems.add")}
           </button>
@@ -85,15 +85,15 @@ export function ProjectCostItemsSection({
       </div>
 
       {itemsQuery.isLoading && (
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       )}
       {!itemsQuery.isLoading && items.length === 0 && (
-        <p className="text-slate-500">{t("projects.costItems.empty")}</p>
+        <p className="text-ink-muted">{t("projects.costItems.empty")}</p>
       )}
       {items.length > 0 && (
         <table className="w-full text-sm">
-          <thead className="text-left text-slate-600">
-            <tr className="border-b border-slate-300">
+          <thead className="text-left text-ink-muted">
+            <tr className="border-b border-rule">
               <th className="px-2 py-2">{t("costs.fields.title")}</th>
               <th className="px-2 py-2">{t("costs.fields.bkp")}</th>
               <th className="px-2 py-2 text-right">
@@ -104,7 +104,7 @@ export function ProjectCostItemsSection({
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.id} className="border-b border-slate-200">
+              <tr key={item.id} className="border-b border-rule">
                 <td
                   className="cursor-pointer px-2 py-2 font-medium hover:underline"
                   onClick={() =>
@@ -123,7 +123,7 @@ export function ProjectCostItemsSection({
                   <button
                     type="button"
                     onClick={() => void handleUnlink(item)}
-                    className="text-xs text-slate-500 hover:text-red-700"
+                    className="text-xs text-ink-muted hover:text-negative"
                   >
                     {t("projects.costItems.remove")}
                   </button>

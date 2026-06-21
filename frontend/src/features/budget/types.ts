@@ -71,24 +71,23 @@ export type LumpSumYear = z.infer<typeof lumpSumYearSchema>;
 
 export const reservePlanSchema = z.object({
   object_id: z.string().uuid(),
-  inflation_rate_percent: z.number(),
+  inflation_rate_percent: chfString,
   initial_reserve_chf: chfString,
   contribution_mode: z.enum(CONTRIBUTION_MODES),
   horizon_years: z.number().int(),
   total_planned_inflated_chf: chfString,
   required_total_chf: chfString,
-  /** For monthly/yearly: a single scalar. For lump_sum: see lump_sum_schedule. */
-  required_contribution_chf: chfString.nullable(),
-  lump_sum_schedule: z.array(lumpSumYearSchema),
-  my_role: z.enum(OBJECT_ROLES),
+  required_per_year_chf: chfString,
+  required_per_month_chf: chfString,
+  required_lump_sums: z.array(lumpSumYearSchema),
+  scope_pro_rated: z.boolean(),
 });
 export type ReservePlan = z.infer<typeof reservePlanSchema>;
 
 export const timelineResponseSchema = z.object({
   object_id: z.string().uuid(),
   rows: z.array(timelineRowSchema),
-  my_role: z.enum(OBJECT_ROLES),
-  is_scoped: z.boolean(),
+  scope_pro_rated: z.boolean(),
 });
 export type TimelineResponse = z.infer<typeof timelineResponseSchema>;
 

@@ -31,7 +31,7 @@ export function Drawer({ title, onClose, children }: DrawerProps): JSX.Element {
   return (
     <div className="fixed inset-0 z-40 flex">
       <div
-        className="flex-1 bg-slate-900/40"
+        className="flex-1 bg-ink/40"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -39,7 +39,7 @@ export function Drawer({ title, onClose, children }: DrawerProps): JSX.Element {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="z-50 w-full max-w-xl overflow-y-auto bg-white p-6 shadow-xl"
+        className="z-50 w-full max-w-xl overflow-y-auto bg-paper-raised p-6 shadow-xl"
       >
         <header className="mb-4 flex items-center justify-between">
           <h3 id={titleId} className="text-lg font-semibold">{title}</h3>
@@ -48,7 +48,7 @@ export function Drawer({ title, onClose, children }: DrawerProps): JSX.Element {
             type="button"
             onClick={onClose}
             aria-label={t("common.close")}
-            className="text-slate-500 hover:text-slate-900"
+            className="text-ink-muted hover:text-ink"
           >
             ×
           </button>

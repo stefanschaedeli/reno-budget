@@ -86,6 +86,12 @@ ACTION_TAG_DELETE = "tag.delete"
 ACTION_TAG_ASSIGN = "tag.assign"
 ACTION_TAG_UNASSIGN = "tag.unassign"
 
+# AI Project Assistant. Only the accept actions are audited — running a step
+# produces a draft and writes nothing to real data, so it is not a mutation.
+ACTION_AI_DESCRIPTION_ACCEPT = "ai.description_accept"
+ACTION_AI_ESTIMATE_ACCEPT = "ai.estimate_accept"
+ACTION_AI_BKP_ACCEPT = "ai.bkp_accept"
+
 # Worker (Phase 9). System-driven; ``actor_email`` is the synthetic
 # ``worker@reno-budget.local`` identity since there's no logged-in caller.
 ACTION_WORKER_BACKUP = "worker.backup"

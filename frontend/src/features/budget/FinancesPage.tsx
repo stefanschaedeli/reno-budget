@@ -32,16 +32,16 @@ export function FinancesPage(): JSX.Element {
       />
       <div className="space-y-4">
 
-      {q.isLoading && <p className="text-slate-500">{t("common.loading")}</p>}
+      {q.isLoading && <p className="text-ink-muted">{t("common.loading")}</p>}
       {q.isError && (
-        <p className="text-red-700">{t("budget.errors.generic")}</p>
+        <p className="text-negative">{t("budget.errors.generic")}</p>
       )}
       {q.data && sortedRows.length === 0 && (
-        <p className="text-slate-500">{t("budget.finances.empty")}</p>
+        <p className="text-ink-muted">{t("budget.finances.empty")}</p>
       )}
       {q.data && sortedRows.length > 0 && (
         <table className="w-full text-sm">
-          <thead className="text-left text-xs uppercase text-slate-500">
+          <thead className="text-left text-xs uppercase text-ink-muted">
             <tr>
               <th className="py-2">{t("budget.finances.object")}</th>
               <th className="py-2">{t("budget.finances.role")}</th>
@@ -61,19 +61,19 @@ export function FinancesPage(): JSX.Element {
               <tr
                 key={r.object_id}
                 data-testid={`finances-row-${r.object_id}`}
-                className="border-t border-slate-100"
+                className="border-t border-rule"
               >
                 <td className="py-2">
                   <Link
                     to={`/objekte/${r.object_id}/budget`}
-                    className="font-medium text-slate-900 underline-offset-2 hover:underline"
+                    className="font-medium text-ink underline-offset-2 hover:underline"
                   >
                     {r.name}
                   </Link>
                   {r.is_scoped && (
                     <span
                       data-testid={`scoped-badge-${r.object_id}`}
-                      className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800"
+                      className="ml-2 rounded bg-warning-soft px-1.5 py-0.5 text-xs text-warning"
                     >
                       {t("budget.finances.scopedBadge")}
                     </span>

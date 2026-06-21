@@ -39,29 +39,29 @@ export function ObjectsListPage(): JSX.Element {
         actions={
           <Link
             to="/objekte/neu"
-            className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
+            className="rounded bg-ink px-3 py-1 text-sm text-paper hover:bg-ink"
           >
             {t("objects.list.create")}
           </Link>
         }
       />
 
-      {error && <p className="text-red-700">{error}</p>}
-      {objects === null && !error && <p className="text-slate-500">{t("common.loading")}</p>}
+      {error && <p className="text-negative">{error}</p>}
+      {objects === null && !error && <p className="text-ink-muted">{t("common.loading")}</p>}
       {objects && objects.length === 0 && (
-        <p className="text-slate-600">{t("objects.list.empty")}</p>
+        <p className="text-ink-muted">{t("objects.list.empty")}</p>
       )}
       {objects && objects.length > 0 && (
-        <ul className="divide-y rounded border border-slate-200">
+        <ul className="divide-y rounded border border-rule">
           {objects.map((o) => (
-            <li key={o.id} className="p-3 hover:bg-slate-50">
+            <li key={o.id} className="p-3 hover:bg-paper-sunk">
               <Link to={`/objekte/${o.id}`} className="flex justify-between">
                 <span className="font-medium">{o.name}</span>
-                <span className="text-sm text-slate-500">
+                <span className="text-sm text-ink-muted">
                   {t(`objects.type.${o.type}`)}
                 </span>
               </Link>
-              {o.address && <p className="text-sm text-slate-500">{o.address}</p>}
+              {o.address && <p className="text-sm text-ink-muted">{o.address}</p>}
             </li>
           ))}
         </ul>

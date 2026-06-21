@@ -85,10 +85,10 @@ export function ProjectForm({
           type="text"
           value={state.name}
           onChange={(e) => update("name", e.target.value)}
-          className="w-full rounded border border-slate-300 px-2 py-1"
+          className="w-full rounded border border-rule px-2 py-1"
           required
         />
-        {err("name") && <p className="text-xs text-red-700">{err("name")}</p>}
+        {err("name") && <p className="text-xs text-negative">{err("name")}</p>}
       </label>
 
       <label className="block text-sm">
@@ -99,7 +99,7 @@ export function ProjectForm({
           value={state.description}
           onChange={(e) => update("description", e.target.value)}
           rows={3}
-          className="w-full rounded border border-slate-300 px-2 py-1"
+          className="w-full rounded border border-rule px-2 py-1"
         />
       </label>
 
@@ -111,7 +111,7 @@ export function ProjectForm({
           <select
             value={state.status}
             onChange={(e) => update("status", e.target.value as ProjectStatus)}
-            className="w-full rounded border border-slate-300 px-2 py-1"
+            className="w-full rounded border border-rule px-2 py-1"
           >
             {PROJECT_STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -131,7 +131,7 @@ export function ProjectForm({
             max={2200}
             value={state.planned_year}
             onChange={(e) => update("planned_year", e.target.value)}
-            className="w-full rounded border border-slate-300 px-2 py-1"
+            className="w-full rounded border border-rule px-2 py-1"
           />
         </label>
       </div>
@@ -148,10 +148,10 @@ export function ProjectForm({
           value={state.rough_estimate_chf}
           onChange={(e) => update("rough_estimate_chf", e.target.value)}
           placeholder={t("projects.fields.roughEstimatePlaceholder")}
-          className="w-full rounded border border-slate-300 px-2 py-1 tabular-nums"
+          className="w-full rounded border border-rule px-2 py-1 tabular-nums"
         />
         {err("rough_estimate_chf") && (
-          <p className="text-xs text-red-700">{err("rough_estimate_chf")}</p>
+          <p className="text-xs text-negative">{err("rough_estimate_chf")}</p>
         )}
       </label>
 
@@ -160,7 +160,7 @@ export function ProjectForm({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+            className="rounded border border-rule px-3 py-1 text-sm hover:bg-paper-sunk"
           >
             {t("costs.cancel")}
           </button>
@@ -168,7 +168,7 @@ export function ProjectForm({
         <button
           type="submit"
           disabled={submitting}
-          className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700 disabled:opacity-50"
+          className="rounded bg-ink px-3 py-1 text-sm text-paper hover:bg-ink disabled:opacity-50"
         >
           {submitting ? t("common.submitting") : t("costs.save")}
         </button>

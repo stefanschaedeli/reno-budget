@@ -5,7 +5,36 @@ All notable changes to **Reno-Budget** are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.0] — 2026-06-21
+
+### Added
+- **KI-Projekt-Assistent** (`app/services/ai/`, `frontend/src/features/ai/`):
+  geführter Wizard mit Chat-Rückfallebene, der ein Projekt in eine bessere
+  Beschreibung, eine Grobschätzung und BKP-Positionen (In/Out-of-Scope)
+  ausarbeitet. KI-generierte, aber typisierte Fragen passen sich dem Projekttyp
+  an (Dach → m², Fenster → Anzahl + Dämmstufe). Drei Prüfebenen gegen
+  Halluzinationen: (1) deterministische Prüfungen ohne KI (BKP-Code existiert,
+  plausible CHF-Bandbreiten, Summen stimmen), (2) Selbst-Begründung mit
+  Annahmen + Konfidenz pro Zahl, (3) Zweitmeinung durch ein anderes Modell auf
+  Schätzung und BKP. Ausgaben sind stets Entwürfe — erst nach Bestätigung
+  werden echte `Projekt`-Felder bzw. Kostenpositionen geschrieben (Audit-Eintrag
+  pro Übernahme). Generator: Opus 4.8; Kritiker: Sonnet 4.6. Server-seitiger
+  Schlüssel `RENO_ANTHROPIC_API_KEY` (leer = deaktiviert, Endpunkte antworten
+  mit 503). Zugriff ab Rolle Editor. Siehe `docs/howto/ai-assistent.md`.
+
+### Changed
+- **Design-System-Umstellung (Breaking, visuell):** die komplette Oberfläche
+  wurde auf ein semantisches Token-System umgestellt (`frontend/src/index.css`,
+  `frontend/tailwind.config.js`). Rohe Tailwind-Farben (`slate-*`, `red-*`,
+  `emerald-*`, `amber-*`, `blue-*` …) sind durch semantische Tokens ersetzt —
+  Flächen (`bg-paper`/`-sunk`/`-raised`), Text (`text-ink`/`-muted`/`-subtle`),
+  Hairline-Rules (`border-rule`), Akzent (`accent`) und Semantik
+  (`positive`/`negative`/`warning`, je mit `-soft`-Tint). Eigene Schriftfamilien
+  (Fraunces für Überschriften, Inter Tight für Body/UI, JetBrains Mono für
+  Zahlen/Codes) werden selbst gehostet via `@fontsource-variable/*`. Geldwerte
+  rendern durchgängig `font-mono tabular-nums`. Reine Light-Mode-Palette.
+  Betrifft ~70 Komponenten- und Seiten-Dateien; verbindliche Regeln in
+  `CLAUDE.md`, ausführlich in `docs/design-system.md`.
 
 ## [1.0.0] — 2026-06-06
 

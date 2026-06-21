@@ -32,14 +32,14 @@ export function SupplierDetailPage(): JSX.Element {
   if (supplierQuery.isLoading || !supplierId) {
     return (
       <PageContainer width="narrow">
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       </PageContainer>
     );
   }
   if (supplierQuery.isError || !supplierQuery.data) {
     return (
       <PageContainer width="narrow">
-        <p className="text-red-700">{t("common.error")}</p>
+        <p className="text-negative">{t("common.error")}</p>
       </PageContainer>
     );
   }
@@ -95,13 +95,13 @@ export function SupplierDetailPage(): JSX.Element {
         />
       </section>
 
-      <section className="border-t border-slate-200 pt-4">
+      <section className="border-t border-rule pt-4">
         <div className="flex gap-2">
           {!supplier.archived_at && (
             <button
               type="button"
               onClick={() => void handleArchive()}
-              className="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+              className="rounded border border-rule px-3 py-1 text-sm hover:bg-paper-sunk"
             >
               {t("suppliers.archive")}
             </button>
@@ -109,7 +109,7 @@ export function SupplierDetailPage(): JSX.Element {
           <button
             type="button"
             onClick={() => void handleDelete()}
-            className="rounded border border-red-300 px-3 py-1 text-sm text-red-700 hover:bg-red-50"
+            className="rounded border border-negative px-3 py-1 text-sm text-negative hover:bg-negative-soft"
           >
             {t("suppliers.delete")}
           </button>

@@ -1,4 +1,4 @@
-"""Phase 4 — cross-object finance roll-up at ``GET /api/v1/finances/overview``.
+"""Phase 4 — cross-object finance roll-up at ``GET /api/v1/finances``.
 
 Covers:
 
@@ -140,16 +140,16 @@ class TestOverview:
         )
         token = await _login(integration_client, owner.email)
         r = await integration_client.get(
-            "/api/v1/finances/overview", headers=_auth(token, integration_client)
+            "/api/v1/finances", headers=_auth(token, integration_client)
         )
         assert r.status_code == 200, r.text
-        items = r.json()["items"]
-        assert len(items) == 2
-        by_name = {it["name"]: it for it in items}
+        rows = r.json()["rows"]
+        assert len(rows) == 2
+        by_name = {it["name"]: it for it in rows}
         assert by_name["Haus A"]["total_planned_inflated_chf"] == "10000.00"
         assert by_name["Haus A"]["required_per_year_chf"] == "1000.00"
         assert by_name["Haus B"]["required_per_year_chf"] == "500.00"
-        assert by_name["Haus A"]["scope_pro_rated"] is False
+        assert by_name["Haus A"]["is_scoped"] is False
         assert by_name["Haus A"]["role"] == "owner"
 
     async def test_hides_objects_user_is_not_member_of(
@@ -165,10 +165,10 @@ class TestOverview:
         )
         token = await _login(integration_client, other.email)
         r = await integration_client.get(
-            "/api/v1/finances/overview", headers=_auth(token, integration_client)
+            "/api/v1/finances", headers=_auth(token, integration_client)
         )
         assert r.status_code == 200
-        assert r.json()["items"] == []
+        assert r.json()["rows"] == []
 
     async def test_pro_rates_for_scoped_viewer(
         self,
@@ -189,13 +189,13 @@ class TestOverview:
 
         token = await _login(integration_client, viewer.email)
         r = await integration_client.get(
-            "/api/v1/finances/overview", headers=_auth(token, integration_client)
+            "/api/v1/finances", headers=_auth(token, integration_client)
         )
         assert r.status_code == 200
-        items = r.json()["items"]
-        assert len(items) == 1
-        row = items[0]
+        rows = r.json()["rows"]
+        assert len(rows) == 1
+        row = rows[0]
         # 10000 * 400/1000 = 4000.
         assert row["total_planned_inflated_chf"] == "4000.00"
-        assert row["scope_pro_rated"] is True
+        assert row["is_scoped"] is True
         assert row["role"] == "viewer"

@@ -45,7 +45,7 @@ function RequireAuth({ children }: { children: React.ReactElement }) {
   const { t } = useTranslation();
   if (bootstrapping) {
     return (
-      <p className="mx-auto mt-16 max-w-md text-center text-slate-500">{t("common.loading")}</p>
+      <p className="mx-auto mt-16 max-w-md text-center text-ink-muted">{t("common.loading")}</p>
     );
   }
   if (!user) return <Navigate to="/anmelden" replace />;

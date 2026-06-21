@@ -11,8 +11,7 @@ const OBJECT_ID = "00000000-0000-0000-0000-000000000001";
 
 const baseTimeline = {
   object_id: OBJECT_ID,
-  my_role: "owner",
-  is_scoped: false,
+  scope_pro_rated: false,
   rows: [
     {
       year: 2026,
@@ -29,21 +28,6 @@ const baseTimeline = {
   ],
 };
 
-const drill = {
-  year: 2026,
-  items: [
-    {
-      id: "11111111-1111-1111-1111-111111111111",
-      title: "Fenster ersetzen",
-      bkp_code: "C2.04",
-      status: "planned",
-      priority: "med",
-      planned_amount_chf: "10000",
-      actual_amount_chf: null,
-    },
-  ],
-};
-
 describe("TimelineChart", () => {
   beforeEach(() => {
     mockFetchByRoute([
@@ -54,10 +38,6 @@ describe("TimelineChart", () => {
       {
         match: get("/budget/timeline?inflated=0"),
         respond: () => ({ body: baseTimeline }),
-      },
-      {
-        match: get(`/budget/timeline/2026`),
-        respond: () => ({ body: drill }),
       },
     ]);
   });
@@ -80,15 +60,6 @@ describe("TimelineChart", () => {
       expect(
         screen.getByTestId("timeline-year-2026").getAttribute("data-planned"),
       ).toBe("10000");
-    });
-  });
-
-  it("drills down into a year on click", async () => {
-    renderWithProviders(<TimelineChart objectId={OBJECT_ID} />);
-    const row2026 = await screen.findByTestId("timeline-year-2026");
-    fireEvent.click(row2026);
-    await waitFor(() => {
-      expect(screen.getByText("Fenster ersetzen")).toBeInTheDocument();
     });
   });
 

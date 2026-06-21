@@ -72,7 +72,7 @@ function NodeRow({
     <li>
       <div
         className={`flex items-center gap-1 rounded px-1 py-0.5 ${
-          isSelected ? "bg-slate-200" : "hover:bg-slate-100"
+          isSelected ? "bg-paper-sunk" : "hover:bg-paper-sunk"
         }`}
         style={{ paddingLeft: `${depth * 12 + 4}px` }}
       >
@@ -81,7 +81,7 @@ function NodeRow({
             type="button"
             aria-label={isOpen ? "Zuklappen" : "Aufklappen"}
             onClick={() => setOpen((v) => !v)}
-            className="h-4 w-4 text-xs text-slate-600"
+            className="h-4 w-4 text-xs text-ink-muted"
           >
             {isOpen ? "▾" : "▸"}
           </button>
@@ -93,7 +93,7 @@ function NodeRow({
           onClick={() => onSelect(node.code)}
           className="flex-1 text-left text-sm"
         >
-          <span className="font-mono text-xs text-slate-700">{node.code}</span>
+          <span className="font-mono text-xs text-ink-muted">{node.code}</span>
           <span className="ml-2">{node.label_de}</span>
         </button>
       </div>
@@ -131,9 +131,9 @@ export function BkpCodePicker({
   );
 
   return (
-    <div className="rounded border border-slate-300">
-      <div className="border-b border-slate-200 p-2">
-        <div className="mb-2 text-xs text-slate-500">
+    <div className="rounded border border-rule">
+      <div className="border-b border-rule p-2">
+        <div className="mb-2 text-xs text-ink-muted">
           {value ? (
             <span>
               <span className="font-mono">{value}</span>
@@ -149,17 +149,17 @@ export function BkpCodePicker({
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("costs.bkp.search")}
           aria-label={t("costs.bkp.search")}
-          className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+          className="w-full rounded border border-rule px-2 py-1 text-sm"
         />
       </div>
       <div className="max-h-64 overflow-auto p-1">
         {isLoading && (
-          <p className="p-2 text-sm text-slate-500">
+          <p className="p-2 text-sm text-ink-muted">
             {t("costs.bkp.loading")}
           </p>
         )}
         {!isLoading && filtered.length === 0 && (
-          <p className="p-2 text-sm text-slate-500">{t("costs.bkp.empty")}</p>
+          <p className="p-2 text-sm text-ink-muted">{t("costs.bkp.empty")}</p>
         )}
         {!isLoading && filtered.length > 0 && (
           <ul role="tree">

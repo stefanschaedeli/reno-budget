@@ -37,9 +37,9 @@ const RIGHT_PAD = 16;
 const TOP_PAD = 16;
 const BOTTOM_PAD = 32;
 
-const COLOR_BALANCE = "#0f172a"; // slate-900
-const COLOR_NEGATIVE = "#b91c1c"; // red-700
-const COLOR_PLANNED = "#94a3b8"; // slate-400
+const COLOR_BALANCE = "#0E1A2B"; // --ink
+const COLOR_NEGATIVE = "#9A2A2A"; // --negative
+const COLOR_PLANNED = "#7A8294"; // --ink-subtle
 
 export function RenofondPage(): JSX.Element {
   const { t } = useTranslation();
@@ -47,7 +47,7 @@ export function RenofondPage(): JSX.Element {
   if (!id)
     return (
       <PageContainer width="wide">
-        <p className="text-red-700">{t("common.error")}</p>
+        <p className="text-negative">{t("common.error")}</p>
       </PageContainer>
     );
   return <RenofondPageInner objectId={id} />;
@@ -61,7 +61,7 @@ function RenofondPageInner({ objectId }: { objectId: string }): JSX.Element {
   if (projection.isLoading || contributions.isLoading) {
     return (
       <PageContainer width="wide">
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       </PageContainer>
     );
   }
@@ -72,14 +72,14 @@ function RenofondPageInner({ objectId }: { objectId: string }): JSX.Element {
         : t("renofond.errors.generic");
     return (
       <PageContainer width="wide">
-        <p className="text-red-700">{msg}</p>
+        <p className="text-negative">{msg}</p>
       </PageContainer>
     );
   }
   if (contributions.isError) {
     return (
       <PageContainer width="wide">
-        <p className="text-red-700">{t("renofond.errors.generic")}</p>
+        <p className="text-negative">{t("renofond.errors.generic")}</p>
       </PageContainer>
     );
   }
@@ -96,7 +96,7 @@ function RenofondPageInner({ objectId }: { objectId: string }): JSX.Element {
         <div
           role="alert"
           data-testid="underfunding-banner"
-          className="rounded border border-red-300 bg-red-50 p-4 text-red-800"
+          className="rounded border border-negative bg-negative-soft p-4 text-negative"
         >
           <p className="font-medium">{t("renofond.underfunding.banner")}</p>
           <ul className="mt-2 list-inside list-disc text-sm">
@@ -109,11 +109,11 @@ function RenofondPageInner({ objectId }: { objectId: string }): JSX.Element {
         </div>
       )}
 
-      <div className="rounded border border-slate-200 bg-white p-4">
+      <div className="rounded border border-rule bg-paper-raised p-4">
         <ProjectionChart rows={proj.rows} />
       </div>
 
-      <div className="rounded border border-slate-200 bg-white p-4">
+      <div className="rounded border border-rule bg-paper-raised p-4">
         <h3 className="mb-3 text-lg font-medium">
           {t("renofond.contributions.title")}
         </h3>
@@ -125,7 +125,7 @@ function RenofondPageInner({ objectId }: { objectId: string }): JSX.Element {
         {isOwner ? (
           <AddContributionForm objectId={objectId} />
         ) : (
-          <p className="mt-4 text-sm text-slate-500">
+          <p className="mt-4 text-sm text-ink-muted">
             {t("renofond.contributions.readOnlyHint")}
           </p>
         )}
@@ -139,7 +139,7 @@ function ProjectionChart({ rows }: { rows: ProjectionRow[] }): JSX.Element {
   const { t } = useTranslation();
   if (rows.length === 0) {
     return (
-      <p className="text-slate-500">{t("renofond.projection.noData")}</p>
+      <p className="text-ink-muted">{t("renofond.projection.noData")}</p>
     );
   }
   const balances = rows.map((r) => toNumber(r.balance_chf));
@@ -162,7 +162,7 @@ function ProjectionChart({ rows }: { rows: ProjectionRow[] }): JSX.Element {
     >
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h3 className="text-lg font-medium">{t("renofond.projection.title")}</h3>
-        <div className="flex items-center gap-4 text-xs text-slate-600">
+        <div className="flex items-center gap-4 text-xs text-ink-muted">
           <span className="flex items-center gap-1">
             <span
               className="inline-block h-3 w-3 rounded-sm"
@@ -184,7 +184,7 @@ function ProjectionChart({ rows }: { rows: ProjectionRow[] }): JSX.Element {
         role="img"
         aria-label={t("renofond.projection.title")}
         viewBox={`0 0 ${VIEW_W} ${CHART_HEIGHT}`}
-        className="w-full border border-slate-200 bg-white"
+        className="w-full border border-rule bg-paper-raised"
       >
         <line
           x1={LEFT_PAD}
@@ -261,7 +261,7 @@ function ContributionsTable({
     return (
       <p
         data-testid="contributions-empty"
-        className="text-sm text-slate-500"
+        className="text-sm text-ink-muted"
       >
         {t("renofond.contributions.empty")}
       </p>
@@ -269,7 +269,7 @@ function ContributionsTable({
   }
   return (
     <table className="w-full text-sm" data-testid="contributions-table">
-      <thead className="border-b border-slate-200 text-left text-xs uppercase text-slate-500">
+      <thead className="border-b border-rule text-left text-xs uppercase text-ink-muted">
         <tr>
           <th className="py-1">{t("renofond.contributions.year")}</th>
           <th className="py-1 text-right">
@@ -283,20 +283,20 @@ function ContributionsTable({
           )}
         </tr>
       </thead>
-      <tbody className="divide-y divide-slate-100">
+      <tbody className="divide-y divide-rule">
         {rows.map((c) => (
           <tr key={c.id}>
             <td className="py-1">{c.year}</td>
             <td className="py-1 text-right tabular-nums">
               {formatChfRounded(c.amount_chf)}
             </td>
-            <td className="py-1 text-slate-600">{c.note ?? ""}</td>
+            <td className="py-1 text-ink-muted">{c.note ?? ""}</td>
             {isOwner && (
               <td className="py-1 text-right">
                 <button
                   type="button"
                   onClick={() => deleteMut.mutate(c.id)}
-                  className="text-xs text-red-700 hover:underline"
+                  className="text-xs text-negative hover:underline"
                 >
                   {t("renofond.contributions.delete")}
                 </button>
@@ -366,7 +366,7 @@ function AddContributionForm({
           type="number"
           value={year}
           onChange={(e) => setYear(e.target.value)}
-          className="rounded border border-slate-300 px-2 py-1"
+          className="rounded border border-rule px-2 py-1"
         />
       </label>
       <label className="flex flex-col text-sm">
@@ -378,7 +378,7 @@ function AddContributionForm({
           inputMode="decimal"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className="rounded border border-slate-300 px-2 py-1"
+          className="rounded border border-rule px-2 py-1"
         />
       </label>
       <label className="flex flex-col text-sm sm:col-span-2">
@@ -389,26 +389,26 @@ function AddContributionForm({
           type="text"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="rounded border border-slate-300 px-2 py-1"
+          className="rounded border border-rule px-2 py-1"
         />
       </label>
       <div className="sm:col-span-4">
         <button
           type="submit"
           disabled={createMut.isPending}
-          className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700 disabled:opacity-60"
+          className="rounded bg-ink px-3 py-1 text-sm text-paper hover:bg-ink disabled:opacity-60"
         >
           {createMut.isPending
             ? t("renofond.contributions.submitting")
             : t("renofond.contributions.submit")}
         </button>
         {savedFlash && (
-          <span className="ml-3 text-sm text-green-700" role="status">
+          <span className="ml-3 text-sm text-positive" role="status">
             {t("renofond.contributions.saved")}
           </span>
         )}
         {error && (
-          <span className="ml-3 text-sm text-red-700" role="alert">
+          <span className="ml-3 text-sm text-negative" role="alert">
             {error}
           </span>
         )}

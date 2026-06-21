@@ -110,7 +110,7 @@ export function CostItemList({
     sort.key === key ? (sort.dir === "asc" ? " ▲" : " ▼") : "";
 
   if (items.length === 0) {
-    return <p className="text-slate-500">{t("costs.empty")}</p>;
+    return <p className="text-ink-muted">{t("costs.empty")}</p>;
   }
 
   const columns: Array<[SortKey, string]> = [
@@ -124,15 +124,18 @@ export function CostItemList({
   ];
 
   return (
-    <table className="w-full text-sm">
-      <thead className="text-left text-slate-600">
-        <tr className="border-b border-slate-300">
+    <table className="w-full border-collapse text-sm">
+      <thead>
+        <tr className="border-b border-rule text-left">
           {columns.map(([key, label]) => (
-            <th key={key} className="cursor-pointer px-2 py-2">
+            <th
+              key={key}
+              className="cursor-pointer px-3 py-3 text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-ink-muted"
+            >
               <button
                 type="button"
                 onClick={() => toggleSort(key)}
-                className="font-medium hover:underline"
+                className="hover:text-accent"
               >
                 {label}
                 {arrow(key)}
@@ -146,10 +149,10 @@ export function CostItemList({
           <tr
             key={item.id}
             onClick={() => onRowClick(item)}
-            className="cursor-pointer border-b border-slate-200 hover:bg-slate-50"
+            className="cursor-pointer border-b border-rule text-ink transition hover:bg-paper-sunk"
           >
-            <td className="px-2 py-2 font-medium">
-              <div className="flex flex-wrap items-center gap-1">
+            <td className="px-3 py-3 font-medium">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <span>{item.title}</span>
                 {item.tag_ids
                   ? item.tag_ids
@@ -159,7 +162,7 @@ export function CostItemList({
                   : null}
                 {item.lot_ids && item.lot_ids.length > 0 && (
                   <span
-                    className="inline-flex items-center rounded bg-slate-200 px-1.5 py-0.5 text-xs text-slate-700"
+                    className="inline-flex items-center rounded-sheet border border-rule px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wider text-ink-muted"
                     title={t("costs.inLotsTitle")}
                   >
                     {t("costs.inLots", { count: item.lot_ids.length })}
@@ -167,22 +170,26 @@ export function CostItemList({
                 )}
               </div>
             </td>
-            <td className="px-2 py-2 font-mono text-xs">
+            <td className="px-3 py-3 font-mono text-xs text-ink-muted">
               {item.bkp_code ?? (
-                <span className="text-slate-400 italic">
+                <span className="italic text-ink-subtle">
                   {t("costs.uncategorised")}
                 </span>
               )}
             </td>
-            <td className="px-2 py-2">{t(`costs.status.${item.status}`)}</td>
-            <td className="px-2 py-2">
+            <td className="px-3 py-3 text-ink-muted">
+              {t(`costs.status.${item.status}`)}
+            </td>
+            <td className="px-3 py-3 text-ink-muted">
               {t(`costs.priority.${item.priority}`)}
             </td>
-            <td className="px-2 py-2">{item.planned_year ?? "—"}</td>
-            <td className="px-2 py-2 text-right tabular-nums">
+            <td className="px-3 py-3 font-mono tabular-nums text-ink-muted">
+              {item.planned_year ?? "—"}
+            </td>
+            <td className="px-3 py-3 text-right font-mono tabular-nums text-ink">
               {formatChf(item.planned_amount_chf)}
             </td>
-            <td className="px-2 py-2 text-right tabular-nums">
+            <td className="px-3 py-3 text-right font-mono tabular-nums text-ink">
               {formatChf(item.actual_amount_chf)}
             </td>
           </tr>

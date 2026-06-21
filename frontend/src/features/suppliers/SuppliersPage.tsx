@@ -27,7 +27,7 @@ export function SuppliersPage(): JSX.Element {
   if (!objectId) {
     return (
       <PageContainer width="default">
-        <p className="text-red-700">{t("common.error")}</p>
+        <p className="text-negative">{t("common.error")}</p>
       </PageContainer>
     );
   }
@@ -48,7 +48,7 @@ export function SuppliersPage(): JSX.Element {
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="rounded bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-700"
+            className="rounded bg-ink px-3 py-1 text-sm text-paper hover:bg-ink"
           >
             {t("suppliers.create")}
           </button>
@@ -65,18 +65,18 @@ export function SuppliersPage(): JSX.Element {
       </label>
 
       {suppliersQuery.isLoading && (
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <p className="text-ink-muted">{t("common.loading")}</p>
       )}
       {suppliersQuery.isError && (
-        <p className="text-red-700">{t("common.error")}</p>
+        <p className="text-negative">{t("common.error")}</p>
       )}
       {suppliersQuery.isSuccess && suppliers.length === 0 && (
-        <p className="text-slate-500">{t("suppliers.empty")}</p>
+        <p className="text-ink-muted">{t("suppliers.empty")}</p>
       )}
       {suppliers.length > 0 && (
         <table className="w-full text-sm">
-          <thead className="text-left text-slate-600">
-            <tr className="border-b border-slate-300">
+          <thead className="text-left text-ink-muted">
+            <tr className="border-b border-rule">
               <th className="px-2 py-2">{t("suppliers.fields.name")}</th>
               <th className="px-2 py-2">{t("suppliers.fields.email")}</th>
               <th className="px-2 py-2">{t("suppliers.fields.phone")}</th>
@@ -88,7 +88,7 @@ export function SuppliersPage(): JSX.Element {
               <tr
                 key={s.id}
                 data-testid={`supplier-row-${s.id}`}
-                className="border-b border-slate-200 hover:bg-slate-50"
+                className="border-b border-rule hover:bg-paper-sunk"
               >
                 <td className="px-2 py-2 font-medium">
                   <Link
@@ -100,7 +100,7 @@ export function SuppliersPage(): JSX.Element {
                 </td>
                 <td className="px-2 py-2">{s.contact_email ?? "—"}</td>
                 <td className="px-2 py-2">{s.contact_phone ?? "—"}</td>
-                <td className="px-2 py-2 text-slate-500">
+                <td className="px-2 py-2 text-ink-muted">
                   {s.archived_at
                     ? new Date(s.archived_at).toLocaleDateString("de-CH")
                     : "—"}
